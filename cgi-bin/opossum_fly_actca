@@ -1,0 +1,10 @@
+#!/usr/local/bin/perl
+
+use strict;
+use warnings;
+
+use oPossumGeneACTCAWeb;
+
+my $app = oPossumGeneACTCAWeb->new(PARAMS => {species => 'fly'});
+
+$app->run();

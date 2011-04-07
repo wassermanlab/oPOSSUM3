@@ -1,0 +1,10 @@
+#!/usr/local/bin/perl
+
+use strict;
+use warnings;
+
+use oPossumSeqTCAWeb;
+
+my $app = oPossumSeqTCAWeb->new();
+
+$app->run;

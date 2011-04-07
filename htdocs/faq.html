@@ -1,0 +1,26 @@
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=iso-8859-15">
+  <link rel="stylesheet" href="styles.css" type="text/css">
+  <title>oPOSSUM 3.0 FAQ</title>
+</head>
+
+<body class="text">
+  <h1>Frequently Asked Questions</h1>
+
+  <p>
+  <h4>Q. I entered a list of genes into Human SSA and I noticed that several were excluded from the analysis. Why is this?</h4>
+  <p>
+  A. This can happen for several reasons. The background data set was built by extracting 
+  all human/mouse ortholog pairs from Ensembl, determining the promoter region, aligning 
+  the sequences and scanning the conserved portions within the promoter regions for putative 
+  TFBSs. In many cases, strict one-to-one human/mouse orthologs were not defined. Out of the 
+  orthologs which were defined, some did not align in such a way that the conserved promoter 
+  region could be identified in a satisfactory way. These genes were therefore excluded from 
+  the oPOSSUM background set. Additionally, not all genes in the set could be mapped in all 
+  other gene identification schemas. In the latter case you could try entering your list of 
+  genes using a different gene identification system, preferably Ensembl Gene ID.
+  </p>
+
+</body>
+</html>

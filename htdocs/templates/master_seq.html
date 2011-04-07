@@ -1,0 +1,49 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/loose.dtd">
+<html>
+  <head>
+    <title>[%analysis%]</title>
+    <link type="text/css" rel="stylesheet" href="[%rel_html_path%]/templates/opossum.css" />
+    <link rel="stylesheet" href="[%rel_html_path%]/templates/styles.css" type="text/css">
+    <script type="text/javascript" src="[%rel_html_path%]/templates/sortable.js"></script>
+  </head>
+<body>
+  <a name="top"></a>
+  <div id="pageContainer">
+    <div id="menuMain">
+      <a href="javascript:newWindow=window.open('[%rel_html_path%]/help.html#FAQ', 'help', 'width=800,height=800,toolbar=1,location=0,directories=0,status=0,menuBar=0,scrollBars=1,resizable=1'); newWindow.focus()">FAQ</a> | 
+      <a href="javascript:newWindow=window.open('[%rel_html_path%]/help.html','help','width=800,height=800,toolbar=1,location=0,directories=0,status=0,menuBar=0,scrollBars=1,resizable=1'); newWindow.focus()"">Help</a> | 
+      <a href="javascript:newWindow=window.open('[%rel_html_path%]/about.html','about','width=800,height=800,toolbar=1,location=1,directories=0,status=0,menuBar=0,scrollBars=0,resizable=1'); newWindow.focus()">About</a> | 
+      <a href="javascript:newWindow=window.open('[%rel_html_path%]/news.html','news','width=800,height=800,toolbar=1,location=1,directories=0,status=0,menuBar=0,scrollBars=0,resizable=1'); newWindow.focus()">News</a> | 
+      <a href="javascript:newWindow=window.open('[%rel_html_path%]/about.html#contact','about','width=800,height=800,toolbar=1,location=1,directories=0,status=0,menuBar=0,scrollBars=0,resizable=1'); newWindow.focus()">Contact</a>
+    </div> 
+    <div id="logo"><a href="[%rel_html_path%]"><img src="[%rel_html_path%]/images/logo.gif" border="0" alt="oPOSSUM" /></a><br /></div>
+    <div id="menuTabContainer">
+      <div id="tabHumanSSA" class="tabHumanSSA"><a href="http://www.cisreg.ca/cgi-bin/oPOSSUM/opossum/" class="tab">Human SSA</a></div>
+      <div id="tabHumanCSA" class="tabHumanCSA"><a href="http://www.cisreg.ca/oPOSSUM2_dev/opossum2.php" class="tab">Human CSA</a></div>
+      <div id="tabWormSSA" class="tabWorm"><a href="http://www.cisreg.ca/cgi-bin/worm_oPOSSUM/opossum" class="tab">Worm SSA</a></div>
+      <div id="tabYeastSSA" class="tabYeast"><a href="http://www.cisreg.ca/shosui/yeast_oPOSSUM" class="tab">Yeast SSA</a></div>
+    </div>
+    <div id="menuSecondary">
+      <a href="http://www.cisreg.ca/oPOSSUM/">oPOSSUM Main</a> |
+      <a href="[%rel_cgi_bin_path%]/opossum">Home</a>  | 
+      <a href="[%rel_cgi_bin_path%]/opossum?rm=custom_input">Custom Analysis</a> | 
+      <a href="[%rel_html_path%]/download/oPOSSUM_API.tar.gz">Download API</a> | 
+      <a href="javascript:newWindow=window.open('[%rel_html_path%]/download_db.html', 'download_db', 'width=800,height=800,toolbar=1,location=0,directories=0,status=0,menuBar=0,scrollBars=1,resizable=1'); newWindow.focus()">Download DB</a>
+    </div>
+    <div id="content">
+      <h1>[%analysis%]</h1>
+      <h3 align="center">Version [%version%]</h3>
+      
+      [%IF devel_version%]
+      <b>Please Note: This is the development version of oPOSSUM</b>
+      [%END%]
+      <!--
+      <p class="warn_text"><b>Attention: On September 25th at approximately 2:00 pm PST, a small update was made to the oPOSSUM database's pre-computed values for a few genes. This may slightly affect the z-score values you obtain when using the default analysis parameters, although it should not affect the relative rankings of the results. We apologize for any inconsistency this may cause with previous analysis results.</b></p>
+      -->
+
+
+      [%INCLUDE $var_template%]
+    </div>
+  </div>
+</body>
+</html>

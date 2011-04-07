@@ -1,0 +1,384 @@
+<html>
+
+<head>
+  <link rel="stylesheet" href="[%rel_htdocs_path%]/styles.css" type="text/css">
+  <title>[%title%]</title>
+</head> <a name="top"></a>
+
+<body>
+<form name="tfbs_genes" enctype="multipart/form-data" method="post" onSubmit="window.close()">
+
+  <h2>[%anchor_matrix.name%]</h2>
+
+  <table border="0" cellpadding="2" cellspacing="0">
+    <tr class="table_text">
+      <td align="left" class="table_title">JASPAR ID:</td>
+      <td align="left" class="table_text"><a href="javascript:newWindow=window.open('[%jaspar_url%]?rm=present&collection=[%collection%]&ID=[%anchor_matrix.ID%]', '[%anchor_matrix.ID%]', 'width=850,height=700,toolbar=0,location=0,directories=0,status=0,menuBar=0,scrollBars=1'); newWindow.focus()">[%anchor_matrix.ID%]</a></td>
+    </tr>
+    <tr class="table_text">
+      <td align="left" class="table_title">Class:</td>
+      <td align="left" class="table_text">[%anchor_matrix.class%]</td>
+    </tr>
+    <tr class="table_text">
+      <td align="left" class="table_title">Family:</td>
+      <td align="left" class="table_text">[%anchor_matrix.tag('family')%]</td>
+    </tr>
+    <tr class="table_text">
+      <td align="left" class="table_title">Tax group:</td>
+      <td align="left" class="table_text">[%anchor_matrix.tag('tax_group')%]</td>
+    </tr>
+    <tr class="table_text">
+      <td align="left" class="table_title">Information content:</td>
+      <td align="left" class="table_text">
+      [%total_ic = formatf(3, anchor_matrix.to_ICM.total_ic)%]
+      [%IF total_ic > high_matrix_ic or total_ic < low_matrix_ic%]
+        <b class="warn_text">[%total_ic%]</b>
+      [%ELSE%]
+        [%total_ic%]
+      [%END%]
+      </td>
+    </tr>
+    <tr class="table_text">
+      <td align="left" class="table_title">GC content:</td>
+      <td align="left" class="table_text">
+      [%gc = anchor_matrix.tag('gc_content')%]
+      [%IF gc > high_matrix_gc or gc < low_matrix_gc%]
+        <b class="warn_text">[%gc%]</b>
+      [%ELSE%]
+        [%gc%]
+      [%END%]
+      </td>
+    </tr>
+  </table>
+
+  <h2>[%tf.name%]</h2>
+
+  <table border="0" cellpadding="2" cellspacing="0">
+    <tr class="table_text">
+      <td align="left" class="table_title">JASPAR ID:</td>
+      <td align="left" class="table_text"><a href="javascript:newWindow=window.open('[%jaspar_url%]?rm=present&collection=[%collection%]&ID=[%tf.ID%]', '[%tf.ID%]', 'width=850,height=700,toolbar=0,location=0,directories=0,status=0,menuBar=0,scrollBars=1'); newWindow.focus()">[%tf.ID%]</a></td>
+    </tr>
+    <tr class="table_text">
+      <td align="left" class="table_title">Class:</td>
+      <td align="left" class="table_text">[%tf.class%]</td>
+    </tr>
+    <tr class="table_text">
+      <td align="left" class="table_title">Family:</td>
+      <td align="left" class="table_text">[%tf.tag('family')%]</td>
+    </tr>
+    <tr class="table_text">
+      <td align="left" class="table_title">Tax group:</td>
+      <td align="left" class="table_text">[%tf.tag('tax_group')%]</td>
+    </tr>
+    <tr class="table_text">
+      <td align="left" class="table_title">Information content:</td>
+      <td align="left" class="table_text">
+      [%total_ic = formatf(3, tf.to_ICM.total_ic)%]
+      [%IF total_ic > high_matrix_ic or total_ic < low_matrix_ic%]
+        <b class="warn_text">[%total_ic%]</b>
+      [%ELSE%]
+        [%total_ic%]
+      [%END%]
+      </td>
+    </tr>
+    <tr class="table_text">
+      <td align="left" class="table_title">GC content:</td>
+      <td align="left" class="table_text">
+      [%gc = tf.tag('gc_content')%]
+      [%IF gc > high_matrix_gc or gc < low_matrix_gc%]
+        <b class="warn_text">[%gc%]</b>
+      [%ELSE%]
+        [%gc%]
+      [%END%]
+      </td>
+    </tr>
+  </table>
+
+  <br>
+  <h3>[%anchor_matrix.name%] - [%tf.name%] Binding Site Combinations</h3>
+
+
+  <table width="100%"  border="0" cellpadding="2" cellspacing="1">
+    <tr align="left" class="table_title">
+      [%UNLESS gene_id_type == dflt_gene_id_type%]
+        <th>Gene ID(s)</th>
+      [%END%]
+      <th>Ensembl ID</th>
+      [%IF has_operon%]
+        <th>Operon ID</th>
+      [%END%]
+      <th align="center">Chr</th>
+      <th align="right">Gene Start</th>
+      <th align="right">Gene End</th>
+      <th align="center">Strand</th>
+      <th align="right">Nearest TSS</th>
+      <th align="right">Anchoring TF</th>
+      <th align="right">Start</th>
+      <th align="right">End</th>
+      <th align="right">Rel. Start</th>
+      <th align="right">Rel. End</th>
+      <th align="center">Strand</th>
+      <th align="right">Score</th>
+      <th align="right">%Score</th>
+      <th align="left">Sequence</th>
+      <th align="right">Anchored TF</th>
+      <th align="right">Start</th>
+      <th align="right">End</th>
+      <th align="right">Rel. Start</th>
+      <th align="right">Rel. End</th>
+      <th align="center">Strand</th>
+      <th align="right">Score</th>
+      <th align="right">%Score</th>
+      <th align="left">Sequence</th>
+      <th align="right">Distance</th>
+    </tr>
+
+    [%FOREACH gene = genes%]
+      [%gid = gene.id%]
+      [%promoters = gene.promoters()%]
+
+      [%IF gene.strand == 1%]
+        [%prom_start = gene.tss%]
+        [%prom_end   = gene.end%]
+      [%ELSE%]
+        [%prom_start = gene.start%]
+        [%prom_end   = gene.tss%]
+      [%END%]
+
+      <tr align="left" class="table_text">
+
+        [%IF has_operon and operon_genes.$gid%]
+          
+          [%UNLESS gene_id_type == dflt_gene_id_type%]
+            [%FOREACH input_gene = operon_genes.$gid%]
+              [%input_gid = input_gene.id%]
+              [%gene_ids = gid_gene_ids.$input_gid%]
+              <td>
+              [%FOREACH gene_id = gene_ids%][%gene_id%]&nbsp;[%END%]
+              </td>
+            [%END%]
+          [%END%]
+          <td>
+          [%FOREACH input_gene = operon_genes.$gid%]
+            [%input_gene.ensembl_id%]&nbsp;
+          [%END%]
+          </td>
+          
+        [%ELSE%]
+          
+          [%UNLESS gene_id_type == dflt_gene_id_type%]
+            [%gene_ids = gid_gene_ids.$gid%]
+            <td>
+            [%FOREACH gene_id = gene_ids%][%gene_id%]&nbsp;[%END%]
+            </td>
+          [%END%]
+          <td>[%gene.ensembl_id%]</td>
+        
+        [%END%]
+        
+        [%IF has_operon%]
+          [%IF gene.operon%]
+            <td>[%gene.operon.symbol%]</td>
+          [%ELSE%]
+            <td>N/A</td>
+          [%END%]
+        [%END%]
+        
+        <td align="center">[%gene.chr%]</td>
+        <td align="right">[%prom_start%]</td>
+        <td align="right">[%prom_end%]</td>
+        <td align="center">[%IF gene.strand == 1%]+[%ELSE%]-[%END%]</td>
+
+        [%first = 1%]
+        [%FOREACH sitepair = gid_sitepairs.$gid%]
+          [%anchor = sitepair.anchor_site%]
+          [%site = sitepair.tf_site%]
+          [%distance = sitepair.distance%]
+
+          [%anchor_start = gene.start + anchor.start - 1%]
+          [%anchor_end   = gene.start + anchor.end - 1%]
+          [%site_start = gene.start + site.start - 1%]
+          [%site_end   = gene.start + site.end - 1%]
+
+          [%anchor_closest_tss = gene.tss%]
+          [%site_closest_tss = gene.tss%]
+
+          [%min_anchor_tss_dist = 999999%]
+          [%min_site_tss_dist = 999999%]
+
+          [%FOREACH promoter = promoters%]
+            [%tss = promoter.tss()%]
+
+            [%anchor_start_tss_dist = anchor_start - tss%]
+            [%anchor_end_tss_dist   = anchor_end - tss%]
+
+            [%IF anchor_start_tss_dist < 0%]
+              [%anchor_start_tss_dist = anchor_start_tss_dist * -1%]
+            [%END%]
+
+            [%IF anchor_end_tss_dist < 0%]
+              [%anchor_end_tss_dist = anchor_end_tss_dist * -1%]
+            [%END%]
+
+            [%IF anchor_start_tss_dist < min_anchor_tss_dist%]
+              [%min_anchor_tss_dist = anchor_start_tss_dist%]
+              [%anchor_closest_tss = tss%]
+            [%END%]
+
+            [%IF anchor_end_tss_dist < min_anchor_tss_dist%]
+              [%min_anchor_tss_dist = anchor_end_tss_dist%]
+              [%anchor_closest_tss = tss%]
+            [%END%]
+
+<!--
+            [%site_start_tss_dist = site_start - tss%]
+            [%site_end_tss_dist   = site_end - tss%]
+
+            [%IF site_start_tss_dist < 0%]
+              [%site_start_tss_dist = site_start_tss_dist * -1%]
+            [%END%]
+
+            [%IF site_end_tss_dist < 0%]
+              [%site_end_tss_dist = site_end_tss_dist * -1%]
+            [%END%]
+
+            [%IF site_start_tss_dist < min_site_tss_dist%]
+              [%min_site_tss_dist = site_start_tss_dist%]
+              [%site_closest_tss = tss%]
+            [%END%]
+
+            [%IF site_end_tss_dist < min_site_tss_dist%]
+              [%min_site_tss_dist = site_end_tss_dist%]
+              [%site_closest_tss = tss%]
+            [%END%]
+-->
+          [%END%]
+
+          [%IF gene.strand == 1%]
+            [%anchor_rel_start = anchor_start - anchor_closest_tss%]
+            [%IF anchor_start >= anchor_closest_tss%]
+              [%anchor_rel_start = anchor_rel_start + 1%]
+            [%END%]
+
+            [%anchor_rel_end = anchor_end - anchor_closest_tss%]
+            [%IF anchor_end >= anchor_closest_tss%]
+              [%anchor_rel_end = anchor_rel_end + 1%]
+            [%END%]
+
+<!--
+            [%site_rel_start = site_start - site_closest_tss%]
+            [%IF site_start >= site_closest_tss%]
+              [%site_rel_start = site_rel_start + 1%]
+            [%END%]
+
+            [%site_rel_end = site_end - site_closest_tss%]
+            [%IF site_end >= site_closest_tss%]
+              [%site_rel_end = site_rel_end + 1%]
+            [%END%]
+-->
+            [%site_rel_start = site_start - anchor_closest_tss%]
+            [%IF site_start >= anchor_closest_tss%]
+              [%site_rel_start = site_rel_start + 1%]
+            [%END%]
+
+            [%site_rel_end = site_end - anchor_closest_tss%]
+            [%IF site_end >= anchor_closest_tss%]
+              [%site_rel_end = site_rel_end + 1%]
+            [%END%]
+          [%ELSE%]
+            [%anchor_rel_start = anchor_closest_tss - anchor_start%]
+            [%IF anchor_start <= anchor_closest_tss%]
+              [%anchor_rel_start = anchor_rel_start + 1%]
+            [%END%]
+
+            [%anchor_rel_end = anchor_closest_tss - anchor_end%]
+            [%IF anchor_end <= anchor_closest_tss%]
+              [%anchor_rel_end = anchor_rel_end + 1%]
+            [%END%]
+
+            [%temp = anchor_rel_end%]
+            [%anchor_rel_end = anchor_rel_start%]
+            [%anchor_rel_start = temp%]
+
+<!--
+            [%site_rel_start = site_closest_tss - site_start%]
+            [%IF site_start <= site_closest_tss%]
+              [%site_rel_start = site_rel_start + 1%]
+            [%END%]
+
+            [%site_rel_end = site_closest_tss - site_end%]
+            [%IF site_end <= site_closest_tss%]
+              [%site_rel_end = site_rel_end + 1%]
+            [%END%]
+-->
+            [%site_rel_start = anchor_closest_tss - site_start%]
+            [%IF site_start <= anchor_closest_tss%]
+              [%site_rel_start = site_rel_start + 1%]
+            [%END%]
+
+            [%site_rel_end = anchor_closest_tss - site_end%]
+            [%IF site_end <= anchor_closest_tss%]
+              [%site_rel_end = site_rel_end + 1%]
+            [%END%]
+
+            [%temp = site_rel_end%]
+            [%site_rel_end = site_rel_start%]
+            [%site_rel_start = temp%]
+          [%END%]
+
+          [%UNLESS first == 1%]
+            <tr align="left" class="table_text">
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            [%IF has_operon%]
+              <td></td>
+            [%END%]
+
+            [%UNLESS gene_id_type == dflt_gene_id_type%]
+              <td></td>
+            [%END%]
+          [%END%]
+
+          <td align="right">[%anchor_closest_tss%]</td>
+          <td align="right">[%anchor_matrix.name()%]</td>
+          <td align="right">[%anchor_start%]</td>
+          <td align="right">[%anchor_end%]</td>
+          <td align="right">[%anchor_rel_start%]</td>
+          <td align="right">[%anchor_rel_end%]</td>
+          <td align="center">[%IF anchor.strand() == 1%]+[%ELSE%]-[%END%]</td>
+          <td align="right">[%anchor.score()%]</td>
+          <td align="right">[%anchor.rel_score() * 100%]%</td>
+          <td align="left" class="seqtext">[%anchor.seq()%]</td>
+
+          <td align="right">[%tf.name()%]</td>
+          <td align="right">[%site_start%]</td>
+          <td align="right">[%site_end%]</td>
+          <td align="right">[%site_rel_start%]</td>
+          <td align="right">[%site_rel_end%]</td>
+          <td align="center">[%IF site.strand() == 1%]+[%ELSE%]-[%END%]</td>
+          <td align="right">[%site.score()%]</td>
+          <td align="right">[%site.rel_score() * 100%]%</td>
+          <td align="left" class="seqtext">[%site.seq()%]</td>
+
+          <td align="right">[%distance%]</td>
+          </tr>
+
+          [%first = 0%]
+        [%END%] <!--foreach site -->
+    [%END%] <!-- foreach gene -->
+  </table>
+<hr solid=1>
+<p class="text" align="center">
+<a href="[%rel_results_dir%]/[%tf.ID%].txt" target="_blank">Download as a tab delimited text file</a> (results will be kept on the server for [%result_retain_days%] days after analysis)
+</p>
+
+<p align="center"><a href="#top"><img src="[%rel_htdocs_path%]/images/arrow-up.gif" border="0" alt="Back to top"></a></p>
+
+<p align="center"><input type="submit" name="Submit" value="Close Window"></p>
+</form>
+</body>
+
+</html>

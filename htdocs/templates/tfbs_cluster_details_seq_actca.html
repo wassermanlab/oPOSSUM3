@@ -1,0 +1,104 @@
+<html>
+
+<head>
+<link rel="stylesheet" href="[%rel_htdocs_path%]/templates/styles.css" type="text/css">
+<title>[%title%]</title>
+</head> <a name="top"></a>
+
+<body>
+  
+<form name="tfbs_cluster_seqs" enctype="multipart/form-data" method="post" onSubmit="window.close()">
+
+  <h3>C[%anchor_cluster.id%] ([%anchor_tf_name%])</h3>
+
+  <table border="0" cellpadding="2" cellspacing="0">
+    <tr class="table_text">
+      <td align="left" class="table_title">Class:</td>
+      <td align="left" class="table_text">[%anchor_cluster.class%]</td>
+    </tr>
+    <tr class="table_text">
+      <td align="left" class="table_title">Family:</td>
+      <td align="left" class="table_text">[%anchor_cluster.family%]</td>
+    </tr>
+  </table>
+
+  <h3>C[%tf_cluster.id%]</h3>
+
+  <table border="0" cellpadding="2" cellspacing="0">
+    <tr class="table_text">
+      <td align="left" class="table_title">Class:</td>
+      <td align="left" class="table_text">[%tf_cluster.class%]</td>
+    </tr>
+    <tr class="table_text">
+      <td align="left" class="table_title">Family:</td>
+      <td align="left" class="table_text">[%tf_cluster.family%]</td>
+    </tr>
+  </table>
+
+  <br>
+  <h3>C[%anchor_cluster.id%] - C[%tf_cluster.id%] Binding Site Combinations</h3>
+
+  <table width="100%" border="0" cellpadding="2" cellspacing="1">
+    [%IF seq_ids%]
+      <tr align="left" class="table_title">
+        <th align="center">Sequence ID</th>
+        <th align="center">Anchoring TFBS Cluster</th>
+        <th align="center">Start</th>
+        <th align="center">End</th>
+        <th align="center">Strand</th>
+        <th align="center">%Score</th>
+        <th align="center">Sequence</th>
+        <th align="center">Anchored TFBS Cluster</th>
+        <th align="center">Start</th>
+        <th align="center">End</th>
+        <th align="center">Strand</th>
+        <th align="center">%Score</th>
+        <th align="center">Sequence</th>
+        <th align="center">Distance</th>
+      </tr>
+
+      [%FOREACH seq_id = seq_ids%]
+        [%display_id = seq_id_display_ids.$seq_id%]
+        <tr align="left" class="table_text">
+        <td>[%display_id%]</td>
+        [%first = 1%]
+        [%sitepairs = seq_sitepairs.$seq_id%]
+        [%FOREACH sitepair = sitepairs%]
+          [%anchor_site = sitepair.anchor_site%]
+          [%cl_site = sitepair.cluster_site%]
+          [%anchor_rel_score = anchor_site.rel_score * 100%]
+          [%cl_rel_score = cl_site.rel_score * 100%]
+          [%UNLESS first == 1%]
+            <tr align="left" class="table_text">
+            <td></td>
+          [%END%]
+          [%first = 0%]
+          <td align="right">C[%anchor_cluster.id%]</td>
+          <td align="right">[%anchor_site.start%]</td>
+          <td align="right">[%anchor_site.end%]</td>
+          <td align="right">[%anchor_site.strand%]</td>
+          <td align="right">[%formatf(1, anchor_rel_score)%]%</td>
+          <td align="left" class="seqtext">[%anchor_site.seq%]</td>
+          <td align="right">C[%tf_cluster.id%]</td>
+          <td align="right">[%cl_site.start%]</td>
+          <td align="right">[%cl_site.end%]</td>
+          <td align="right">[%cl_site.strand%]</td>
+          <td align="right">[%formatf(1, cl_rel_score)%]%</td>
+          <td align="left" class="seqtext">[%cl_site.seq%]</td>
+          <td align="right">[%sitepair.distance%]</td>
+          </tr>
+        [%END%]
+      [%END%]
+    [%ELSE%]
+      <tr><td>No sites found for this TFBS cluster</td></tr>
+    [%END%]
+  </table>
+<hr solid=1>
+<p class="text" align="center">
+<a href="javascript:newWindow=window.open('[%rel_results_dir%]/[%tfbs_cluster_details_file%]'); newWindow.focus()">Download as a tab delimited text file</a>
+</p>
+<p align="center"><a href="#top"><img src="[%rel_htdocs_path%]/images/arrow-up.gif" border="0" alt="Back to top"></a></p>
+
+<p align="center"><input type="submit" name="Submit" value="Close Window"></p>
+</form>
+</html>

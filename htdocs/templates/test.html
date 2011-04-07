@@ -1,0 +1,29 @@
+<script type="text/javascript">
+</script>
+
+<form name="genes">
+  <input type="hidden" id="human_genes" value="hg1
+hg2
+hg3">
+  <input type="hidden" id="mouse_genes" value="mg1
+mg2
+mg3">
+
+  <!--
+  <div id="human_genes" style="display:none" value="hgene1\nhgene2\nhgene3">hgene1\nhgene2\nhgene3</div>
+  -->
+
+  <!--
+  <input type="button" name="sample_genes" value="Use sample genes"
+    onClick={genes.gene_list.value="hg1\nhg2\nhg3"}>
+  -->
+
+  <input type="button" name="sample_genes" value="Use sample genes"
+    onClick="{genes.gene_list.value=document.getElementById('human_genes').value}">
+
+  <br>
+
+  <textarea name="gene_list" rows=5 cols=50 wrap=SOFT">
+  </textarea>
+</form>
+

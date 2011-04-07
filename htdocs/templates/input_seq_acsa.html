@@ -1,0 +1,448 @@
+<script language="JavaScript">
+<!-- BEGIN script hiding
+function isblank(s)
+{
+    for (var i = 0; i < s.length; i++) {
+        var c = s.charAt(i);
+        if ((c != ' ') && (c != '\n') && (c != '\t')) return false;
+    }
+    return true;
+}
+
+function verify(f)
+{
+    var msg;
+    var errors = "";
+
+    if (f.seq_input_method[0].checked) {
+        if (f.seq_list.value == null || f.seq_list.value == "" || isblank(f.seq_list.value))
+        {
+            errors += "No sequences were pasted into the Paste Sequences box\n";
+        }
+    } else if (f.seq_input_method[1].checked) {
+        if (f.seq_file.value == null || f.seq_file.value == "" || isblank(f.seq_file.value))
+        {
+            errors += "No sequence upload file was selected\n";
+        }
+    }
+
+    if (f.bg_seq_input_method[0].checked) {
+    } else if (f.bg_seq_input_method[1].checked) {
+        if (f.bg_seq_list.value == null || f.bg_seq_list.value == "" || isblank(f.bg_seq_list.value))
+        {
+            errors += "No background sequences were pasted into the Paste Sequences box\n";
+        }
+    } else if (f.bg_seq_input_method[2].checked) {
+        if (f.bg_seq_file.value == null || f.bg_seq_file.value == "" || isblank(f.bg_seq_file.value))
+        {
+            errors += "No background sequence upload file was selected\n";
+        }
+    }
+
+    if (f.tf_select_method[0].checked) {
+        var v = parseFloat(f.core_min_ic.value);
+        if (isNaN(v)) {
+            errors += "Minimum specificity for JASPAR CORE profiles is not a valid number\n";
+        } else {
+            if (v < [%min_ic%]) {
+                errors += "Minimum specificity for JASPAR CORE profiles is below minimum allowable";
+                errors += " [%min_ic%] bits\n";
+            }
+        }
+    } else if (f.tf_select_method[1].checked) {
+        var tfs_selected = false;
+        for (var i = 0; i < f.core_tfs.options.length; i++) {
+            if (f.core_tfs.options[i].selected) {
+                tfs_selected = true;
+                break;
+            }
+        }
+        if (!tfs_selected) {
+            errors += "No specific JASPAR CORE profiles were selected\n";
+        }
+    } else if (f.tf_select_method[2].checked) {
+        if (isblank(f.matrix_paste_text.value)) {
+            errors += "No custom profiles text pasted\n";
+        }
+    } else if (f.tf_select_method[3].checked) {
+        if (isblank(f.matrix_upload_file.value)) {
+            errors += "No custom profiles upload file specified\n";
+        }
+    }
+
+    if (f.anchor_tf_select_method[0].checked) {
+        if (isblank(f.anchor_tf_id.value)) {
+            errors += "No specific JASPAR CORE anchoring profile was selected\n";
+        }
+    } else if (f.anchor_tf_select_method[1].checked) {
+        if (isblank(f.anchor_matrix_paste_text.value)) {
+            errors += "No custom anchoring profile text pasted\n";
+        }
+    } else if (f.anchor_tf_select_method[2].checked) {
+        if (isblank(f.anchor_matrix_upload_file.value)) {
+            errors += "No custom anchoring profile upload file specified\n";
+        }
+    }
+
+    var v = parseFloat(f.threshold.value);
+    if (isNaN(v)) {
+        errors += "Matrix match threshold is not a valid number\n";
+    } else {
+        if (v < [%min_threshold%]) {
+            errors += "Matrix match threshold is below minimum allowable";
+            errors += " value of [%min_threshold%]%\n";
+        }
+    }
+	
+    if (f.email.value == null || f.email.value == ""
+        || isblank(f.email.value))
+    {
+	    	errors += "No email was provided\n";
+    }
+		
+    if (!errors) return true;
+
+    msg = "_________________________________________________________\n\n";
+    msg += "The analysis was not submitted due to the following problem(s).\n";
+    msg += "Please correct these problem(s) and re-submit.\n";
+    msg += "________________________________________________________\n\n";
+    msg += errors;
+    alert(msg);
+    return false;
+}
+// END script hiding -->
+</script>
+
+<form name="input" enctype="multipart/form-data" method="post" onSubmit="return verify(this)" target="_blank">
+  <h3>STEP 1a: Enter your sequences</h3>
+  <p class="text">
+    <input type="radio" name="seq_input_method" value="paste" checked>
+    Paste fasta formatted sequences (retrieve from <a href="http://main.g2.bx.psu.edu/" target="_blank">Galaxy</a>):<br>
+<!--
+    <input type="button" name="use_sample_seqs" value="Use sample seqs"
+      onClick="{input.seq_input_method[0].checked=true; input.seq_list.value="[%sample_sequences%]}">
+-->
+    <textarea name="seq_list" rows=5 cols=50 wrap=SOFT
+      onFocus="{input.seq_input_method[0].checked=true}" 
+      onChange="{
+        if (!isblank(input.seq_list.value))
+          {input.seq_input_method[0].checked=true}
+        else if (!isblank(input.seq_file.value))
+          {input.seq_input_method[1].checked=true}
+      }"></textarea>
+    <br>
+    <input type="button" name="clear_seqs" value="Clear"
+      onClick="{input.seq_list.value=''}">
+    <br><br>
+    <input type="radio" name="seq_input_method" value="upload">
+    <b>OR</b> upload a file containing a list of fasta formatted sequences:<br>
+    <input type="file" name="seq_file" size="40"
+      onClick="{input.seq_input_method[1].checked=true}"
+      onFocus="{input.seq_input_method[1].checked=true}"
+      onChange="{
+        if (!isblank(input.seq_file.value))
+          {input.seq_input_method[1].checked=true}}
+        else if (!isblank(input.seq_list.value))
+          {input.seq_input_method[0].checked=true}}">
+    <br><br>
+  </p>
+
+  <h3>STEP 1b: Enter a background list of sequences</h3>
+  <p class="text">
+    <input type="radio" name="bg_seq_input_method" value="default" checked>
+    Choose a background (sequences randomly selected from experimental control peaks)
+    <select name="bg_seq_set_key" onChange="{input.bg_seq_input_method[0].checked=true}">
+      [%FOREACH key = bg_seq_set_keys%]
+        <option value="[%key%]">[%bg_seq_set_names.$key%]</option>
+      [%END%]
+    </select>
+    <br>
+    <input type="radio" name="bg_seq_input_method" value="paste">
+    <b>OR</b> Paste fasta formatted background sequences (retrieve from <a href="http://main.g2.bx.psu.edu/" target="_blank">Galaxy</a>):<br>
+    <textarea name="bg_seq_list" rows=5 cols=50 wrap=SOFT
+      onFocus="{input.bg_seq_input_method[1].checked=true}" 
+      onChange="{
+        if (!isblank(input.bg_seq_list.value))
+          {input.bg_seq_input_method[1].checked=true}
+        else if (!isblank(input.bg_seq_file.value))
+          {input.bg_seq_input_method[2].checked=true}
+        else
+          {input.bg_seq_input_method[0].checked=true}
+      }"></textarea>
+    <br>
+    <input type="button" name="clear_bg_seqs" value="Clear"
+      onClick="{input.bg_seq_list.value=''}">
+    <br><br>
+    <input type="radio" name="bg_seq_input_method" value="upload">
+    <b>OR</b> upload a file containing a list of fasta formatted background sequences:<br>
+    <input type="file" name="bg_seq_file" size="40"
+      onClick="{input.bg_seq_input_method[2].checked=true}"
+      onFocus="{input.bg_seq_input_method[2].checked=true}"
+      onChange="{
+        if (!isblank(input.bg_seq_file.value))
+          {input.bg_seq_input_method[2].checked=true}
+        else if (!isblank(input.bg_seq_list.value))
+          {input.bg_seq_input_method[1].checked=true}
+        else {input.bg_seq_input_method[0].checked=true}}">
+  </p>
+
+  <hr noshade><br>
+
+  <h3>STEP 2: Select transcription factor binding site matrices</h3> 
+
+  <p class="text">
+    <h4>Select anchoring TF</h4>
+    <input type="radio" name="anchor_tf_select_method" value="core_specific" checked>
+    Select specific JASPAR CORE profile:
+    <br>
+    <table>
+      <tr>
+        [%tf_list = tf_set.get_matrix_list('name')%]
+        <td>
+          <select size=8 name=anchor_tf_id onFocus="{input.anchor_tf_select_method[0].checked=true}">
+          [%FOREACH tf = tf_list%]
+            <option value=[%tf.ID%]>[%tf.name%]</option>
+          [%END%]
+          </select>
+        </td>
+      </tr>
+    </table>
+    <br>
+    <input type="radio" name="anchor_tf_select_method" value="paste">
+    <b>OR</b> paste a TFBS profile (retrieve from <a href="http://www.pazar.info/" target="_blank">PAZAR</a>)
+    <br>
+    <textarea name="anchor_matrix_paste_text" rows=5 cols=50 wrap=SOFT
+      onFocus="{input.anchor_tf_select_method[1].checked=true}"
+      onChange="{
+        if (!isblank(input.anchor_matrix_paste_text.value))
+          {input.anchor_tf_select_method[1].checked=true}
+        else if (!isblank(input.anchor_matrix_paste_text.value))
+          {input.anchor_tf_select_method[1].checked=true}
+      }"></textarea>
+    <br>
+    <input type="button" name="clear_profiles" value="Clear"
+      onClick="{input.anchor_matrix_paste_text.value=''}">
+    <br>
+    <br>
+
+    <input type="radio" name="anchor_tf_select_method" value="upload">
+    <b>OR</b> upload a file containing a TFBS profile
+    <br>
+    <input type="file" name="anchor_matrix_upload_file" size="40"
+      onClick="{input.anchor_tf_select_method[2].checked=true}"
+      onFocus="{input.anchor_tf_select_method[2].checked=true}"
+      onChange="{
+        if (!isblank(input.anchor_matrix_upload_file.value))
+          {input.anchor_tf_select_method[2].checked=true}
+        else if (!isblank(input.anchor_matrix_upload_file.value))
+          {input.anchor_tf_select_method[2].checked=true}
+      }">
+  </p>
+
+  <p class="text"> 
+    <h4>Select TFs to find in combination with anchoring TF</h4>
+    <input type="radio" name="tf_select_method" value="core_min_ic" checked>
+    [%IF num_tax_groups > 1%]
+      All JASPAR CORE profiles from the following tax groups:
+      <br>
+      [%first_tax_group = 1%]
+      [%FOREACH tax = tax_groups%]
+        &nbsp;&nbsp;<input type="checkbox" name="core_tax_groups" value="[%tax%]" [%IF first_tax_group == 1%]checked[%END%] onClick="{if (checked) {input.tf_select_method[0].checked=true}}">[%tax%]
+        [%first_tax_group = 0%]
+      [%END%]
+      <br>&nbsp;&nbsp;with a minimum specificity of&nbsp;
+    [%ELSE%]
+      All JASPAR CORE [%tax_groups.0%] profiles with a minimum specificity of&nbsp;
+    [%END%]
+    <input type="text" name="core_min_ic" value=[%min_ic%]
+      size="2" onFocus="{input.tf_select_method[0].checked=true}"> bits (min. [%min_ic%] bits)
+    <br><br>
+
+    <input type="radio" name="tf_select_method" value="core_specific">
+    <b>OR</b> select specific profiles:
+    <br>
+    <table>
+      <tr>
+      [%FOREACH tax = tax_groups%]
+        [%IF tax_tf_sets.$tax.size > 0%]
+          <td class="table_text" align="center">[%tax%]</td>
+        [%END%]
+      [%END%]
+      </tr>
+      <tr>
+      [%FOREACH tax = tax_groups%]
+        [%IF tax_tf_sets.$tax.size > 0%]
+          [%tf_list = tax_tf_sets.$tax.get_matrix_list('name')%]
+          <td>
+          <select multiple size=8 name=core_tfs onFocus="{input.tf_select_method[1].checked=true}">
+          [%FOREACH tf = tf_list%]
+            <option value=[%tf.ID%]>[%tf.name%]</option>
+          [%END%]
+          </select>
+          </td>
+        [%END%]
+      [%END%]
+      </tr>
+    </table>
+
+    <input type="radio" name="tf_select_method" value="paste">
+    <b>OR</b> paste one or more TFBS profiles (retrieve from <a href="http://www.pazar.info/" target="_blank">PAZAR</a>)
+    <br>
+    <textarea name="matrix_paste_text" rows=5 cols=50 wrap=SOFT
+      onFocus="{input.tf_select_method[2].checked=true}"
+      onChange="{
+        if (!isblank(input.matrix_paste_text.value))
+          {input.tf_select_method[2].checked=true}
+        else if (!isblank(input.matrix_paste_text.value))
+          {input.tf_select_method[2].checked=true}
+      }"></textarea>
+    <br>
+    <input type="button" name="clear_profiles" value="Clear"
+      onClick="{input.matrix_paste_text.value=''}">
+    <br><br>
+
+    <input type="radio" name="tf_select_method" value="upload">
+    <b>OR</b> upload a file containing one or more TFBS profiles
+    <br>
+    <input type="file" name="matrix_upload_file" size="40"
+      onClick="{input.tf_select_method[3].checked=true}"
+      onFocus="{input.tf_select_method[3].checked=true}"
+      onChange="{
+        if (!isblank(input.matrix_upload_file.value))
+          {input.tf_select_method[3].checked=true}
+        else if (!isblank(input.matrix_upload_file.value))
+          {input.tf_select_method[3].checked=true}
+      }">
+  </p>
+
+<!--
+  <h4>JASPAR PBM Profiles</h4>
+
+  <p class="text">
+    <input type="radio" name="tf_select_method" value="pbm_min_ic">
+    All profiles with a minimum specificity of
+    <input type="text" name="pbm_min_ic" value=[%min_ic%] size="2"
+     onFocus="{input.tf_select_method[2].checked=true}"> bits (min. [%min_ic%] bits)
+    <br><br>
+
+    <input type="radio" name="tf_select_method" value="pbm_specific">
+    <b>OR</b> select specific profiles:
+    <br>
+
+    <table>
+    <tr>
+    [%FOREACH tax = tax_groups%]
+      [%IF pbm_tf_sets.$tax.size > 0%]
+        <td class="table_text" align="center">[%tax%]</td>
+      [%END%]
+    [%END%]
+    </tr>
+    <tr>
+    [%FOREACH tax = tax_groups%]
+      [%IF pbm_tf_sets.$tax.size > 0%]
+        [%pbm_tf_list = pbm_tf_sets.$tax.get_matrix_list('name')%]
+        <td>
+        <select multiple size=8 name=pbm_tfs
+        onFocus="{input.tf_select_method[3].checked=true}">
+        [%FOREACH tf = pbm_tf_list%]
+          <option value=[%tf.ID%]>[%tf.name%]</option>
+        [%END%]
+        </select>
+        </td>
+      [%END%]
+    [%END%]
+    </tr>
+    </table>
+  </p>
+
+  <h4>JASPAR PENDING Profiles</h4>
+
+  <p class="text">
+    <input type="radio" name="tf_select_method" value="pending_min_ic">
+    All profiles with a minimum specificity of
+    <input type="text" name="pending_min_ic" value=[%min_ic%] size="2"
+     onFocus="{input.tf_select_method[4].checked=true}"> bits (min. [%min_ic%] bits)
+    <br><br>
+
+    <input type="radio" name="tf_select_method" value="pending_specific">
+    <b>OR</b> select specific profiles:
+    <br>
+
+    <table>
+    <tr>
+    [%FOREACH tax = tax_groups%]
+      [%IF pending_tf_sets.$tax.size > 0%]
+        <td class="table_text" align="center">[%tax%]</td>
+      [%END%]
+    [%END%]
+    </tr>
+    <tr>
+    [%FOREACH tax = tax_groups%]
+      [%IF pending_tf_sets.$tax.size > 0%]
+        [%pending_tf_list = pending_tf_sets.$tax.get_matrix_list('name')%]
+        <td>
+        <select multiple size=8 name=pending_tfs
+        onFocus="{input.tf_select_method[5].checked=true}">
+        [%FOREACH tf = pending_tf_list%]
+          <option value=[%tf.ID%]>[%tf.name%]</option>
+        [%END%]
+        </select>
+        </td>
+      [%END%]
+    [%END%]
+    </tr>
+    </table>
+  </p>
+-->
+      
+  <hr noshade><br>
+  <h3>STEP 3: Select parameters</h3>
+  <p class="text">
+    Matrix match threshold (min. [%min_threshold%]%):<br>
+    <input type="text" name="threshold" value=[%dflt_threshold%] size="4">%
+    <br><br>
+    Maximum inter-binding distance <input type="text" name="inter_binding_dist" value="[%dflt_inter_binding_dist%]" size="4"> (max. = [%max_inter_binding_dist%])
+    <br><br>
+    Number of results to return:
+    <br>
+    <input type="radio" name="result_type" value="top_x_results" checked> Top
+    <select name="num_display_results">
+      <option value="5">5</option>
+      <option value="10">10</option>
+      <option value="20">20</option>
+      <option value="All" selected>All</option>
+    </select> results
+    <br>
+    <input type="radio" name="result_type" value="significant_hits"> <b>OR</b> only results with <b>Z-score >= </b>
+    <select name="zscore_cutoff">
+      <option value="5">5</option>
+      <option value="10" selected>10</option>
+      <option value="15">15</option>
+    </select>
+    and <b>Fisher score <= </b>
+    <select name="fisher_cutoff">
+      <option value="0.05">0.05</option>
+      <option value="0.01" selected>0.01</option>
+      <option value="0.001">0.001</option>
+    </select>
+    (Default values have been chosen based on empirical studies)
+    <br>
+    <br>
+    Sort results by:
+    <br>
+    <input type="radio" name="result_sort_by" value="zscore" checked>Z-score
+    <input type="radio" name="result_sort_by" value="fisher_p_value">Fisher score
+    <br><br>
+  </p>
+  <p class="text"> 
+    Enter your email address:
+    <input type="text" name="email" value="">
+    <br><br>
+    Press the <b>Submit</b> button to perform the analysis or <b>Reset</b> to reset the analysis parameters to their default values.<br>The results will be sent to the email address you provided.<br>
+    <br><br>
+    <input type="submit" name="Submit" value="Submit">
+    <input type="reset" name="Reset" value="Reset">
+    <input type="hidden" name="rm" value="process">
+    <br>
+  </p>
+</form>

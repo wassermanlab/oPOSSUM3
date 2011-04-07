@@ -1,0 +1,313 @@
+<h3>Selected Parameters</h3>
+<table border="0" cellpadding="2" cellspacing="0">
+  <tr>
+    <td class="table_title">Job ID:</td>
+    <td class="table_text">[%job_id%]</td>
+  </tr>
+
+  [%IF user_seq_file%]
+    <tr>
+      <td class="table_title">Target sequence file:</td>
+      <td class="table_text">[%user_seq_file%]</td>
+    </tr>
+  [%END%]
+
+  [%IF user_bg_seq_file%]
+    <tr>
+      <td class="table_title">Background sequence file:</td>
+      <td class="table_text">[%user_bg_seq_file%]</td>
+    </tr>
+  [%ELSIF bg_seq_set_name%]
+    <tr>
+      <td class="table_title">Background sequence set:</td>
+      <td class="table_text">[%bg_seq_set_name%]</td>
+    </tr>
+  [%END%]
+
+  <tr>
+    <td class="table_title">Number of target sequences:</td>
+    <td class="table_text">[%num_t_seqs%]</td>
+  </tr>
+
+  <tr>
+    <td class="table_title">Number of background sequences:</td>
+    <td class="table_text">[%num_bg_seqs%]</td>
+  </tr>
+
+  <tr>
+    <td class="table_title">Total target sequence length:</td>
+    <td class="table_text">[%t_seq_len%]</td>
+  </tr>
+
+  <tr>
+    <td class="table_title">Total background sequence length:</td>
+    <td class="table_text">[%bg_seq_len%]</td>
+  </tr>
+
+  <tr>
+    <td class="table_title">Target sequence GC content:</td>
+    <td class="table_text">
+    [%IF t_seq_gc_content > high_seq_gc or t_seq_gc_content < low_seq_gc%]
+      <b class="warn_text">[%t_seq_gc_content%]</b>
+    [%ELSE%]
+      [%t_seq_gc_content%]
+    [%END%]
+    </td>
+  </tr>
+
+  <tr>
+    <td class="table_title">Background sequence GC content:</td>
+    <td class="table_text">
+    [%IF bg_seq_gc_content > high_seq_gc or bg_seq_gc_content < low_seq_gc%]
+      <b class="warn_text">[%bg_seq_gc_content%]</b>
+    [%ELSE%]
+      [%bg_seq_gc_content%]
+    [%END%]
+    </td>
+  </tr>
+
+  [%IF anchor_matrix%]
+    <tr>
+      <td class="table_title">Anchoring TFBS profile:</td>
+      <td class="table_text">[%anchor_matrix.name()%]</td>
+    </tr>
+  [%END%]
+
+  [%IF tf_db%] 
+    <tr>
+      <td class="table_title">TFBS profile matrix source:</td>
+      <td class="table_text">JASPAR</td>
+    </tr>
+    [%IF collection%]
+      <tr>
+        <td class="table_title">JASPAR collection:</td>
+        <td class="table_text">[%collection%]</td>
+      </tr>
+
+      [%IF tf_select_criteria == 'specific'%]
+        [%IF tf_set%]
+          [%matrix_list = tf_set.get_matrix_list('name')%]
+          <tr>
+            <td class="table_title">TFBS profiles:</td>
+            <td class="table_text">
+              [%FOREACH matrix = matrix_list%][%matrix.name()%] [%END%]
+            </td>
+          </tr>
+        [%END%]
+      [%ELSIF tf_select_criteria == 'min_ic'%]
+        [%IF tax_groups%]
+          <tr>
+            <td class="table_title">Taxonomic supergroup(s):</td>
+            <td class="table_text">
+              [%FOREACH tax_group = tax_groups%][%tax_group%]&nbsp;[%END%]
+            </td>
+          </tr>
+        [%END%]
+        [%IF min_ic%]
+          <tr>
+            <td class="table_title">Min. IC:</td>
+            <td class="table_text">[%min_ic%] bits</td>
+          </tr>
+        [%END%]
+      [%END%] <!-- if tf_select_criteria == ... -->
+    [%END%] <!-- if collection -->
+  [%ELSE%] <!-- !tf_db -->
+    <tr>
+      <td class="table_title">TFBS profile matrix source:</td>
+      <td class="table_text">User supplied</td>
+    </tr>
+
+    [%IF user_tf_file%]
+      <tr>
+        <td class="table_title">TFBS profile matrix file:</td>
+        <td class="table_text">[%user_tf_file%]</td>
+      </tr>
+    [%END%]
+  [%END%] <!-- if tf_db> -->
+
+  <tr>
+    <td class="table_title">Matrix score threshold:</td>
+    <td class="table_text">[%threshold%]</td>
+  </tr>
+
+  [%IF result_sort_by == 'zscore'%]
+    [%display_sort_by = 'Z-score'%]
+  [%ELSIF result_sort_by == 'fisher_p_value'%]
+    [%display_sort_by = 'Fisher score'%]
+  [%ELSE%]
+    [%display_sort_by = result_sort_by%]
+  [%END%]
+  <tr>
+    <td class="table_title">Results returned:</td>
+    [%IF result_type == 'top_x_results'%]
+      [%IF num_display_results == 'All'%]
+        <td class="table_text">All results sorted by [%display_sort_by%]</td>
+      [%ELSE%]
+        <td class="table_text">Top [%num_display_results%] results sorted by [%display_sort_by%]</td>
+      [%END%]
+    [%ELSIF result_type == 'significant_hits'%]
+      <td class="table_text">All results with a Z-score >= [%zscore_cutoff%] and a Fisher score <= [%fisher_cutoff%] sorted by [%display_sort_by%]</td>
+    [%END%]
+  </tr>
+
+  <tr>
+    <td class="table_title">The results will be sent to the following email:</td>
+    <td class="table_text">[%email%]</td>
+  </tr>
+</table>
+
+[%IF warn_zero_bg_gene_hits%]
+  <p class="warn_text"><b>Warning</b>: the provided background sequence set resulted in zero binding sites for one or more TFs. In these cases the Z-score is undefined and is marked as N/A. In cases where there were one or more binding sites in the target gene set, the result could still be considered significant. Results for which this was the case are marked with an asterisk (*).
+  </p>
+[%END%]
+
+[%IF results%]
+  <h3>oPOSSUM Analysis</h3>
+  <table id="results_table" class="sortable" cellpadding="2" cellspacing="0">
+  <tr class="table_title">
+    <th title="Click arrows to sort">TF</th>
+    [%IF tf_db%]
+      <th title="Click arrows to sort">JASPAR ID</th>
+    [%END%]
+    <th title="Click arrows to sort">Class</th>
+    <th title="Click arrows to sort">Family</th>
+    <th title="Click arrows to sort">Tax group</th>
+    <th title="Click arrows to sort">IC</th>
+    <th title="Click arrows to sort">GC Content</th>
+    <th class="unsortable">Target seq. hits</th>
+    <th class="unsortable">Target seq. non-hits</th>
+    <th class="unsortable">Background seq. hits</th>
+    <th class="unsortable">Background seq. non-hits</th>
+    <th class="unsortable">Target TFBS hits</th>
+    <th class="unsortable">Target TFBS nucleotide rate</th>
+    <th class="unsortable">Background TFBS hits</th>
+    <th class="unsortable">Background TFBS nucleotide rate</th>
+    <th title="Click arrows to sort">Z-score</th>
+    <th title="Click arrows to sort">Fisher score</th>
+  </tr>
+  [%FOREACH result = results%]
+    [%tf_id = result.id%]
+    [%tf = tf_set.get_matrix(tf_id)%]
+    <tr class="table_text">
+      [%IF result.bg_gene_hits == 0 and result.t_gene_hits > 0%]
+        <td><b class="warn_text">*[%tf.name%]</b></td>
+      [%ELSE%]
+        <td>[%tf.name%]</td>
+      [%END%]
+
+      [%IF tf_db%]
+        <td><a href="javascript:newWindow=window.open('[%jaspar_url%]?rm=present&collection=[%collection%]&ID=[%tf_id%]', '[%tf_id%]', 'width=600,height=800,toolbar=0,location=0,directories=0,status=0,menuBar=0,scrollBars=1'); newWindow.focus()">[%tf_id%]</a>
+        </td>
+      [%END%]
+
+      [%IF tf.class%]
+        <td>[%tf.class%]</td>
+      [%ELSE%]
+        <td>N/A</td>
+      [%END%]
+
+      [%IF tf.tag('family')%]
+        <td>[%tf.tag('family')%]</td>
+      [%ELSE%]
+        <td>N/A</td>
+      [%END%]
+
+      [%IF tf.tag('tax_group')%]
+        <td>[%tf.tag('tax_group')%]</td>
+      [%ELSE%]
+        <td>N/A</td>
+      [%END%]
+
+      <td align=right>
+      [%IF tf.isa('TFBS::Matrix::PFM')%]
+        [%total_ic = formatf(3, tf.to_ICM.total_ic)%]
+        [%IF total_ic > high_matrix_ic or total_ic < low_matrix_ic%]
+          <b class="warn_text">[%total_ic%]</b>
+        [%ELSE%]
+          [%total_ic%]
+        [%END%]
+      [%ELSE%]
+        N/A
+      [%END%]
+      </td>
+
+      [%gc = tf.tag('gc_content')%]
+      <td align=right>
+      [%IF gc > high_matrix_gc or gc < low_matrix_gc%]
+        <b class="warn_text">[%gc%]</b>
+      [%ELSE%]
+        [%gc%]
+      [%END%]
+      </td>
+
+      <td align=right>
+        [%IF result.t_gene_hits > 0%]
+          <a href="[%rel_results_dir%]/[%tf_id%].html" target="_blank">[%result.t_gene_hits%]</a>
+        [%ELSE%]
+          [%result.t_gene_hits%]
+        [%END%]
+      </td>
+
+      <td align=right>[%result.t_gene_no_hits%]</td>
+
+      <td align=right>
+        [%IF result.bg_gene_hits == 0%]
+          <b class="warn_text">[%result.bg_gene_hits%]</b>
+        [%ELSE%]
+          [%result.bg_gene_hits%]
+        [%END%]
+      </td>
+
+      <td align=right>[%result.bg_gene_no_hits%]</td>
+
+      <td align=right>
+        [%IF result.t_tfbs_hits > 0%]
+          <a href="[%rel_results_dir%]/[%tf_id%].html" target="_blank">[%result.t_tfbs_hits%]</a>
+        [%ELSE%]
+          [%result.t_tfbs_hits%]
+        [%END%]
+      </td>
+
+      <td align=right>[%formatg(3, result.t_tfbs_rate)%]</td>
+
+      <td align=right>
+        [%IF result.bg_gene_hits == 0%]
+          <b class="warn_text">[%result.bg_tfbs_hits%]</b>
+        [%ELSE%]
+          [%result.bg_tfbs_hits%]
+        [%END%]
+      </td>
+
+      <td align=right>
+        [%IF result.bg_gene_hits == 0%]
+          <b class="warn_text">[%formatf(3, result.bg_tfbs_rate)%]</b>
+        [%ELSE%]
+          [%formatf(3, result.bg_tfbs_rate)%]
+        [%END%]
+      </td>
+
+      <td align=right>
+        [%IF result.bg_gene_hits == 0%]
+          <b class="warn_text">N/A</b>
+        [%ELSE%]
+          [%formatf(3, result.zscore)%]
+        [%END%]
+      </td>
+
+      <td align=right nowrap>[%formatg(3, result.fisher_p_value)%]</td>
+    </tr>
+  [%END%]
+  </table>
+
+  <p class="text" align="center">
+  <a href="[%rel_results_dir%]/[%results_file%]" target="_blank">Download as a tab delimited text file</a> (results will be kept on the server for [%result_retain_days%] days after analysis)
+  </p>
+
+  <p align="center"><a href="#top"><img src="[%rel_htdocs_path%]/images/arrow-up.gif" border="0" alt="Back to top"></a></p>
+
+  <p class="text">
+  Consult the <a href="javascript:newWindow=window.open('[%rel_htdocs_path%]/help.html','help','width=600,height=800,toolbar=1,location=0,directories=0,status=0,menuBar=0,scrollBars=1,resizable=0'); newWindow.focus()">help file</a> for an explanation of the column headings.
+  </p>
+[%ELSE%]
+  <p class="warn_text">No TFBSs were found which matched your search criteria</p>
+[%END%]

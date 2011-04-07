@@ -1,0 +1,10 @@
+#!/usr/local/bin/perl
+
+use strict;
+use warnings;
+
+use oPossumGeneACSAWeb;
+
+my $app = oPossumGeneACSAWeb->new(PARAMS => {species => 'mouse'});
+
+$app->run();

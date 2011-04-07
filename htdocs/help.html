@@ -1,0 +1,503 @@
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=iso-8859-15">
+  <link rel="stylesheet" href="styles.css" type="text/css">
+  <title>oPOSSUM 3.0 Help</title>
+</head>
+<style type="text/css">
+	body {
+		margin:20px;
+	}
+	.contents_level1 {
+		margin:5px;
+	}
+	.contents_level2 {
+		margin:25px;
+	}
+	.contents_level3 {
+		margin:45px;
+	}
+</style>
+<body class="text">
+<a name="top"></a>
+  <h1><a name="possum_help"></a>oPOSSUM SSA</h1>
+  <p>
+  <b><center>Identification of over-represented transcription factor binding sites in sets of genes</center></b>
+  </p>
+  <h2>Contents</h2>
+  <a class="contents_level1" href="#description">Description</a><br />
+  <a class="contents_level1" href="#background_set">Background Data Sets</a><br />
+  <a class="contents_level2" href="#human_ssa">Human SSA and CSA</a><br />
+  <a class="contents_level2" href="#worm_ssa">Worm SSA</a></br>
+  <a class="contents_level2" href="#yeast_ssa">Yeast SSA</a><br />
+  <a class="contents_level1" href="#statistical_analysis">Statistical Analysis</a><br>
+  <a class="contents_level1" href="#download_api">Download API</a><br />
+  <a class="contents_level1" href="#select_parameters">Select Analysis Parameters</a><br />
+  <a class="contents_level2" href="#select_genes">Entering a list of co-expressed genes</a><br />
+  <a class="contents_level2" href="#select_tfbs">Selecting transcription factor binding site matrices</a><br />
+  <a class="contents_level3" href="#human_tfbs">Human SSA</a><br />
+  <a class="contents_level3" href="#worm_tfbs">Worm SSA</a><br />
+  <a class="contents_level3" href="#yeast_tfbs">Yeast SSA</a><br />
+  <span class="contents_level2">Analysis parameters</span><br />
+  <a class="contents_level3" href="#conservation">Conservation level</a><br />
+  <a class="contents_level3" href="#threshold">Matrix match threshold</a><br />
+  <a class="contents_level3" href="#up_down_seq">Upstream / downstream sequence</a><br />
+  <a class="contents_level1" href="#statistical_measure">Statistical Measure for Over-representation</a><br />
+  <a class="contents_level2" href="#zscore">Z-score</a><br />
+  <a class="contents_level2" href="#fisher">One-tailed Fisher Exact Probability</a><br />
+  <a class="contents_level1" href="#analysis_results">Analysis Results</a><br />
+  <a class="contents_level2" href="#selected_parameters">Selected Parameters</a><br />
+  <a class="contents_level2" href="#target_genes">Target Genes</a><br />
+  <a class="contents_level3" href="#genes_analyzed">Analyzed</a><br />
+  <a class="contents_level3" href="#genes_excluded">Excluded</a><br />
+  <a class="contents_level2" href="#background_genes">Background Genes</a><br />
+  <a class="contents_level3" href="#bg_genes_analyzed">Analyzed</a><br />
+  <a class="contents_level3" href="#bg_genes_excluded">Excluded</a><br />
+  <a class="contents_level2" href="#opossum_results">oPOSSUM Analysis</a><br />
+  <a class="contents_level3" href="#tf">TF</a><br />
+  <a class="contents_level3" href="#tf_class">Class</a><br />
+  <a class="contents_level3" href="#tf_supergroup">Supergroup</a><br />
+  <a class="contents_level3" href="#tf_ic">IC</a><br />
+  <a class="contents_level3" href="#bg_gene_hits">Background gene hits</a><br />
+  <a class="contents_level3" href="#bg_gene_non_hits">Background gene non-hits</a><br />
+  <a class="contents_level3" href="#t_gene_hits">Target gene hits</a><br />
+  <a class="contents_level3" href="#t_gene_non_hits">Target gene non-hits</a><br />
+  <a class="contents_level3" href="#bg_tfbs_hits">Background TFBS hits</a><br />
+  <a class="contents_level3" href="#t_tfbs_hits">Target TFBS hits</a><br />
+  <a class="contents_level3" href="#bg_tfbs_rate">Background TFBS rate</a><br />
+  <a class="contents_level3" href="#t_tfbs_rate">Target TFBS rate</a><br />
+  <a class="contents_level3" href="#zscore_zscore">Z-score</a><br />
+  <a class="contents_level3" href="#fisher_p_value">Fisher score</a><br />
+  <a class="contents_level2" href="#genes_with_tfbss">Genes Containing TFBSs (link)</a><br />
+  <a class="contents_level3" href="#ensembl_id">Ensembl ID</a><br />
+  <a class="contents_level3" href="#operon_id">Operon ID (for <i>C. elegans</i>)</a><br />
+  <a class="contents_level3" href="#chr">Chromosome</a><br />
+  <a class="contents_level3" href="#strand">Strand</a><br />
+  <a class="contents_level3" href="#tss">TSS</a><br />
+  <a class="contents_level3" href="#promoter_start">Promoter start</a><br />
+  <a class="contents_level3" href="#promoter_end">Promoter end</a><br />
+  <a class="contents_level3" href="#tfbs_sequence">TFBS sequence</a><br />
+  <a class="contents_level3" href="#tfbs_start">TFBS start</a><br />
+  <a class="contents_level3" href="#tfbs_end">TFBS end</a><br />
+  <a class="contents_level3" href="#tfbs_orientation">TFBS orientation</a><br />
+  <a class="contents_level3" href="#tfbs_score">TFBS Score</a><br />
+   
+  <p><hr noshade><br><a href="#top"><img src="images/arrow-up.gif" align="right" /></a></p>
+  	
+  <h2><a name="description"></a>Description</h2>
+  <p>
+  	oPOSSUM is a system for determing the over-representation of transcription factor binding sites (TFBS) within a set of (co-expressed) genes or sequences as compared with a pre-compiled <a href="#background_set">background set</a>. The input is a set of gene identifiers (or fasta formatted sequences for sequence-based oPOSSUM). Analysis <a href="#select_parameters">parameters</a> are chosen. The system then compares the number of hits for each selected TFBS in the target set against the background set. Two different measures of statistical significance are applied to determine which sites are over-represented in the target set, <a href="#zscore">Z-score</a> and <a href="#fisher">Fisher's exact test</a>. The <a href="#analysis_results">results</a> of the analysis are displayed in tabular form showing the relative rankings of the TFBSs according to the two statistical measures.
+  </p>
+
+  <h2><a name="background_set"></a>Background Data Sets</h2>
+  
+  <h3><a name="human_ssa"></a>Species-based SSA and CSA</h3>
+  <p>
+  	The background data sets were compiled by selecting genes from Ensembl which were considered to be well known, i.e. the "KNOWN" attribute was true and the genes had a gene symbol assigned (HGNC symbol for human, MGI for mouse etc.). Transcription start sites (TSSs) were assigned for each gene based on the core Ensembl gene TSS annotations.
+  </p> 
+  <p>Conservation was determined by using phastCons scores from the UCSC genome browser scoring above some minimum threshold and merging these into conserved regions of minimum length 20 bp such that the resulting average score over each region was still above threshold. This was done for three different score thresholds non-coding regions were identified using a 100bp sliding window across the alignment. The 
+  	top 10th, 20th and 30th percentiles of windows, based on their sequency identity, were selected if
+  	they met the minimum required thresholds of 70%, 65%, and 60%, respectively. See <a href="#conservation">
+  	Conservation Level</a> for more details.
+  </p>
+  	  
+  <p>The conserved regions that fell within 10,000 nucleotides upstream and downstream of the predicted
+  	transcription start site (TSS) were then scanned for binding sites using position weight matrice (PWM) models 
+  	of transcription factor (TF) binding specificity from the <a href="javascript:newWindow=window.open('http://mordor.cgb.ki.se/cgi-bin/jaspar2005/jaspar_db.pl','jaspar'); newWindow.focus()">JASPAR</a> 
+  	database.</p>
+  <p>These TF sites were stored in the oPOSSUM database and comprise the background set for the default analysis.
+  	For the custom analysis, the user has the option to enter their own list of genes to be used as background.
+  </p>
+  <p>Please refer to the separate <a href="http://www.cisreg.ca/oPOSSUM2_dev/help.html">help file</a> for the oPOSSUM Human Combination Site Analysis</p> 
+ 
+   <h3><a name="worm_ssa"></a>Worm SSA</h3>
+   <p>
+   The background data set was compiled by identifying one-to-one <i>C. elegans</i>/<i>C. briggsae</i> orthologs (as
+   defined by <a href="http://inparanoid.sbc.su.se/">InParanoid</a>) from 
+   <a href="http://wormbase.org/">WormBase</a> (WS160). Overlapping genes were removed from the set. Alignments were performed 
+   on the orthologous gene sequences plus 2kb of upstream sequence (relative to the start codon) for <i>C. elegans</i>, and 4kb 
+   of upstream sequence for <i>C. briggsae</i>. Conserved, non-coding regions were identified using a 100bp sliding window across
+   the alignment. The top 10th, 20th and 30th percentiles of windows, based on their sequence identity, were selected if
+   they met the minimum required sequence identity thresholds of 60%, 55% and 50% respectively. See <a href="#conservation">
+  	Conservation Level</a> for more details.
+  </p>
+  
+  <h3><a name="yeast_ssa"></a>Yeast SSA</h3>
+  <p>
+  	The background data set was compiled from all verified and uncharacterized ORFs from the
+  	<a href="javascript:newWindow=window.open('http://www.yeastgenome.org','jaspar'); newWindow.focus()">
+  	Saccharomyces Genome Database (SGD)</a>. Transposable element genes were included, but dubious ORFs and 
+  	pseudogenes were excluded. For each gene,
+  	1000bp of sequence upstream of the first ATG was scanned for binding sites using position 
+  	weight matrice (PWM) models of transcription factor (TF) binding specificity compiled from 
+  	the <a href="javascript:newWindow=window.open('http://rulai.cshl.edu/SCPD/','jaspar'); newWindow.focus()">
+  	Saccharyomyces cerevisiae Promoter Database (SCPD)</a> and from literature review.</p>
+  <p>These TF sites were stored in the yeast oPOSSUM database and comprise the background set for 
+  	the analysis.
+  </p>
+  
+  
+  <h2><a name="statistical_analysis"></a>Statistical Analysis</h2>
+  <p>
+  Two statistical measures of over-representation are currently employed, a <a href="#zscore">Z-score</a> 
+  and a <a href="#fisher">one-tailed Fisher exact probability</a>. 
+  </p>
+  <h2><a name="download_api"></a>Download API</h2>
+  <p>
+  The oPOSSUM API to the human/mouse database is available for download as a gzipped tar file. 
+  	It consists of a set of perl modules 
+  	which define the data objects used within the oPOSSUM analysis tool as well as an interface into the 
+  	oPOSSUM database. Please note that these modules have a large number of external dependencies.
+  </p>
+	<p><hr noshade><br><a href="#top"><img src="images/arrow-up.gif" align="right" /></a></p>
+  <h2><a name="select_parameters"></a>Select Analysis Parameters</h2>
+    <h3><a name="select_genes"></a>
+      Enter a list of co-expressed genes
+    </h3>
+    <p>
+    Choose the species of interest.
+    </p>
+    <p>
+    Choose the type of gene ID. The gene ID types available are Ensembl, HGNC/MarkerSymbol, RefSeq and Entrez. 
+    <ul><li>Ensembl includes Ensembl human and mouse stable gene IDs</li>
+    <li>HGNC/MarkerSymbol includes HGNC IDs for human and MarkerSymbol for mouse</li>
+    <li>RefSeq includes mRNA RefSeq IDs</li></ul>
+     Please note that while oPOSSUM attempts to use many different ways of identifying genes, the difficulty 
+     in mapping between different gene identification schemes means that not every gene in oPOSSUM is represented 
+     in every scheme. Every gene in oPOSSUM has an Ensembl gene ID, so this is the recommended gene ID type.
+    </p>
+    <p>
+      Next specify your list of genes by either pasting them into the text box or using the file upload option. 
+      The gene list should be separated by spaces, commas, semi-colons, colons, newlines or some combination 
+      thereof. For testing purposes, pressing the <b>Use sample genes</b> button will paste a pre-defined set 
+      of test genes into the text area. Use the <b>Clear</b> button to clear the text area.
+    </p>
+    <h3><a name="select_tfbs"></a>
+      Select transcription factor binding site matrices
+    </h3>
+
+    <h4><a name="human_tfbs">Human SSA</h4>
+    <p>You may either:</p>  
+    <ul><li>select all matrices in the oPOSSUM database with a given minimum specificity, or </li> 
+    <li>select matrices by taxonomic supergroup, or</li>
+    <li>select one or more specific matrices from the scrolling window.</li></ul> 
+    <p>These matrices were obtained from the 
+    	<a href="javascript:newWindow=window.open('http://jaspar.cgb.ki.se/cgi-bin/jaspar_db.pl','jaspar'); newWindow.focus()">JASPAR</a> 
+    	database.
+    </p>
+    <h4><a name="worm_tfbs"></a>Worm SSA</h4>
+    <p>In addition to the above, we have added predicted worm-specific profiles based on literature review. A summary of
+       the worm-specific profiles, including each profile's source, is available 
+       <a href="Supplementary_Table_S2.pdf">here</a>.
+    </p>
+    <h4><a name="yeast_tfbs"></a>Yeast SSA</h4>
+    <p>Only yeast-specific TFBS profiles are used in Yeast SSA. A summary of the worm specific profiles, including each
+       profile's source, is available as a downloadable <a href="Supplementary_Table_S3.pdf">PDF file</a>. Logos for
+       each TFBS profile are also available on the 
+       <a href="http://www.cisreg.ca/shosui/yeast_oPOSSUM/browse_profiles.php">website</a>.
+    </p>
+
+    <h3>
+      Select analysis parameters
+    </h3>
+    <h4><a name="conservation"></a>Conservation level</h4>
+    <p>
+    	In order to limit spurious TF sites, conservation with the aligned orthologous mouse sequence was used 
+    	as a filter such that only sites which fell within these non-coding conserved regions were kept. 
+    	A conserved region was defined as a span of some minimum length L within the human sequence which had 
+    	a percent identity with the aligned mouse sequence of some minimum value X. In order to choose this 
+    	minimum value X, a window of 100 bp was slid along the human sequence and the percent identity with 
+    	the aligned mouse sequence computed for each window. The value X was thus chosen such that the top N 
+    	percentile of scoring windows scored greater than or equal to X. An absolute minimum value for percent 
+    	identity, Y, was also chosen such that if X was less than Y, then Y was used as the percent identity. 
+    	The 100 bp scoring windows were then combined to form the set of conserved regions such that the span 
+    	of each conserved region was maximized while it's percent identity still fell above the minimum percent 
+    	identity computed above.</p>
+    <p>The background set was pre-computed with three levels of conservation filter. 
+    	<ul><li>Level 1 corresponds to the top 10 percentile of non-coding conserved regions with 
+    			an absolute minimum percent identity of 70%</li>
+    		<li>Level 2 corresponds to the top 20 percentile with a minimum percent identity of 65%</li>
+    		<li>Level 3 corresponds to the top 30 percentile with a minimum percent identity of 60%</li>
+    	</ul>
+    </p>
+    <h4><a name="threshold"></a>Matrix match threshold</h4>
+    <p>
+    	TF sites are scanned by sliding the corresponding postion weight matrix (PWM) along the sequence 
+    	and scoring it at each position. The threshold is the minimum relative score used to report the 
+    	position as a putative binding site. The background set was computed using a threshold of 70%.
+    </p>
+    <h4><a name="up_down_seq"></a>Upstream / Downstream sequence</h4>
+    <p class="text">
+    	This refers to the size of the region around the transcription start site (TSS) which was analysed 
+    	for TF sites. The background set was computed using a region extending a maximum of 10000 bp 
+    	upstream and 10000 bp downstream of the TSS. 
+    </p>
+    <p><hr noshade><br><a href="#top"><img src="images/arrow-up.gif" align="right" /></a></p>
+
+  <h2><a name="statistical_measure"></a>
+    Statistical measure for over-representation
+  </h2>
+    <p>
+    Two measures of statistical over-representation are available, a Z-score and a one-tailed Fisher 
+    exact probablility. 
+    </p>
+    <h3><a name="zscore"></a>Z-score</h3>
+    <p>
+    The Z-score uses the normal approximation to the binomial distribution to compare the rate of occurrence of a 
+    TFBS in the target set of genes to the expected rate estimated from the pre-computed background set.
+    </p>
+    <p class="text">
+    For a given TFBS, let the random variable <i>X</i> denote the number of 
+    <font color="blue">predicted</font> binding site nucleotides in the conserved non-coding 
+    regions of the target gene set.  Let <i>B</i> be the number of predicted binding site 
+    nucleotides in the conserved non-coding regions of the <font color="blue">background</font> 
+    gene set.
+    </p>
+    <p>Using a binomial model with <i>n</i> events, where <i>n</i> is the total number of nucleotides 
+    examined (i.e. the total number of nucleotides in the conserved non-coding regions) from the 
+    co-expressed genes, and <i>N</i> is the total number of nucleotides examined from the background
+    genes, then the expected value of <i>X</i> is <i>u</i> = <i>B</i> * <i>C</i>, where 
+    <i>C</i> = <i>n</i> / <i>N</i> (i.e. <i>C</i> is the ratio of sample sizes). 
+    Then taking <i>p</i> = <i>B</i> / <i>N</i> as the probability of success, the standard deviation 
+    is given by <i>s</i> = sqrt(<i>n</i> * <i>p</i> * (1 - <i>p</i>)).
+    </p>
+    <p>Now, let <i>x</i> be the <font color="blue">observed</font> number of binding site nucleotides 
+    in the conserved non-coding regions of the co-expressed genes.  By applying the Central Limit 
+    Theorem and using the normal approximation to the binomial distribution with a continuity 
+    correction, the z-score is calculated as 
+    <i>z</i>&nbsp;=&nbsp;(<i>x</i>&nbsp;-&nbsp;<i>u</i>&nbsp;-&nbsp;0.5)&nbsp;/&nbsp;<i>s</i>.
+    </p>
+
+    <h3><a name="fisher"></a>
+      One-tailed Fisher Exact Probablility
+    </h3>
+    <p>
+    In contrast to the z-score, the one-tailed Fisher exact probability compares the proportion 
+    of co-expressed genes containing a particular TFBS to the proportion of the background set 
+    that contains the site to determine the probability of a non-random association between the 
+    co-expressed gene set and the TFBS of interest.  It is calculated using the hypergeometric 
+    probability distribution that describes sampling without replacement from a finite population 
+    consisting of two types of elements.  Therefore, the number of times a TFBS occurs in the 
+    promoter of an individual gene is disregarded, and instead, the TFBS is considered as either 
+    present or absent. Fisher exact probabilities were calculated using the R Statistics package.
+    </p>
+	<p><hr noshade><br><a href="#top"><img src="images/arrow-up.gif" align="right" /></a></p>
+  <h2><a name="analysis_results"></a>Analysis Results</h2>
+    <h3><a name="selected_parameters"></a>
+      Selected Parameters
+    </h3>
+      <p>
+      This section summarizes the input parameters used for the analysis.
+      </p>
+    <h3><a name="target_genes"></a>Target Genes</h3>
+      <p>
+      This section lists the set of genes that were entered for analysis by the user. It is 
+      broken down into the sections <a href="#genes_analyzed">Analyzed</a> and 
+      <a href="#genes_excluded">Excluded</a>. This is because it is possible that not all 
+      genes entered by the user are actually in the oPOSSUM database. When this occurs, 
+      those genes that are not found in the database are excluded from the analysis. It is 
+      important to realize that for the <a href="#fisher">one-tailed Fisher exact probability</a> 
+      analysis, that the gene counts are based on the number of genes included in the analysis 
+      and not on the total number of genes entered by the user and that for the 
+      <a href="#zscore">Z-score</a> analysis the rate of TF sites is again based on the rate 
+      within the included genes, not the entire set entered.
+      </p>
+
+      <h4><a name="genes_analyzed"></a>Analyzed</h4>
+	<p>
+	This is the sub-set of target genes entered by the user which were found within the 
+	oPOSSUM database (i.e. a strict one-to-one ortholog could be assigned), and therefore 
+	included in the analysis.
+	</p>
+      <h4><a name="genes_excluded"></a>Excluded</h4>
+	<p>
+	This is the sub-set of target genes entered by the user which were not found within 
+	the oPOSSUM database (i.e. a strict one-to-one ortholog could not be assigned), and 
+	therefore had to be excluded from the analysis.
+
+    <h3><a name="background_genes"></a>Background Genes</h3>
+      <p>
+      This section lists the set of background genes that were entered by the user. It is 
+      broken down into the sections <a href="#bg_genes_analyzed">Analyzed</a> and 
+      <a href="#bg_genes_excluded">Excluded</a>. Please see description under 
+      <a href="#target_genes">Target Genes</a> of what is meant by 'Analyzed' and 'Excluded' 
+      and how this may impact the results of the analysis.
+      </p>
+	</p>
+      <h4><a name="bg_genes_analyzed"></a>Analyzed</h4>
+	<p>
+	This is the sub-set of background genes entered by the user which were found within 
+	the oPOSSUM database(i.e. a strict one-to-one ortholog could be assigned), and therefore 
+	included in the analysis.
+	</p>
+      <h4><a name="bg_genes_excluded"></a>Excluded</h4>
+	<p class="text">
+	This is the sub-set of background genes entered by the user which were not found within 
+	the oPOSSUM database (i.e. a strict one-to-one ortholog could not be assigned), and therefore 
+	had to be excluded from the analysis.
+	</p>
+
+    <h3><a name="opossum_results"></a>
+      oPOSSUM Analysis
+    </h3>
+      <p>
+      This table contains the results of both the Z-score and Fisher analyses. The results are 
+      ordered by Z-score from most to least significant (higher to lower z-score). The columns 
+      of the table are as follows:
+      </p>
+      <h4><a name="tf"></a>TF</h4>
+	<p>
+	The name of the transcription factor.
+	</p>
+      <h4><a name="tf_class"></a>Class</h4>
+	<p>
+	The class of TFs to which this TF belongs.
+	</p>
+      <h4><a name="tf_supergroup"></a>Supergroup</h4>
+	<p>
+	The taxonomic supergroup to which this TF belongs.
+	</p>
+      <h4><a name="tf_ic"></a>IC</h4>
+	<p>
+	The information content or specificity of this TFBS profile's position weight matrix.
+	</p>
+      <h4><a name="bg_gene_hits"></a>Background gene hits</h4>
+	<p>
+	The number of genes in the background set for which this TFBS was predicted within the 
+	conserved non-coding regions.
+	</p>
+      <h4><a name="bg_gene_non_hits"></a>Background gene non-hits</h4>
+	<p>
+	The number of genes in the background set for which this TFBS was NOT predicted within 
+	the conserved non-coding regions.
+	</p>
+      <h4><a name="t_gene_hits"></a>Target gene hits</h4>
+	<p>
+	The number of genes in the included target set for which this TFBS was predicted within 
+	the conserved non-coding regions.
+	</p>
+      <h4><a name="t_gene_non_hits"></a>Target gene non-hits</h4>
+	<p>
+	The number of genes in the included target set for which this TFBS was NOT predicted 
+	within the conserved non-coding regions.
+	</p>
+      <h4><a name="bg_tfbs_hits"></a>Background TFBS hits</h4>
+	<p>
+	The number of times this TFBS was detected within the conserved non-coding regions 
+	of the background set of genes.
+	</p>
+      <h4><a name="t_tfbs_hits"></a>Target TFBS hits</h4>
+	<p>
+	The number of times this TFBS was detected within the conserved non-coding regions 
+	of the target set of genes.
+	</p>
+      <h4><a name="bg_tfbs_rate"></a>Background TFBS rate</h4>
+	<p>
+	The rate of occurrence of this TFBS within the conserved non-coding regions of the background 
+	set of genes. The rate is equal to the number of times the site was predicted (background hits) 
+	multiplied by the with of the TFBS profile, divided by the total number of nucleotides in the 
+	conserved non-coding regions of the background gene set.
+	</p>
+      <h4><a name="t_tfbs_rate"></a>Target TFBS rate</h4>
+	<p>
+	The rate of occurrence of this TFBS within the conserved non-coding regions of the included 
+	target set of genes. The rate is equal to the number of times the site was predicted 
+	(target hits) multiplied by the with of the TFBS profile, divided by the total number of 
+	nucleotides in the conserved non-coding regions of the included target gene set.
+	</p>
+      <h4><a name="zscore_zscore"></a>Z-score</h4>
+	<p>
+	The likelihood that the number of TFBS nucleotides detected for the included target genes 
+	is significant as compared with the number of TFBS nucleotides detected for the background 
+	set. Z-score is expressed in units of magnitude of the standard deviation.
+	</p>
+      <h4><a name="fisher_p_value"></a>Fisher score</h4>
+	<p>
+	The probability that the number of hits vs. non-hits for the included target genes 
+	could have occured by random chance based on the hits vs. non-hits for the background set.
+	</p>
+		
+	<h3><a name="genes_with_tfbss"></a>Genes Containing TFBSs (link)</h3>
+    <p>
+      This table contains the gene and promoter information where the TFBS prediction is found.</p>
+      
+      <p> Note that for human and mouse genes, a gene may have multiple alternative promoters. In some cases, the 
+      region upstream of one TSS overlaps with the downstream region of an adjacent TSS (depending on the 
+      promoter upstream and downstream parameters selected). If a TFBS prediction resides in the overlapping 
+      region, it is marked with an asterisk (*) and highlighted in yellow.<p>
+      
+      <p>A total of 2140 genes occur in operons in the <i>C. elegans</i> genome. For these genes, the operon ID is displayed.</p>
+ 
+	<h4><a name="ensembl_id"></a>Ensembl ID</h4>
+	<p>
+ 	The Ensembl gene ID for which the TFBS is predicted.
+	</p>
+	<h4><a name="operon_id"></a>Operon ID (for <i> C. elegans</i>)</h4>
+    <p>The ID for the operon containing the gene. When a gene occurs as part of an operon, the TFBSs upstream
+    	of the first gene in the operon apply to all genes in the operon.</p>
+    <h4><a name="chr"></a>Chromosome</h4>
+	<p>
+	The chromosome on which the gene is located.
+	</p>
+	
+	 <h4><a name="strand"></a>Strand</h4>
+	<p>
+	The chromosome strand on which the gene is located.
+	</p>
+	
+	 <h4><a name="tss"></a>TSS</h4>
+
+	<p>
+	The transcription start site (TSS) chromosome location.
+	</p>
+	
+	<h4><a name="promoter_start"></a>Promoter start</h4>
+	<p>
+	The start of the promoter search region chromosome location.
+	</p>
+	
+	<h4><a name="promoter_end"></a>Promoter end</h4>
+	<p>
+
+	The end of the promoter search region chromosome location.
+	</p>
+	
+	<h4><a name="tfbs_sequence"></a>TFBS sequence</h4>
+	<p>The sequence matching the given TFBS profile above the threshold match score.</p>
+	
+	<h4><a name="tfbs_start"></a>TFBS start</h4>
+	<p>The start of the TFBS in chromosome coordinates.</p>
+	
+	<h4><a name="tfbs_end"></a>TFBS end</h4>
+	<p>The end of the TFBS in chromosome coordinates.</p>
+	
+	<h4><a name="tfbs_orientation"></a>TFBS orientation</h4>
+	<p>The orientation of the TFBS sequence (assuming the gene sequence is positive).</p>
+	
+	<h4><a name="tfbs_score"></a>TFBS score</h4>
+	<p>The relative score for the sequence given the weight matrix profile.</p>
+	
+	<p><hr noshade><br><a href="#top"><img src="images/arrow-up.gif" align="right" /></a></p>
+
+    <h4>Q. How often will oPOSSUM be updated?</h4>
+    <p>
+    A. oPOSSUM will be updated periodically as new gene assemblies, better ortholog mappings and 
+    improved annotations become available. Therefore, there is no fixed schedule for oPOSSUM updates.
+    </p>
+    <h4>Q. What is the difference between &quot;Target gene hits&quot; and 
+    &quot;Target TFBS hits&quot;?</h4>
+    <p>The Fisher statistic reflects the proportion of genes that contain the TFBS compared to 
+    background. We, therefore, report the total number of genes in the co-expressed set 
+    containing the TFBS under <a href="#t_gene_hits">Target gene hits</a>.</p>
+    <p>The Z-score statistic reflects the occurrence of the TFBS in the promoters of the 
+    co-expressed set compared to background. Therefore, we report the total number of TFBSs 
+    for the set under <a href="#t_tfbs_hits">Target TFBS hits</a>.</p>
+    
+    </p>If you use the sample gene set provided on the website and submit with default parameters, 
+    you'll see that SRF is the top-scoring TFBS for the Z-score analysis and ranked second for the 
+    Fisher analysis. If you click on the number under &quot;Target gene hits&quot; in the table 
+    (it should be 5), you'll see that there are 5 genes containing one or more predicted SRF binding 
+    sites. The total count of SRF binding sites is 9, which is what is reported under 
+    &quot;Target TFBS hits&quot;.</p>
+
+	<p><hr noshade><br><a href="#top"><img src="images/arrow-up.gif" align="right" /></a></p>

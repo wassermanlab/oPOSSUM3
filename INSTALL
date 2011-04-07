@@ -1,0 +1,94 @@
+oPOSSUM Installation Instructions
+--------------------------------
+
+Installation instructions for oPOSSUM. Please also see the DEPENDENCIES file
+for a list of prerequisite databases, programs and libraries that are required
+by oPOSSUM.
+
+1) Install the oPOSSUM databases. There are currenly four species databases
+   and one database used for the TF cluster analysis:
+
+	oPOSSUM_2010_human
+	oPOSSUM_2010_mouse
+	oPOSSUM_2010_worm
+	oPOSSUM_2010_yeast
+	oPOSSUM_cluster
+
+   To download the databases from our servers see section below.
+
+   Now you must create a user "opossum_r" with select privileges on the
+   each of the databases, e.g.
+
+    mysql> grant select on oPOSSUM_2010_human.* to opossum_r@'%'; (etc..)
+
+2) For web-based oPOSSUM, set up symbolic links from your webserver htdocs and
+   cgi-bin directories. For example if you have installed oPOSSUM under a
+   directory /apps then assuming you are using the Apache server installed in
+   /usr/local/apache you would use something like the following:
+
+    $ ln -s /apps/oPOSSUM/cgi-bin /usr/local/apache/cgi-bin/oPOSSUM
+    $ ln -s /apps/oPOSSUM/htdocs /usr/local/apache/htdocs/oPOSSUM
+
+   You may have to edit your apache config file (httpd.conf) to allow following
+   of symbolic links and executing cgi-bin files, e.g.:
+    <Directory "/usr/local/apache/cgi-bin">
+        AllowOverride FileInfo
+        Options FollowSymLinks +ExecCGI +Includes
+        Order allow,deny
+        Allow from all
+    </Directory>
+
+   Alternatively, of course you could copy the oPOSSUM htdocs and cgi-bin
+   directories directly into the apache tree.
+
+4) For web-based oPOSSUM, edit the configuration constants in the main web
+   options file cgi-bin/oPossumWebOpt.pm to reflect your specific
+   installation.
+
+   Specifically,
+   
+   * edit the OPOSSUM_HOME constant to point to the top-level directory
+     under which oPOSSUM is installed.
+   
+   * edit the WEB_SERVER_URL constant to point to the top-level URL of your
+     oPOSSUM web server.
+   
+   * edit the WEB_SERVER_HOME constant to point to the top-level directory
+     of your apache web server.
+   
+   * edit the JASPAR DB connection constants, JASPAR_DB_HOST etc.
+
+   There are additional option files specific to each flavour of oPOSSUM
+   (oPossumGeneWebOpt.pm etc.).
+
+   * edit the oPOSSUM DB connection constants, OPOSSUM_DB_HOST etc.
+   
+   It is also possible to edit other values in these files to reflect
+   different default values for the oPOSSUM analysis.
+
+
+Accessing/Downloading Wasserman Lab Databases
+---------------------------------------------
+The Wasserman lab maintains an ftp site at cisreg.ca.
+
+The JASPAR database is available under:
+
+	/pub/JASPAR/JASPAR_2010.sql.tar.gz
+
+Some of the databases may be too large to maintain on the ftp site. In these
+cases It's possible to dump them directly from the Wasserman lab DB servers
+using the mysqldump facility, e.g.:
+
+    $ mysqldump -h vm5.cmmt.ubc.ca -u opossum_r --skip-lock-tables oPOSSUM_2010_human > oPOSSUM_2010_human.sql
+
+Note: you will probably have to use the --skip-lock-tables option to the
+mysqldump command.
+
+The databases are all hosted on vm5.cmmt.ubc.ca and have a "read-only"
+(i.e. select privilege) user associated with them which does not require a
+password:
+
+DB		User
+--------------	---------
+oPOSSUM_2010_*	opossum_r
+JASPAR_2010	jaspar_r

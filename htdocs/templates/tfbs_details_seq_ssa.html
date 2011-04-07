@@ -1,0 +1,105 @@
+<html>
+<head>
+<link rel="stylesheet" href="[%rel_htdocs_path%]/templates/styles.css" type="text/css">
+<title>[%title%]</title>
+</head> <a name="top"></a>
+<form name="tfbs_seqs" enctype="multipart/form-data" method="post" onSubmit="window.close()">
+
+  <h2>[%tf.name%]</h2>
+
+  <table border="0" cellpadding="2" cellspacing="0">
+    [%IF tf_db%]
+      <tr>
+        <td class="table_title">JASPAR ID:</td>
+        <td class="table_text"><a href="javascript:newWindow=window.open('[%jaspar_url%]?rm=present&collection=[%collection%]&ID=[%tf.ID%]', '[%tf.ID%]', 'width=850,height=700,toolbar=0,location=0,directories=0,status=0,menuBar=0,scrollBars=1'); newWindow.focus()">[%tf.ID%]</a></td>
+      </tr>
+    [%END%]
+    <tr>
+      <td class="table_title">Class:</td>
+      <td class="table_text">[%tf.class%]</td>
+    </tr>
+    <tr>
+      <td class="table_title">Family:</td>
+      <td class="table_text">[%tf.tag('family')%]</td>
+    </tr>
+    <tr>
+      <td class="table_title">Tax group:</td>
+      <td class="table_text">[%tf.tag('tax_group')%]</td>
+    </tr>
+    <tr>
+      <td class="table_title">Information content:</td>
+      <td class="table_text">
+      [%IF tf.isa('TFBS::Matrix::PFM')%]
+        [%total_ic = formatf(3, tf.to_ICM.total_ic)%]
+        [%IF total_ic > high_matrix_ic or total_ic < low_matrix_ic%]
+          <b class="warn_text">[%total_ic%]</b>
+        [%ELSE%]
+          [%total_ic%]
+        [%END%]
+      [%ELSE%]
+        N/A
+      [%END%]
+      </td>
+    </tr>
+    <tr class="table_text">
+      <td align="left" class="table_title">GC content:</td>
+      <td align="left" class="table_text">
+      [%gc = tf.tag('gc_content')%]
+      [%IF gc > high_matrix_gc or gc < low_matrix_gc%]
+        <b class="warn_text">[%gc%]</b>
+      [%ELSE%]
+        [%gc%]
+      [%END%]
+      </td>
+    </tr>
+  </table>
+
+  <br>
+  <h3>[%tf.name%] Binding Sites</h3>
+
+  <table width="100%" border="0" cellpadding="2" cellspacing="1">
+    [%IF seq_ids%]
+      <tr align="left" class="table_title">
+        <th align="left">Sequence ID</th>
+        <th align="right">Start</th>
+        <th align="right">End</th>
+        <th align="right">Strand</th>
+        <th align="right">Abs. Score</th>
+        <th align="right">Rel. Score</th>
+        <th align="left">TFBS Sequence</th>
+      </tr>
+
+      [%FOREACH seq_id = seq_ids%]
+        [%display_id = seq_id_display_ids.$seq_id%]
+        <tr align="left" class="table_text">
+        <td>[%display_id%]</td>
+        [%first = 1%]
+        [%FOREACH site = seq_sites.$seq_id%]
+          [%rel_score = site.rel_score * 100%]
+          [%UNLESS first == 1%]
+            <tr align="left" class="table_text">
+            <td></td>
+          [%END%]
+          [%first = 0%]
+          <td align="right">[%site.start%]</td>
+          <td align="right">[%site.end%]</td>
+          <td align="right">[%site.strand%]</td>
+          <td align="right">[%formatf(3, site.score)%]</td>
+          <td align="right">[%formatf(1, rel_score)%]%</td>
+          <td align="left" class="seqtext">[%site.seq.seq%]</td>
+          </tr>
+        [%END%]
+      [%END%]
+    [%ELSE%]
+      <tr><td>No sites found for this TF</td></tr>
+    [%END%]
+  </table>
+<hr solid=1>
+<p class="text" align="center">
+<a href="javascript:newWindow=window.open('[%rel_results_dir%]/[%tfbs_details_file%]'); newWindow.focus()">Download as a tab delimited text file</a>
+</p>
+<p align="center"><a href="#top"><img src="[%rel_htdocs_path%]/images/arrow-up.gif" border="0" alt="Back to top"></a></p>
+
+<p align="center"><input type="submit" name="Submit" value="Close Window"></p>
+</form>
+</html>

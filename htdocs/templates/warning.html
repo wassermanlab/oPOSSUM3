@@ -1,0 +1,14 @@
+<form name="possum_warning" enctype="multipart/form-data" method="post" action="none">
+  <p class="title">Warning</p>
+  <p class="subtitle">The following warning(s) occured</p>
+  <p class="text">
+  <b>
+  [%FOREACH warn = warnings%]
+    [%warn%]<br>
+  [%END%]
+  </b>
+  </p>
+  <p class="text">
+  If the above warning(s) were the result of inproper input, please use the back button on your browser, correct the input and re-submit the analysis. If the problem persists please use the Contact link to contact the site administrator.
+  </p>
+</form>

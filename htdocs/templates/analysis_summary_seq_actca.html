@@ -1,0 +1,102 @@
+  <p class="text">
+    Your oPOSSUM analysis has been successfully submitted.<br>
+    A notification will be e-mailed to you at [%email%] when the analysis is completed
+  </p>
+
+  <h3>Selected Parameters</h3>
+
+  <table border="0" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="table_title">Job ID:</td>
+      <td class="table_text">[%job_id%]</td>
+    </tr>
+
+    [%IF user_seq_file%]
+      <tr>
+        <td class="table_title">Target sequence file:</td>
+        <td class="table_text">[%user_seq_file%]</td>
+      </tr>
+    [%END%]
+
+    [%IF user_bg_seq_file%]
+      <tr>
+        <td class="table_title">Background sequence file:</td>
+        <td class="table_text">[%user_bg_seq_file%]</td>
+      </tr>
+    [%ELSIF bg_seq_set_name%]
+      <tr>
+        <td class="table_title">Background sequence set:</td>
+        <td class="table_text">[%bg_seq_set_name%]</td>
+      </tr>
+    [%END%]
+
+    [%IF anchor_tf_id%]
+      <tr>
+        <td class="table_title">Anchor TFBS profile:</td>
+        <td class="table_text">[%anchor_tf_id%]</td>
+      </tr>
+    [%END%]
+
+    [%IF cl_db%]
+      <tr>
+        <td class="table_title">TFBS cluster source:</td>
+        <td class="table_text">[%cl_db%]</td>
+      </tr>
+    [%END%] <!-- if cl_db -->
+    
+    [%IF tf_db%]
+      <tr>
+        <td class="table_title">TFBS profile source:</td>
+        <td class="table_text">[%tf_db%]</td>
+      </tr>
+    [%END%] <!-- if tf_db -->
+
+    [%IF collections%]
+      <tr>
+        <td class="table_title">JASPAR collections:</td>
+        <td class="table_text">
+          [%FOREACH col = collections%][%col%]&nbsp;[%END%]
+        </td>
+      </tr>
+    [%END%]
+    
+    [%IF tax_groups%]
+      <tr>
+        <td class="table_title">Taxonomic supergroup(s):</td>
+        <td class="table_text">
+          [%FOREACH tax_group = tax_groups%][%tax_group%]&nbsp;[%END%]
+        </td>
+      </tr>
+    [%END%]
+    
+    <tr>
+      <td class="table_title">Matrix score threshold:</td>
+      <td class="table_text">[%threshold%]%</td>
+    </tr>
+    
+    [%IF result_sort_by == 'zscore'%]
+      [%display_sort_by = 'Z-score'%]
+    [%ELSIF result_sort_by == 'fisher'%]
+      [%display_sort_by = 'Fisher score'%]
+    [%ELSE%]
+      [%display_sort_by = result_sort_by%]
+    [%END%]
+    <tr>
+      <td class="table_title">Results returned:</td>
+      [%IF result_type == 'top_x_results'%]
+        [%IF num_display_results == 'All'%]
+          <td class="table_text">All results sorted by [%display_sort_by%]</td>
+        [%ELSE%]
+          <td class="table_text">Top [%num_display_results%] results by [%display_sort_by%]</td>
+        [%END%]
+      [%ELSIF result_type == 'significant_hits'%]
+        <td class="table_text">All results with a Z-score >= [%zscore_cutoff%] and a Fisher score <= [%fisher_cutoff%] sorted by [%display_sort_by%]</td>
+      [%END%]
+    </tr>
+
+    <tr>
+      <td class="table_title">The results will be sent to the following email:</td>
+      <td class="table_text">[%email%]</td>
+    </tr>
+
+  </table>

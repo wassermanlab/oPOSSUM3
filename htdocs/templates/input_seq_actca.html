@@ -1,0 +1,289 @@
+<script language="JavaScript">
+<!-- BEGIN script hiding
+function isblank(s)
+{
+    for (var i = 0; i < s.length; i++) {
+        var c = s.charAt(i);
+        if ((c != ' ') && (c != '\n') && (c != '\t')) return false;
+    }
+    return true;
+}
+
+function verify(f)
+{
+    var msg;
+    var errors = "";
+
+    if (f.seq_input_method[0].checked) {
+        if (f.seq_list.value == null || f.seq_list.value == "" || isblank(f.seq_list.value))
+        {
+            errors += "No sequences were pasted into the Paste Sequences box\n";
+        }
+    } else if (f.seq_input_method[1].checked) {
+        if (f.seq_file.value == null || f.seq_file.value == "" || isblank(f.seq_file.value))
+        {
+            errors += "No sequence upload file was selected\n";
+        }
+    }
+
+    if (f.bg_seq_input_method[0].checked) {
+    } else if (f.bg_seq_input_method[1].checked) {
+        if (f.bg_seq_list.value == null || f.bg_seq_list.value == "" || isblank(f.bg_seq_list.value))
+        {
+            errors += "No background sequences were pasted into the Paste Sequences box\n";
+        }
+    } else if (f.bg_seq_input_method[2].checked) {
+        if (f.bg_seq_file.value == null || f.bg_seq_file.value == "" || isblank(f.bg_seq_file.value))
+        {
+            errors += "No background sequence upload file was selected\n";
+        }
+    }
+
+    if (f.anchor_tf_id.value == null
+        || f.anchor_tf_id.value == ""
+        || isblank(f.anchor_tf_id.value))
+    {
+        errors += "No anchoring TF was selected.\n";
+    }
+    
+    var v = parseFloat(f.tf_min_ic.value);
+    if (isNaN(v)) {
+        errors += "Minimum specificity for JASPAR CORE profiles is not a valid number\n";
+    } else {
+        if (v < [%min_ic%]) {
+            errors += "Minimum specificity for JASPAR CORE profiles is below minimum allowable";
+            errors += " [%min_ic%] bits\n";
+        }
+    }
+
+    if (f.tf_cluster_select_method[1].checked) {
+        var fams_selected = false;
+        for (var i = 0; i < f.tf_cluster_families.options.length; i++) {
+            if (f.tf_cluster_families.options[i].selected) {
+                fams_selected = true;
+                break;
+            }
+        }
+
+        if (!fams_selected) {
+            errors += "No specific TFBS cluster families were selected\n";
+        }
+    }
+
+    if (   f.email.value == null
+        || f.email.value == ""
+        || isblank(f.email.value)
+    ) {
+        errors += "No email was provided. This is required to send notification when your analyis results are ready.\n";
+    }
+
+    if (!errors) return true;
+
+    msg = "_________________________________________________________\n\n";
+    msg += "The analysis was not submitted due to the following problem(s).\n";
+    msg += "Please correct these problem(s) and re-submit.\n";
+    msg += "________________________________________________________\n\n";
+    msg += errors;
+
+    alert(msg);
+
+    return false;
+}
+// END script hiding -->
+</script>
+
+<form name="input" enctype="multipart/form-data" method="post" onSubmit="return verify(this)" target="_blank">
+
+  <h3>STEP 1a: Enter your sequences</h3>
+  <p class="text">
+    <input type="radio" name="seq_input_method" value="paste" checked>
+    Paste fasta formatted sequences (retrieve from <a href="http://main.g2.bx.psu.edu/" target="_blank">Galaxy</a>):<br>
+<!--
+    <input type="button" name="use_sample_seqs" value="Use sample seqs"
+      onClick="{input.seq_input_method[0].checked=true; input.seq_list.value="[%sample_sequences%]}">
+-->
+    <textarea name="seq_list" rows=5 cols=50 wrap=SOFT
+      onFocus="{input.seq_input_method[0].checked=true}" 
+      onChange="{
+        if (!isblank(input.seq_list.value))
+          {input.seq_input_method[0].checked=true}
+        else if (!isblank(input.seq_file.value))
+          {input.seq_input_method[1].checked=true}
+      }"></textarea>
+    <br>
+    <input type="button" name="clear_seqs" value="Clear"
+      onClick="{input.seq_list.value=''}">
+    <br><br>
+    <input type="radio" name="seq_input_method" value="upload">
+    <b>OR</b> upload a file containing a list of fasta formatted sequences:<br>
+    <input type="file" name="seq_file" size="40"
+      onClick="{input.seq_input_method[1].checked=true}"
+      onFocus="{input.seq_input_method[1].checked=true}"
+      onChange="{
+        if (!isblank(input.seq_file.value))
+	  {input.seq_input_method[1].checked=true}}
+	else if (!isblank(input.seq_list.value))
+	  {input.seq_input_method[0].checked=true}}">
+    <br><br>
+  </p>
+  <h3>STEP 1b: Enter a background list of sequences</h3>
+  <p class="text">
+    <input type="radio" name="bg_seq_input_method" value="default" checked>
+    Choose a background (sequences randomly selected from experimental control peaks)
+    <select name="bg_seq_set_key" onChange="{input.bg_seq_input_method[0].checked=true}">
+      [%FOREACH key = bg_seq_set_keys%]
+        <option value="[%key%]">[%bg_seq_set_names.$key%]</option>
+      [%END%]
+    </select>
+    <br>
+    <input type="radio" name="bg_seq_input_method" value="paste">
+    <b>OR</b> Paste fasta formatted background sequences (retrieve from <a href="http://main.g2.bx.psu.edu/" target="_blank">Galaxy</a>):<br>
+    <textarea name="bg_seq_list" rows=5 cols=50 wrap=SOFT
+      onFocus="{input.bg_seq_input_method[1].checked=true}" 
+      onChange="{
+        if (!isblank(input.bg_seq_list.value))
+          {input.bg_seq_input_method[1].checked=true}
+        else if (!isblank(input.bg_seq_file.value))
+          {input.bg_seq_input_method[2].checked=true}
+        else
+          {input.bg_seq_input_method[0].checked=true}
+      }"></textarea>
+    <br>
+    <input type="button" name="clear_bg_seqs" value="Clear"
+      onClick="{input.bg_seq_list.value=''}">
+    <br><br>
+    <input type="radio" name="bg_seq_input_method" value="upload">
+    <b>OR</b> upload a file containing a list of fasta formatted background sequences:<br>
+    <input type="file" name="bg_seq_file" size="40"
+      onClick="{input.bg_seq_input_method[2].checked=true}"
+      onFocus="{input.bg_seq_input_method[2].checked=true}"
+      onChange="{
+        if (!isblank(input.bg_seq_file.value))
+          {input.bg_seq_input_method[2].checked=true}
+        else if (!isblank(input.bg_seq_list.value))
+          {input.bg_seq_input_method[1].checked=true}
+        else {input.bg_seq_input_method[0].checked=true}}">
+  </p>
+
+  <br>
+  <hr noshade><br>
+
+  <h3>STEP 2: Select transcription factor binding site cluster parameters</h3> 
+
+  <h4>Select anchoring TF</h4>
+
+  <p class="text">
+    <table>
+      <tr>
+        [%tf_list = tf_set.get_matrix_list('name')%]
+        <td>
+          <select size=8 name=anchor_tf_id>
+          [%FOREACH tf = tf_list%]
+            <option value=[%tf.ID%]>[%tf.name%]</option>
+          [%END%]
+          </select>
+        </td>
+      </tr>
+    </table>
+  </p>
+
+  <h4>TFBS Clusters Based on JASPAR Profiles</h4>
+
+  <p class="text">
+    <div style="float:left;">
+      
+      Collections:
+      [%FOREACH col = collections%]
+        &nbsp;&nbsp;<input type="checkbox" name="tf_collections" value="[%col%]" checked>[%col%]
+      [%END%]
+      
+      <br><br>
+      
+      Tax groups:
+      [%FOREACH tax = tax_groups%]
+        &nbsp;&nbsp;<input type="checkbox" name="tf_tax_groups" value="[%tax%]" checked>[%tax%]
+      [%END%]
+      
+      <br><br>
+      
+      Minimum specificity: &nbsp;
+      <input type="text" name="tf_min_ic" value=[%min_ic%] size="2"> bits (min. [%min_ic%] bits)
+    
+      <br><br>
+
+    TF Families:
+    <br>
+    <input type="radio" name="tf_cluster_select_method" value="all" checked=true>
+        All TF families
+    <br>
+    <input type="radio" name="tf_cluster_select_method" value="specific">
+    <b>OR</b> select specific TF famlies:
+    <br>
+    <table>
+	[%tfc_families = tf_cluster_set.get_tf_families()%]
+	<select multiple size=8 name=tf_cluster_families
+	    onFocus="{input.cluster_type[1].checked=true}">
+	[%FOREACH fam = tfc_families%]
+	    <option value=[%fam%]>[%fam%]</option>
+	[%END%]
+    </select>
+    </table>
+  </p>
+
+  <div style="clear:left;"></div>
+  <br><hr noshade><br>
+
+  <h3>STEP 3: Select TFBS cluster search parameters</h3>
+
+  <p class="text">
+
+    Maximum inter-binding distance <input type="text" name="inter_binding_dist" value="[%dflt_inter_binding_dist%]" size="4"> (max. = [%max_inter_binding_dist%])
+    <br><br>
+
+    Matrix match threshold (min. [%min_threshold%]%):<br>
+    <input type="text" name="threshold" value=[%dflt_threshold%] size="4">%
+    <br><br>
+    
+    Number of results to display:
+    <br>
+    <input type="radio" name="result_type" value="top_x_results" checked> Top
+    <select name="num_display_results">
+      <option value="5">5</option>
+      <option value="10">10</option>
+      <option value="20">20</option>
+      <option value="All" selected>All</option>
+    </select> results
+    <br>
+    <input type="radio" name="result_type" value="significant_hits"> <b>OR</b> only results with <b>Z-score >= </b>
+    <select name="zscore_cutoff">
+      <option value="5">5</option>
+      <option value="10" selected>10</option>
+      <option value="15">15</option>
+    </select>
+    and <b>Fisher score <= </b>
+    <select name="fisher_cutoff">
+      <option value="0.05">0.05</option>
+      <option value="0.01" selected>0.01</option>
+      <option value="0.001">0.001</option>
+    </select>
+    (Default values have been chosen based on empirical studies)
+    <br>
+    <br>
+    Sort results by:
+    <br>
+    <input type="radio" name="result_sort_by" value="zscore" checked>Z-score
+    <input type="radio" name="result_sort_by" value="fisher_p_value">Fisher score
+    <br><br>
+  </p>
+  <p class="text"> 
+    Enter your email address:
+    <input type="text" name="email" value="">
+    <br><br>
+    Press the <b>Submit</b> button to perform the analysis or <b>Reset</b> to reset the analysis parameters to their default values.<br>The results will be sent to the email address you provided.<br>
+    <br><br>
+    <input type="submit" name="Submit" value="Submit">
+    <input type="reset" name="Reset" value="Reset">
+    <input type="hidden" name="rm" value="process">
+    <br>
+  </p>
+</form>

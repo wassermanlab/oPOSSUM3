@@ -1,0 +1,283 @@
+body {
+	color:#000000;
+	font-family:Verdana, Arial, Helvetica;
+	font-size: 10pt;
+	margin:0px 0px 0px 0px;
+}
+
+a {
+	color:#33oocc;
+}
+
+a:hover {
+	color:#36c;
+}
+
+/*** LAYOUT ***/
+#pageContainer {
+        min-width:925px;  
+	margin:0px 0px 0px 0px;
+	padding:0px 0px 0px 0px;
+}
+
+#logo {
+	float:left;
+	height:78px;
+	margin:0px 5px 0px 5px;
+	padding:0px 0px 0px 0px;
+	position:relative;
+}
+
+#version {
+	float:left;
+	height:35px;
+	margin:35px 5px 0px 5px;
+	padding:0px 0px 0px 0px;
+	position:relative;
+        text-align:left;
+}
+
+#heading {
+	float:left;
+	height:78px;
+	margin:0px 5px 0px 5px;
+	padding:0px 0px 0px 0px;
+	position:relative;
+	font-size: 26pt;
+	color: #000099;
+}
+
+#menuMain {
+	float:right;
+	font-size: 9pt;
+	height:18px;
+	margin:5px 5px 0px 5px;
+	padding:0px 0px 0px 0px;
+	position:relative;
+}
+
+#menuTabContainer {
+	clear:right;
+	float:right;
+	margin:0px 0px 0px 0px;
+	padding:0px 0px 0px 0px;
+	position:relative;
+	top:47px;
+	width:800px;
+}
+
+#menuSecondary {
+	border-top:solid 1px black;
+	border-bottom:solid 1px black;
+	clear:both;
+	font-size:10pt;
+	padding: 5px 5px 2px 5px;
+	text-align:left;
+}
+
+#menuSecondary a {
+	color:#000;
+}
+
+#menuSecondary a:hover {
+	color:#0033cc;
+}
+
+#content {
+	font-size: 12pt;
+	margin-left:auto;
+	margin-right:auto;
+	padding-top:25px;
+	padding-left:25px;
+	padding-right:50px;
+	/*max-width:1000px;*/
+}
+
+.siteCaption {
+	font-size: 10px;
+}
+
+.bgc_gene_ssa {
+    /*background-color: #64C2C2;*/
+    background-color: #64C29C;
+}
+
+.bgc_seq_ssa {
+    /*background-color: #9999FF;*/
+    /*background-color: #64C2C2;*/
+    background-color: #64C29C;
+}
+
+.bgc_gene_acsa {
+    /*background-color: #C264C2;*/
+    background-color: #9999FF;
+}
+
+.bgc_seq_acsa {
+    /*background-color: #649CC2;*/
+    /*background-color: #C264C2;*/
+    background-color: #9999FF;
+}
+
+.bgc_gene_tca {
+    background-color: #C26464;
+}
+
+.bgc_seq_tca {
+    background-color: #C26464;
+}
+
+.bgc_gene_actca {
+    background-color: #C26464;
+}
+
+.bgc_seq_actca {
+    background-color: #C26464;
+}
+
+.tabYeast {
+        background-color:#fff68f;
+        border-top:solid 1px black;
+        border-left:solid 1px black;
+        border-right:solid 1px black;
+        color:#3300cc;
+        float:left;
+        font-family:Verdana, Arial;
+        font-size:12px;
+        font-weight:bold;
+        height:19px;
+        margin:0px 0px 0px -1px;
+        padding:5px 5px 5px 5px;
+        position:relative;
+        text-align:center;
+        width:80px;
+}
+.tabWormSSA {
+        background-color:#ecacac;
+        border-top:solid 1px black;
+        border-left:solid 1px black;
+        border-right:solid 1px black;
+        color:#3300cc;
+        float:left;
+        font-family:Verdana, Arial;
+        font-size:12px;
+        font-weight:bold;
+        height:19px;
+        margin:0px 0px 0px -1px;
+        padding:5px 5px 5px 5px;
+        position:relative;
+        text-align:center;
+        width:80px;
+}
+
+.tabHumanSSA {
+        background-color:#64C29C;
+        border-top:solid 1px black;
+        border-left:solid 1px black;
+        border-right:solid 1px black;
+        color:#3300cc;
+        float:left;
+        font-family:Verdana, Arial;
+        font-size:12px;
+        font-weight:bold;
+        height:19px;
+        margin:0px 0px 0px -1px;
+        padding:5px 5px 5px 5px;
+        position:relative;
+        text-align:center;
+        width:80px;
+}
+
+.tabMouseSSA {
+        background-color:#9999FF;
+        border-top:solid 1px black;
+        border-left:solid 1px black;
+        border-right:solid 1px black;
+        color:#3300cc;
+        float:left;
+        font-family:Verdana, Arial;
+        font-size:12px;
+        font-weight:bold;
+        height:19px;
+        margin:0px 0px 0px -1px;
+        padding:5px 5px 5px 5px;
+        position:relative;
+        text-align:center;
+        width:80px;
+}
+
+.tabFlySSA {
+        background-color:#C264C2;
+        border-top:solid 1px black;
+        border-left:solid 1px black;
+        border-right:solid 1px black;
+        color:#3300cc;
+        float:left;
+        font-family:Verdana, Arial;
+        font-size:12px;
+        font-weight:bold;
+        height:19px;
+        margin:0px 0px 0px -1px;
+        padding:5px 5px 5px 5px;
+        position:relative;
+        text-align:center;
+        width:80px;
+}
+
+.tabSeq {
+        background-color:#9CC264;
+        border-top:solid 1px black;
+        border-left:solid 1px black;
+        border-right:solid 1px black;
+        color:#3300cc;
+        float:left;
+        font-family:Verdana, Arial;
+        font-size:12px;
+        font-weight:bold;
+        height:19px;
+        margin:0px 0px 0px -1px;
+        padding:5px 5px 5px 5px;
+        position:relative;
+        text-align:center;
+        width:120px;
+}
+
+.tabHumanCSA {
+        background-color:#9999FF;
+        border-top:solid 1px black;
+        border-left:solid 1px black;
+        border-right:solid 1px black;
+        color:#3300cc;
+        cursor:pointer;
+        float:left;
+        font-family:Verdana, Arial;
+        font-size:12px;
+        font-weight:bold;
+        height:19px;
+        margin:0px 0px 0px -1px;
+        padding:5px 5px 5px 5px;
+        position:relative;
+        text-align:center;
+        width:80px;
+}
+.tabWormTCA {
+        background-color:#ecacac;
+        border-top:solid 1px black;
+        border-left:solid 1px black;
+        border-right:solid 1px black;
+        color:#3300cc;
+        float:left;
+        font-family:Verdana, Arial;
+        font-size:12px;
+        font-weight:bold;
+        height:19px;
+        margin:0px 0px 0px -1px;
+        padding:5px 5px 5px 5px;
+        position:relative;
+        text-align:center;
+        width:80px;
+}
+a.tab:link {color: #000; text-decoration:none; }
+a.tab:visited {color: #000; text-decoration:none; }
+a.tab:hover { color:#f0f0f0; text-decoration:none; }
+

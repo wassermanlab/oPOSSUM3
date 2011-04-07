@@ -1,0 +1,47 @@
+oPOSSUM Dependencies
+--------------------
+
+The following software and databases are required by oPOSSUM3.
+
+1) The bioperl library
+
+   The bioperl library available at:
+   	http://www.bioperl.org/wiki/Getting_BioPerl
+
+   oPOSSUM had been tested with 1.4.
+
+2) The TFBS perl library
+
+   This is available at:
+   	http://tfbs.genereg.net
+
+3) Perl modules
+
+   The folowing perl modules must be installed:
+	CGI
+   	CGI::Application
+	Data::Dumper
+	DBD::MySQL
+	DBI
+	File::Temp
+	Log::Log4perl
+	Statistics::Distributions
+	Template
+
+   These should all be available through cpan.
+
+4) The JASPAR DB of transcription factor binding site profiles is required by
+   oPOSSUM3. This may be downloaded from the Wasserman lab (see section below).
+
+Accessing/Downloading Wasserman Lab Databases
+---------------------------------------------
+The Wasserman lab maintains an ftp site at cisreg.ca.
+
+The JASPAR database is available under:
+	/pub/JASPAR/JASPAR_2010.sql.tar.gz
+
+It *may* also be possible to dump the JASPAR database directly from the
+Wasserman lab DB server using the mysqldump facility. The database is hosted
+on vm5.cmmt.ubc.ca. and has a "read-only" (i.e. select privilege) user
+"jaspar_r" which does not require a password. Note: you will probably have to
+use the --skip-lock-tables option to the mysqldump command.

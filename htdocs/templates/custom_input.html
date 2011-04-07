@@ -1,0 +1,309 @@
+<script language="JavaScript">
+<!-- BEGIN script hiding
+function isblank(s)
+{
+    for (var i = 0; i < s.length; i++) {
+        var c = s.charAt(i);
+	if ((c != ' ') && (c != '\n') && (c != '\t')) return false;
+    }
+    return true;
+}
+
+function verify(f)
+{
+    var msg;
+    var errors = "";
+
+    if (f.id_input_method[0].checked) {
+    	if (f.gene_list.value == null || f.gene_list.value == ""
+		|| isblank(f.gene_list.value))
+	{
+	    errors += "No gene IDs were pasted into the Paste Gene IDs box\n";
+	}
+    } else if (f.id_input_method[1].checked) {
+    	if (f.gene_file.value == null || f.gene_file.value == ""
+		|| isblank(f.gene_file.value))
+	{
+	    errors += "No gene upload file was selected\n";
+	}
+    }
+
+    if (f.tfbs_type[0].checked) {
+	var v = parseFloat(f.min_ic.value);
+	if (isNaN(v)) {
+	    errors += "Minimum specificity is not a valid number\n";
+	} else {
+	    if (v < [%db_build_info.min_pwm_ic%]) {
+		errors += "Minimum specificity is below minimum allowable";
+		errors += " [%db_build_info.min_pwm_ic%] bits\n";
+	    }
+	}
+    } else if (f.tfbs_type[1].checked) {
+    	if (!f.phylum[0].checked && !f.phylum[1].checked
+		&& !f.phylum[2].checked)
+	{
+	    errors += "No taxonomic supergroups were selected\n";
+	}
+    } else if (f.tfbs_type[2].checked) {
+    	var tfs_selected = false;
+    	for (var i = 0; i < f.tfs.options.length; i++) {
+	    if (f.tfs.options[i].selected) {
+	    	tfs_selected = true;
+		break;
+	    }
+	}
+	if (!tfs_selected) {
+	    errors += "No specific profiles were selected\n";
+	}
+    }  else if (f.tfbs_type[3].checked) {
+        var w = parseFloat(f.phylofacts_min_ic.value);
+        if (isNaN(w)) {
+            errors += "Minimum specificity for JASPAR PhyloFACTS profiles is not a valid number\n";
+        } else {
+            if (w < [%db_build_info.min_pwm_ic%]) {
+                errors += "Minimum specificity for JASPAR PhyloFACTS profiles is below minimum allowable";
+                errors += " [%db_build_info.min_pwm_ic%] bits\n";
+            }	
+        }   
+    }	
+   
+
+    var v = parseFloat(f.threshold.value);
+    if (isNaN(v)) {
+	errors += "Matrix match threshold is not a valid number\n";
+    } else {
+	if (v < [%db_build_info.min_tfbs_score%]) {
+	    errors += "Matrix match threshold is below minimum allowable";
+	    errors += " value of [%db_build_info.min_tfbs_score%]%\n";
+	}
+    }
+
+    var u = parseInt(f.upstream_bp.value);
+    if (isNaN(u)) {
+	errors += "Upstream sequence length is not a valid number\n";
+    } else {
+	if (u > [%max_upstream_bp%]) {
+	    errors += "Upstream sequence length is above maximum allowable";
+	    errors += " value of [%max_upstream_bp%]\n";
+	} else if (u < 0) {
+	    errors += "Upstream sequence length cannot be negative\n";
+	}
+    }
+
+    var d = parseInt(f.downstream_bp.value);
+    if (isNaN(d)) {
+	errors += "Downstream sequence length is not a valid number\n";
+    } else {
+	if (d > [%max_downstream_bp%]) {
+	    errors += "Downstream sequence length is above maximum allowable";
+	    errors += " value of [%max_downstream_bp%]\n";
+	} else if (d < 0) {
+	    errors += "Downstream sequence length cannot be negative\n";
+	}
+    }
+
+    if ((u + d) == 0) {
+	errors += "Total sequence to analyze has zero length\n";
+    }
+
+    if (!errors) return true;
+
+    msg = "_________________________________________________________\n\n";
+    msg += "The analysis was not submitted due to the following problem(s).\n";
+    msg += "Please correct these problem(s) and re-submit.\n";
+    msg += "________________________________________________________\n\n";
+    msg += errors;
+    alert(msg);
+    return false;
+}
+// END script hiding -->
+</script>
+
+<form name="opossum_input" enctype="multipart/form-data" method="post" onSubmit="return verify(this)">
+  <h2>Select Custom Analysis Parameters</h2>
+  <h3>STEP 1a: Enter a list of co-expressed genes</h3>
+  <p>
+    <span class="text"><b>Species:</b></span><br>
+    <span class="subtext">
+    <input type="radio" name="species" value="1" checked>[%db_build_info.species1()%]
+    <input type="radio" name="species" value="2">[%db_build_info.species2()%]
+    </span>
+    <br><br>
+    <span class="text"><b>Gene ID type:</b></span><br>
+    <span class="subtext">
+    <input type="radio" name="id_type" value="0" checked>Ensembl
+    [%FOREACH egit = egits%]
+      <input type="radio" name="id_type" value=[%egit.id_type()%]>[%egit.name()%]
+    [%END%]
+    </span>
+    <br><br>
+    <input type="radio" name="id_input_method" value="paste" checked>
+    <span class="text">Paste gene IDs (max. 1000 genes):</span><br>
+    <input type="button" name="use_sample_genes" value="Use sample genes"
+      onClick="{opossum_input.id_input_method[0].checked=true; opossum_input.gene_list.value='ENSG00000092054\nENSG00000109063\nENSG00000122180\nENSG00000143632\nENSG00000149925\nENSG00000159173\nENSG00000168530\nENSG00000175084\nENSG00000081189\nENSG00000129152\nENSG00000108556\nENSG00000198125\nENSG00000114854\nENSG00000135902\nENSG00000196811\nENSG00000138435\nENSG00000104879\nENSG00000111046\nENSG00000197616\nENSG00000170175\nENSG00000198947\nENSG00000141048\nENSG00000198336\nENSG00000007314\nENSG00000181856\nENSG00000159251\n'}">
+    <input type="button" name="clear_gene_ids" value="Clear"
+      onClick="{opossum_input.gene_list.value=''}">
+    <br>
+    <textarea name="gene_list" rows=5 cols=50 wrap=SOFT
+      onFocus="{opossum_input.id_input_method[0].checked=true}" 
+      onChange="{
+	if (!isblank(opossum_input.gene_list.value))
+	  {opossum_input.id_input_method[0].checked=true}
+	else if (!isblank(opossum_input.gene_file.value))
+	  {opossum_input.id_input_method[1].checked=true}}"></textarea>
+    <br><br>
+    <input type="radio" name="id_input_method" value="upload">
+    <span class="text"><b>OR</b> upload a file containing a list of gene identifiers:</span><br>
+    <span class="subtext">
+    <input type="file" name="gene_file" size="40"
+      onClick="{opossum_input.id_input_method[1].checked=true}"
+      onFocus="{opossum_input.id_input_method[1].checked=true}"
+      onChange="{
+        if (!isblank(opossum_input.gene_file.value))
+	  {opossum_input.id_input_method[1].checked=true}}
+	else if (!isblank(opossum_input.gene_list.value))
+	  {opossum_input.id_input_method[0].checked=true}}">
+    </span>
+    <br><br>
+  </p>
+  <h3>STEP 1b: Enter a background list of genes</h3>
+  <p>
+    <input type="radio" name="bg_id_input_method" value="default" checked>
+    <span class="text">Use background set of 1000 random genes</span><br>
+    <input type="radio" name="bg_id_input_method" value="paste">
+    <span class="text"><b>OR</b> Paste background gene IDs (max. 1000 genes):</span><br>
+    <input type="button" name="clear_bg_gene_ids" value="Clear"
+      onClick="{opossum_input.bg_gene_list.value=''}">
+    <br>
+    <textarea name="bg_gene_list" rows=5 cols=50 wrap=SOFT
+      onFocus="{opossum_input.bg_id_input_method[1].checked=true}" 
+      onChange="{
+        if (!isblank(opossum_input.bg_gene_list.value))
+	  {opossum_input.bg_id_input_method[1].checked=true}
+	else if (!isblank(opossum_input.bg_gene_file.value))
+	  {opossum_input.bg_id_input_method[2].checked=true}
+	else {opossum_input.bg_id_input_method[0].checked=true}}"></textarea>
+    <br><br>
+    <input type="radio" name="bg_id_input_method" value="upload">
+    <span class="text"><b>OR</b> upload a file containing a list of gene identifiers:</span><br>
+    <span class="subtext">
+    <input type="file" name="bg_gene_file" size="40"
+      onClick="{opossum_input.bg_id_input_method[2].checked=true}"
+      onFocus="{opossum_input.bg_id_input_method[2].checked=true}"
+      onChange="{
+        if (!isblank(opossum_input.bg_gene_file.value))
+	  {opossum_input.bg_id_input_method[2].checked=true}
+	else if (!isblank(opossum_input.bg_gene_list.value))
+	  {opossum_input.bg_id_input_method[1].checked=true}
+	else {opossum_input.bg_id_input_method[0].checked=true}}">
+    </span>
+  </p>
+  <hr noshade><br>
+  <h3>STEP 2: Select transcription factor binding site matrices</h3> 
+
+   <h4>JASPAR CORE Profiles</h4>
+  <p> 
+    <input type="radio" name="tfbs_type" value="core" checked>
+    <span class="text">All profiles with a minimum specificity of
+    <input type="text" name="min_ic" value=[%db_build_info.min_pwm_ic()%]
+       size="2" onFocus="{opossum_input.tfbs_type[0].checked=true}"> bits (min. [%db_build_info.min_pwm_ic()%] bits)
+    </span>
+    <br><br>
+    <input type="radio" name="tfbs_type" value="group">
+    <span class="text"><b>OR</b> select by taxonomic supergroup:</span><br> 
+    <span class="subtext">
+    [%FOREACH phylum = phylums%]
+      <input type="checkbox" name="phylum" value=[%phylum%]
+        onClick="{if (checked) {opossum_input.tfbs_type[1].checked=true}}">[%phylum%]&nbsp;
+    [%END%]
+    </span>
+    <br><br>
+    <input type="radio" name="tfbs_type" value="specific">
+    <span class="text"><b>OR</b> select specific profiles:</span><br>
+    <select multiple size=8 name=tfs
+      onFocus="{opossum_input.tfbs_type[2].checked=true}">
+      [%FOREACH tf = core_tfs%]
+        <option value=[%tf.id()%]>[%tf.name()%]</option>
+      [%END%]
+    </select>
+  <p>
+
+<h4>JASPAR PhyloFACTS Profiles</h4>
+  <p>
+    <input type="radio" name="tfbs_type" value="phylofacts">
+    <span class="text">All profiles with a minimum specificity of
+    <input type="text" name="phylofacts_min_ic" value=[%db_build_info.min_pwm_ic()%] size="2" onFocus="{opossum_input.tfbs_type[3].checked=true}"> bits (min. [%db_build_info.min_pwm_ic()%] bits)
+    </span>
+  </p>
+
+  <hr noshade><br>
+  <h3>STEP 3: Select parameters</h3>
+  <p>
+    <span class="text">Level of conservation:</span><br>
+    <select name="conservation_level">
+      [%num_levels = cls.num_levels()%]
+      [%cl_idx = 0%]
+      [%WHILE cl_idx < num_levels%]
+	[%cl = cls.get_conservation_level(cl_idx)%]
+	<option value=[%cl.level()%][%IF cl.level() == 3%] selected[%END%]>Top [%cl.top_percentile()*100%]% of conserved regions (min. conservation [%cl.min_percentage()*100%]%)</option>
+	[%cl_idx = cl_idx + 1%]
+      [%END%]
+    </select>
+    <br><br>
+    <span class="text">Matrix match threshold (min. [%db_build_info.min_tfbs_score()*100%]%):<br>
+    <input type="text" name="threshold" value=[%threshold%] size="4">%
+    </span>
+    <br><br>
+    <span class="text">Amount of upstream / downstream sequence (max. [%max_upstream_bp%] / [%max_downstream_bp%] bp):<br>
+    <input type="text" name="upstream_bp" value=[%upstream_bp%] size="4"> / 
+    <input type="text" name="downstream_bp" value=[%downstream_bp%] size="4"> bp
+    </span>
+    <br><br>
+    <!--
+    <span class="text">Statistical measure for over-representation:</span><br>
+    <select name="analysis_method">
+      <option value="zscore">Z-score</option>
+      <option value="fisher">One-tailed Fisher Exact Probability</option>
+      <option value="both" selected>Both</option>
+    </select>
+    -->
+    <span class="text">Number of results to display:
+    <br>
+    <input type="radio" name="result_type" value="top_x_results" checked> Top
+    <select name="num_display_results">
+      <option value="5">5</option>
+      <option value="10" selected>10</option>
+      <option value="20">20</option>
+      <option value="999">All</option>
+    </select> results
+    <br>
+    <input type="radio" name="result_type" value="significant_hits"> <b>OR</b> only results with <b>Z-score >= </b>
+    <select name="zscore_cutoff">
+      <option value="5">5</option>
+      <option value="10" selected>10</option>
+      <option value="15">15</option>
+    </select>
+    and <b>Fisher score <= </b>
+    <select name="fisher_cutoff">
+      <option value="0.05">0.05</option>
+      <option value="0.01" selected>0.01</option>
+      <option value="0.001">0.001</option>
+    </select>
+    (Default values have been chosen based on empirical studies)
+    <br>
+    <br>
+    <span class="text">Sort results by:
+    <br>
+    <input type="radio" name="result_sort_by" value="zscore" checked>Z-score
+    <input type="radio" name="result_sort_by" value="fisher">Fisher score
+    </span>
+    <br><br>
+  </p>
+  <p class="text"> 
+    Press the <b>Submit</b> button to perform the analysis or <b>Reset</b> to reset the analysis parameters to their default values. Depending on server load, the analysis may take a minute or more to perform. Please be patient.<br>
+    <input type="submit" name="Submit" value="Submit">
+    <input type="reset" name="Reset" value="Reset">
+    <input type="hidden" name="rm" value="custom_results">
+    <br>
+  </p>
+</form>

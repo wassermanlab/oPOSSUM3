@@ -1,0 +1,719 @@
+<script language="JavaScript">
+<!-- BEGIN script hiding
+function isblank(s)
+{
+    for (var i = 0; i < s.length; i++) {
+        var c = s.charAt(i);
+        if ((c != ' ') && (c != '\n') && (c != '\t')) return false;
+    }
+    return true;
+}
+
+function verify(f)
+{
+    var msg;
+    var errors = "";
+
+    if (f.t_id_input_method[0].checked) {
+        if (   f.t_gene_text.value == null
+            || f.t_gene_text.value == ""
+            || isblank(f.t_gene_text.value)
+        ) {
+            errors += "No gene IDs were pasted into the Paste Gene IDs box\n";
+        }
+
+        var EnsemblID = /(\bENS\w+\d+)+/;
+        if (f.species == 'worm') {
+          EnsemblID = /\w+\.\d+/;
+        } else {
+          EnsemblID = /(\bENS\w+\d+)+/;
+        }
+        var RefseqID = /(\b\w{2}_\d+\b)+/;
+
+        if (   f.t_gene_id_type[0].selected
+            && !EnsemblID.test(f.t_gene_text.value))
+        {
+            errors += "Target genes entered do not appear to be Ensembl IDs.\n";
+            errors += " Please check to see that you've entered valid"
+            errors += " Ensembl IDs or change the target Gene ID type.\n";
+        }
+      } else if (f.t_id_input_method[1].checked) {
+          if (   f.t_gene_file.value == null || f.t_gene_file.value == ""
+              || isblank(f.t_gene_file.value)
+          ) {
+              errors += "No target gene upload file was selected\n";
+          }
+      }
+
+    if (f.bg_id_input_method[1].checked) {
+        if (   f.bg_num_rand_genes.value == null
+            || f.bg_num_rand_genes.value == ""
+            || isblank(f.bg_num_rand_genes.value)
+        ) {
+            errors += "No number of random background genes selected";
+        } else if (isNaN(f.bg_num_rand_genes.value)) {
+            errors += "Random background genes is not a valid number";
+        }
+    } else if (f.bg_id_input_method[2].checked) {
+        if (   f.bg_gene_text.value == null
+            || f.bg_gene_text.value == ""
+            || isblank(f.bg_gene_text.value)
+        ) {
+            errors += "No background gene IDs were pasted into the";
+            errors += " Paste Gene IDs box\n";
+        }
+
+        var EnsemblID;
+        if (f.species == 'worm') {
+          EnsemblID = /\w+\.\d+/;
+        } else {
+          EnsemblID = /(\bENS\w+\d+)+/;
+        }
+        var RefseqID = /(\b\w{2}_\d+\b)+/;
+
+        if (   f.bg_gene_id_type[0].selected
+            && !EnsemblID.test(f.bg_gene_text.value)
+        ) {
+            errors += "Background genes entered do not appear to be Ensembl";
+            errors += " IDs. Please check to see that you've entered valid";
+            errors += " Ensembl IDs or change the Gene ID type.\n";
+        }
+    } else if (f.bg_id_input_method[3].checked) {
+        if (   f.bg_gene_file.value == null
+            || f.bg_gene_file.value == ""
+            || isblank(f.bg_gene_file.value)
+        ) {
+            errors += "No background gene upload file was selected\n";
+        }
+    }
+
+    if (   f.anchor_tf_id.value == null
+        || f.anchor_tf_id.value == ""
+        || isblank(f.anchor_tf_id.value))
+    {
+        errors += "No anchoring TF was selected.\n";
+    }
+
+    if (f.tf_select_method[0].checked) {
+        var v = parseFloat(f.min_ic.value);
+        if (isNaN(v)) {
+            errors += "Minimum specificity for JASPAR CORE profiles is not a valid number\n";
+        } else {
+            if (v < [%db_info.min_ic%]) {
+                errors += "Minimum specificity for JASPAR CORE profiles is below minimum allowable";
+                errors += " [%db_info.min_ic%] bits\n";
+            }
+        }
+    } else if (f.tf_select_method[1].checked) {
+        var tfs_selected = false;
+        for (var i = 0; i < f.tf_ids.options.length; i++) {
+            if (f.tf_ids.options[i].selected) {
+                tfs_selected = true;
+                break;
+            }
+        }
+
+        if (!tfs_selected) {
+            errors += "No specific JASPAR CORE profiles were selected\n";
+        }
+    }
+
+    if (   f.email.value == null
+        || f.email.value == ""
+        || isblank(f.email.value)
+    ) {
+        errors += "No email was provided. This is required to send notification when your analyis results are ready.\n";
+    }
+
+    if (!errors) return true;
+
+    msg = "_________________________________________________________\n\n";
+    msg += "The analysis was not submitted due to the following problem(s).\n";
+    msg += "Please correct these problem(s) and re-submit.\n";
+    msg += "________________________________________________________\n\n";
+    msg += errors;
+
+    alert(msg);
+
+    return false;
+}
+// END script hiding -->
+</script>
+
+<form name="input" enctype="multipart/form-data" method="post" onSubmit="return verify(this)" target="_blank">
+
+<input type="hidden" id="sample_genes_human"
+value="AASS
+ACSM1
+ALB
+AMBP
+APOA2
+ATP6V1A
+CPEB3
+CWF19L2
+DDX50
+DYNLL2
+ESD
+EVI5
+FAM134B
+FKBP4
+GPX7
+GRB7
+GTF3C6
+HGFAC
+HNF1B
+IFI30
+IGFBP1
+LEAP2
+LIPG
+MIA2
+NOSIP
+NR0B2
+NR1H4
+NR1I3
+NR5A2
+NUFIP2
+OAZ3
+PAH
+PAPD4
+PARP16
+PEX7
+POLI
+PROS1
+PRR15
+PRRG2
+PSMD13
+RASSF6
+RASSF7
+RNF125
+SEC16B
+SEMA4A
+SLC40A1
+SLC6A13
+SPATC1
+TLE4
+TMEM11
+TRAF3IP3
+TTR
+UGT1A1
+UMPS
+ZBTB39">
+
+<input type="hidden" id="sample_genes_mouse"
+value="Aass
+Acsm1
+Alb
+Ambp
+Apoa2
+Atp6v1a
+AU042651
+Cpeb3
+Cwf19l2
+D1Ertd622e
+Ddx50
+Dynll2
+Esd
+Evi5
+Fam134b
+Fkbp4
+Gpx7
+Grb7
+Gtf3c6
+Hgfac
+Hnf1b
+Ifi30
+Igfbp1
+Leap2
+Lipg
+Mia2
+Nosip
+Nr0b2
+Nr1h4
+Nr1i3
+Nr5a2
+Nufip2
+Oaz3
+Pah
+Papd4
+Parp16
+Pex7
+Poli
+Pros1
+Prr15
+Prrg2
+Psmd13
+Rassf6
+Rassf7
+Rnf125
+Sec16b
+Sema4a
+Slc40a1
+Slc6a13
+Spatc1
+Tle4
+Tmem11
+Traf3ip3
+Ttr
+Ugt1a1
+Umps
+Zbtb39">
+
+<input type="hidden" id="sample_genes_worm"
+value="arl-3
+mec-12
+ttn-1
+osm-12
+bbs-1
+lin-41
+bbs-2
+arl-6
+F58A4.14
+bbs-5
+cct-4
+bbs-8
+bbs-9
+fbl-1
+tbb-4
+cmd-1
+dyf-3
+mmab-1
+dyf-1
+xbx-1
+dac-1
+che-3
+dylt-1
+K08D12.2
+K06A9.1
+acl-6
+F14E5.2
+gsk-3
+daf-21
+dpy-30
+hsp-1
+daf-10
+che-11
+osm-1
+Y110A7A.20
+osm-6
+che-13
+ift-74
+che-2
+ift-81
+osm-5
+dhc-1
+act-4
+F41G4.1
+kap-1
+klp-20
+F35D2.4
+ebp-1
+nph-4
+nph-1
+unc-44
+F38B2.4
+C54D10.4
+dylt-2
+dyrb-1
+dlc-1
+E04F6.2
+lov-1
+pkd-2
+paa-1
+F25B4.5
+pfn-1
+gsp-2
+daf-19
+R02E12.4
+klc-2
+tra-1
+cat-2
+ugt-61
+unc-119
+dyf-13
+cdf-1
+epa-18">
+
+  <h3>STEP 1: Enter target (co-expressed) genes</h3>
+
+  <p class="text">
+    <input type="radio" name="t_id_input_method" value="paste" checked>
+    Paste gene IDs:
+    <br>
+    <input type="button" name="use_sample_genes" value="Use sample genes"
+      onClick="{input.t_id_input_method[0].checked=true; input.t_gene_id_type[1].selected=true; input.t_gene_text.value=document.getElementById('sample_genes_[%species%]').value}">
+    <br>
+    <textarea name="t_gene_text" rows=5 cols=50 wrap=SOFT
+      onFocus="{input.t_id_input_method[0].checked=true}"
+      onChange="{
+        if (!isblank(input.t_gene_text.value))
+          {input.t_id_input_method[0].checked=true}
+        else if (!isblank(input.t_gene_file.value))
+          {input.t_id_input_method[1].checked=true}
+      }">[%FOREACH in_t_gene_id = in_t_gene_ids%][%in_t_gene_id%]&#10;[%END%]</textarea>
+    <br>
+    <input type="button" name="clear_t_gene_ids" value="Clear"
+      onClick="{input.t_gene_text.value=''}">
+    <br><br>
+    <input type="radio" name="t_id_input_method" value="upload">
+    <b>OR</b> upload a file containing a list of gene identifiers:
+    <br>
+    <span class="subtext">
+    <input type="file" name="t_gene_file" size="40"
+      onClick="{input.t_id_input_method[1].checked=true}"
+      onFocus="{input.t_id_input_method[1].checked=true}"
+      onChange="{
+        if (!isblank(input.t_gene_file.value))
+          {input.t_id_input_method[1].checked=true}
+        else if (!isblank(input.t_gene_text.value))
+          {input.t_id_input_method[0].checked=true}
+      }">
+    </span>
+    <br><br>
+    <b>Gene ID type:</b>
+    <span class="subtext">
+    <select size=1 name="t_gene_id_type">
+      <option value="0" selected>Ensembl ID</option>
+      [%FOREACH xgit = xgid_types%]
+        <option value=[%xgit.id_type()%]>[%xgit.name()%]</option>
+      [%END%]
+    </select>
+    </span>
+  </p>
+
+  <br>
+  <hr noshade><br>
+
+  <h3>STEP 2: Enter background genes</h3>
+
+  <p class="text">
+    <input type="radio" name="bg_id_input_method" value="all" checked>All <b>[%total_genes%]</b> genes in the oPOSSUM database
+    <br><br>
+    <input type="radio" name="bg_id_input_method" value="random"> <b>OR</b> a <b>random</b> set of&nbsp;<input type="text" name="bg_num_rand_genes" value=[%dflt_bg_num_rand_genes%] size="5" onFocus="{input.bg_id_input_method[1].checked=true}">&nbsp;genes from the oPOSSUM database
+    <br><br>
+    <input type="radio" name="bg_id_input_method" value="paste">
+    <b>OR</b> paste gene IDs:
+    <br>
+    <textarea name="bg_gene_text" rows=5 cols=50 wrap=SOFT
+      onFocus="{input.bg_id_input_method[2].checked=true}"
+      onChange="{
+        if (!isblank(input.bg_gene_text.value))
+          {input.bg_id_input_method[2].checked=true}
+        else if (!isblank(input.bg_gene_file.value))
+          {input.bg_id_input_method[3].checked=true}
+        else
+          {input.bg_id_input_method[0].checked=true}
+      }">[%FOREACH in_bg_gene_id = in_bg_gene_ids%][%in_bg_gene_id%]&#10;[%END%]</textarea>
+    <br>
+    <input type="button" name="clear_bg_gene_ids" value="Clear"
+      onClick="{input.bg_gene_text.value=''}">
+    <br><br>
+    <input type="radio" name="bg_id_input_method" value="upload">
+    <b>OR</b> upload a file containing a list of gene identifiers:
+    <br>
+    <span class="subtext">
+    <input type="file" name="bg_gene_file" size="40"
+      onClick="{input.bg_id_input_method[2].checked=true}"
+      onFocus="{input.bg_id_input_method[2].checked=true}"
+      onChange="{
+        if (!isblank(input.bg_gene_file.value))
+          {input.bg_id_input_method[2].checked=true}
+        else if (!isblank(input.bg_gene_text.value))
+          {input.bg_id_input_method[1].checked=true}
+        else
+          {input.bg_id_input_method[0].checked=true}
+      }">
+    </span>
+    <br><br>
+    <b>Gene ID type:</b>
+    <span class="subtext">
+    <select size=1 name="bg_gene_id_type">
+      <option value="0" selected>Ensembl ID</option>
+      [%FOREACH xgit = xgid_types%]
+        <option value=[%xgit.id_type()%]>[%xgit.name()%]</option>
+      [%END%]
+    </select>
+    </span>
+  </p>
+
+  <br>
+  <hr noshade><br>
+
+  <h3>STEP 3: Select transcription factor binding site profiles</h3> 
+
+  <h4>JASPAR CORE Profiles</h4>
+
+  <p class="text">
+    <b>Select anchoring TF</b>
+    <br>
+    <table>
+      <tr>
+        [%tf_list = tf_set.get_matrix_list('name')%]
+        <td>
+          <select size=8 name=anchor_tf_id>
+          [%FOREACH tf = tf_list%]
+            <option value=[%tf.ID%]>[%tf.name%]</option>
+          [%END%]
+          </select>
+        </td>
+      </tr>
+    </table>
+  </p>
+
+  <p class="text">
+    <b>Select TFs to find in combination with anchoring TF</b>
+    <br>
+    <input type="radio" name="tf_select_method" value="min_ic" checked>
+    [%IF num_tax_groups > 1%]
+      All profiles from the following tax groups:
+      <br>
+      [%first_tax_group = 1%]
+      [%FOREACH tax = tax_groups%]
+        &nbsp;&nbsp;<input type="checkbox" name="tax_groups" value="[%tax%]" [%IF first_tax_group == 1%]checked[%END%] onClick="{if (checked) {input.tf_select_method[0].checked=true}}">[%tax%]
+        [%first_tax_group = 0%]
+      [%END%]
+      &nbsp;with a minimum specificity of&nbsp;
+    [%ELSE%]
+      All [%tax_groups.0%] profiles with a minimum specificity of&nbsp;
+    [%END%]
+    <input type="text" name="min_ic" value=[%db_info.min_ic()%]
+      size="2" onFocus="{input.tf_select_method[0].checked=true}"> bits (min. [%db_info.min_ic()%] bits)
+
+    <br><br>
+
+    <input type="radio" name="tf_select_method" value="specific">
+    <b>OR</b> select specific profiles:
+    <br>
+    <table>
+      [%IF num_tax_groups > 1%]
+        <tr>
+        [%FOREACH tax = tax_groups%]
+          [%IF tax_tf_sets.$tax.size > 0%]
+            <td class="table_text" align="center">[%tax%]</td>
+          [%END%]
+        [%END%]
+        </tr>
+      [%END%]
+      <tr>
+      [%FOREACH tax = tax_groups%]
+        [%IF tax_tf_sets.$tax.size > 0%]
+          [%tf_list = tax_tf_sets.$tax.get_matrix_list('name')%]
+          <td>
+          <select multiple size=8 name=tf_ids onFocus="{input.tf_select_method[1].checked=true}">
+          [%FOREACH tf = tf_list%]
+            <option value=[%tf.ID%]>[%tf.name%]</option>
+          [%END%]
+          </select>
+          </td>
+        [%END%]
+      [%END%]
+      </tr>
+    </table>
+  </p>
+
+<!--
+  [%UNLESS species == 'yeast'%]
+  <h4>JASPAR PBM Profiles</h4>
+
+  <p class="text">
+    <input type="radio" name="tf_select_method" value="pbm_min_ic">
+    All profiles with a minimum specificity of
+    <input type="text" name="pbm_min_ic" value=[%db_info.min_ic()%] size="2"
+     onFocus="{input.tf_select_method[2].checked=true}"> bits (min. [%db_info.min_ic()%] bits)
+    <br><br>
+
+    <input type="radio" name="tf_select_method" value="pbm_specific">
+    <b>OR</b> select specific profiles:
+    <br>
+
+    <table>
+    <tr>
+    [%FOREACH tax = tax_groups%]
+      [%IF pbm_tf_sets.$tax.size > 0%]
+        <td class="table_text" align="center">[%tax%]</td>
+      [%END%]
+    [%END%]
+    </tr>
+    <tr>
+    [%FOREACH tax = tax_groups%]
+      [%IF pbm_tf_sets.$tax.size > 0%]
+        [%pbm_tf_list = pbm_tf_sets.$tax.get_matrix_list('name')%]
+        <td>
+        <select multiple size=8 name=pbm_tfs
+        onFocus="{input.tf_select_method[3].checked=true}">
+        [%FOREACH tf = pbm_tf_list%]
+          <option value=[%tf.ID%]>[%tf.name%]</option>
+        [%END%]
+        </select>
+        </td>
+      [%END%]
+    [%END%]
+    </tr>
+    </table>
+  </p>
+
+  [%END%]
+-->
+
+  <!--
+  [%IF species == 'human' or species == 'mouse'%]
+  <h4>JASPAR FAM Profiles</h4>
+
+  <p class="text">
+    <input type="radio" name="tf_select_method" value="fam">
+    All profiles
+  </p>
+  [%END%]
+  -->
+
+<!--
+  [%IF species == 'worm'%]
+
+  <h4>JASPAR PENDING Profiles</h4>
+
+  <p class="text">
+  <input type="radio" name="tf_select_method" value="pending_min_ic">
+  All profiles with a minimum specificity of
+  <input type="text" name="pending_min_ic" value=[%db_info.min_ic()%] size="2"
+     onFocus="{input.tf_select_method[2].checked=true}"> bits (min. [%db_info.min_ic()%] bits)
+
+  <br><br>
+
+  <input type="radio" name="tf_select_method" value="pending_specific">
+  <b>OR</b> select specific profiles:
+  <br>
+  <table>
+  <tr>
+  [%FOREACH tax = tax_groups%]
+    [%IF pending_tf_sets.$tax.size > 0%]
+      <td class="table_text" align="center">[%tax%]</td>
+    [%END%]
+  [%END%]
+  </tr>
+  <tr>
+  [%FOREACH tax = tax_groups%]
+    [%IF pending_tf_sets.$tax.size > 0%]
+      [%pending_tf_list = pending_tf_sets.$tax.get_matrix_list('name')%]
+        <td><select multiple size=8 name=pending_tfs
+          onFocus="{input.tf_select_method[3].checked=true}">
+          [%FOREACH tf = pending_tf_list%]
+            <option value=[%tf.ID%]>[%tf.name%]</option>
+          [%END%]
+        </select></td>
+    [%END%]
+  [%END%]
+  </tr>
+  </table>
+  </p>
+
+  [%END%]
+-->
+
+  <div style="clear:left;"></div>
+  <br><hr noshade><br>
+
+  <h3>STEP 4: Select TFBS search parameters</h3>
+
+  <p class="text">
+    [%UNLESS species == 'yeast'%]
+    Conservation cutoff:<br>
+    <select name="conservation_level">
+      [%FOREACH level = cl_levels%]
+        [%cl = cl_hash.$level%]
+        <option value="[%level%]" [%IF level == cl_dflt_level%]selected[%END%]>[%cl.min_conservation()*100%]%</option>
+      [%END%]
+    </select>
+    <br><br>
+    [%END%]
+    Matrix score threshold:
+    <br>
+    <select name="threshold_level">
+      [%FOREACH level = thl_levels%]
+        [%thl = thl_hash.$level%]
+        <option value="[%level%]" [%IF level == thl_dflt_level%]selected[%END%]>[%thl.threshold()*100%]%</option>
+      [%END%]
+    </select>
+    <b>OR</b> enter score threshold
+    [%dflt_threshold = thl_hash.$thl_dflt_level.threshold()%]
+    <input type="text" name="threshold" value="[%in_threshold%]" size="2">% (min. = [%db_info.min_threshold()*100%]%)
+    <br><br>
+    [%IF species == 'yeast'%]
+      Amount of upstream sequence:
+      <select name="search_region_level">
+        [%FOREACH level = srl_levels%]
+          [%srl = srl_hash.$level%]
+          <option value="[%level%]" [%IF level == srl_dflt_level%]selected[%END%]>[%srl.upstream_bp()%]</option>
+        [%END%]
+      </select>
+      <b>OR</b> enter custom values
+      [%dflt_upstream_bp = srl_hash.$srl_dflt_level.upstream_bp()%]
+      <input type="text" name="upstream_bp" value="[%in_upstream_bp%]" size="5">
+      bp (max. = [%db_info.max_upstream_bp%])
+    [%ELSE%]
+      Amount of upstream / downstream sequence:<br>
+      <select name="search_region_level">
+        [%FOREACH level = srl_levels%]
+          [%srl = srl_hash.$level%]
+          <option value="[%level%]" [%IF level == srl_dflt_level%]selected[%END%]>[%srl.upstream_bp()%] / [%srl.downstream_bp()%]</option>
+        [%END%]
+      </select>
+      <b>OR</b> enter custom values
+      [%dflt_upstream_bp = srl_hash.$srl_dflt_level.upstream_bp()%]
+      [%dflt_downstream_bp = srl_hash.$srl_dflt_level.downstream_bp()%]
+      <input type="text" name="upstream_bp" value="[%in_upstream_bp%]" size="5"> /
+      <input type="text" name="downstream_bp" value="[%in_downstream_bp%]" size="5"> bp (max. = [%db_info.max_upstream_bp%] / [%db_info.max_upstream_bp%])
+    [%END%]
+    <br><br>
+
+    Maximum inter-binding distance <input type="text" name="inter_binding_dist" value="[%dflt_inter_binding_dist%]" size="4"> (max. = [%max_inter_binding_dist%])
+    <br><br>
+
+    Number of results to return:
+    <br>
+    <input type="radio" name="result_type" value="top_x_results" checked> Top
+    <select name="num_display_results">
+      [%FOREACH num = nresults%]
+        <option value=[%num%] [%IF num == dflt_nresults%]selected[%END%]>[%num%]</option>
+      [%END%]
+    </select> results
+    <br>
+    <input type="radio" name="result_type" value="significant_hits"> <b>OR</b> all results with <b>Z-score >= </b>
+    <select name="zscore_cutoff">
+      [%FOREACH cutoff = zcutoffs%]
+        <option value=[%cutoff%] [%IF cutoff == dflt_zcutoff%]selected[%END%]>[%cutoff%]</option>
+      [%END%]
+    </select>
+    and <b>Fisher score <= </b>
+    <select name="fisher_cutoff">
+      [%FOREACH cutoff = fcutoffs%]
+        <option value=[%cutoff%] [%IF cutoff == dflt_fcutoff%]selected[%END%]>[%cutoff%]</option>
+      [%END%]
+    </select>
+    (Default values have been chosen based on empirical studies)
+    <br>
+    <br>
+    Sort results by:
+    <br>
+    <input type="radio" name="result_sort_by" value="zscore" checked>Z-score
+    <input type="radio" name="result_sort_by" value="fisher_p_value">Fisher score
+  </p>
+
+  <p class="text"> 
+    <span class="text">
+      Please enter an e-mail address where notification will be sent when your analysis results are ready:
+    <input type="text" name="email" value="">
+    </span>
+    <br>
+  </p>
+    
+  <br>
+  <hr noshade><br>
+  <p class="text"> 
+    Press the <b>Submit</b> button to perform the analysis or <b>Reset</b> to reset the analysis parameters to their default values.<br>
+    Notification will be sent to the e-mail address you provided once the analysis is complete.<br>
+    <input type="submit" name="Submit" value="Submit">
+    <input type="reset" name="Reset" value="Reset">
+    <input type="hidden" name="rm" value="process">
+    <input type="hidden" name="sid" value="[%sid%]">
+  </p>
+
+</form>

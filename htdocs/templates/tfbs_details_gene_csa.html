@@ -1,0 +1,149 @@
+<html>
+<head>
+<link rel="stylesheet" href="[%rel_htdocs_path%]/templates/styles.css" type="text/css">
+<title>[%title%]</title>
+</head> <a name="top"></a>
+<form name="tfbs_genes" enctype="multipart/form-data" method="post" onSubmit="window.close()">
+  <h2>Conserved [%tf.name%] Binding Sites:</h2>
+  <table width="100%"  border="0" cellpadding="2" cellspacing="1">
+    <tr align="left" class="table_title">
+      [%UNLESS gene_id_type == dflt_gene_id_type%]
+        <th>Gene ID(s)</th>
+      [%END%]
+      <th>Ensembl ID</th>
+      <th align="center">Chr</th>
+      <th align="right">Gene Start</th>
+      <th align="right">Gene End</th>
+      <th align="center">Strand</th>
+      <th align="right">TFBS Start</th>
+      <th align="right">TFBS End</th>
+      <th align="right">Nearest TSS</th>
+      <th align="right">TFBS Rel. Start</th>
+      <th align="right">TFBS Rel. End</th>
+      <th align="center">TFBS Strand</th>
+      <th align="right">Score</th>
+      <th align="left">Sequence</th>
+    </tr>
+
+    [%FOREACH gene = genes%]
+      [%gid = gene.id%]
+      [%promoters = gene.fetch_promoters()%]
+
+      [%IF gene.strand == 1%]
+        [%prom_start = gene.tss%]
+        [%prom_end   = gene.end%]
+      [%ELSE%]
+        [%prom_start = gene.start%]
+        [%prom_end   = gene.tss%]
+      [%END%]
+
+      <tr align="left" class="table_text">
+
+        [%UNLESS gene_id_type == dflt_gene_id_type%]
+          [%gene_ids = gid_gene_ids.$gid%]
+          <td>
+          [%FOREACH gene_id = gene_ids%][%gene_id%]&nbsp;[%END%]
+          </td>
+        [%END%]
+
+        <td>[%gene.ensembl_id%]</td>
+        <td align="center">[%gene.chr%]</td>
+        <td align="right">[%prom_start%]</td>
+        <td align="right">[%prom_end%]</td>
+        <td align="center">[%IF gene.strand == 1%]+[%ELSE%]-[%END%]</td>
+
+        [%first = 1%]
+        [%FOREACH site = gid_tfbss.$gid%]
+          [%site_start = gene.start + site.start - 1%]
+          [%site_end   = gene.start + site.end - 1%]
+
+          [%closest_tss = gene.tss%]
+          [%min_tss_dist = 999999%]
+
+          [%FOREACH promoter = promoters%]
+            [%tss = promoter.tss()%]
+
+            [%start_tss_dist = site_start - tss%]
+            [%end_tss_dist   = site_end - tss%]
+
+            [%IF start_tss_dist < 0%]
+              [%start_tss_dist = start_tss_dist * -1%]
+            [%END%]
+
+            [%IF end_tss_dist < 0%]
+              [%end_tss_dist = end_tss_dist * -1%]
+            [%END%]
+
+            [%IF start_tss_dist < min_tss_dist%]
+              [%min_tss_dist = start_tss_dist%]
+              [%closest_tss = tss%]
+            [%END%]
+
+            [%IF end_tss_dist < min_tss_dist%]
+              [%min_tss_dist = end_tss_dist%]
+              [%closest_tss = tss%]
+            [%END%]
+          [%END%]
+
+          [%IF gene.strand == 1%]
+            [%rel_start = site_start - closest_tss%]
+            [%IF site_start >= closest_tss%]
+              [%rel_start = rel_start + 1%]
+            [%END%]
+
+            [%rel_end = site_end - closest_tss%]
+            [%IF site_end >= closest_tss%]
+              [%rel_end = rel_end + 1%]
+            [%END%]
+          [%ELSE%]
+            [%rel_start = closest_tss - site_start%]
+            [%IF site_start <= closest_tss%]
+              [%rel_start = rel_start + 1%]
+            [%END%]
+
+            [%rel_end = closest_tss - site_end%]
+            [%IF site_end <= closest_tss%]
+              [%rel_end = rel_end + 1%]
+            [%END%]
+
+            [%temp = rel_end%]
+            [%rel_end = rel_start%]
+            [%rel_start = temp%]
+          [%END%]
+
+          [%UNLESS first == 1%]
+            <tr align="left" class="table_text">
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+
+            [%UNLESS gene_id_type == dflt_gene_id_type%]
+              <td></td>
+            [%END%]
+          [%END%]
+
+          <td align="right">[%site_start%]</td>
+          <td align="right">[%site_end%]</td>
+          <td align="right">[%closest_tss%]</td>
+          <td align="right">[%rel_start%]</td>
+          <td align="right">[%rel_end%]</td>
+          <td align="center">[%IF site.strand() == 1%]+[%ELSE%]-[%END%]</td>
+          <td align="right">[%site.score()%] ([%site.rel_score() * 100%]%)</td>
+          <td align="left">[%site.seq()%]</td>
+          </tr>
+
+          [%first = 0%]
+        [%END%] <!--foreach site -->
+    [%END%] <!-- foreach gene -->
+  </table>
+<hr solid=1>
+<p class="text" align="center">
+<a href="javascript:newWindow=window.open('[%rel_htdocs_tmp_path%]/[%result_file%]'); newWindow.focus()">Download as a tab delimited text file</a> (results will be kept on the server for [%result_retain_days%] days after analysis)
+</p>
+<p align="center"><a href="#top"><img src="[%rel_htdocs_path%]/images/arrow-up.gif" border="0" alt="Back to top"></a></p>
+
+  <p align="center"><input type="submit" name="Submit" value="Close Window"></p>
+</form>
+</html>

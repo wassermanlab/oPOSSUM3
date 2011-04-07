@@ -1,0 +1,13 @@
+<form name="possum_error" enctype="multipart/form-data" method="post" action="none">
+  <p class="subtitle">The following error(s) occured</p>
+  <p class="text">
+  <b>
+  [%FOREACH err = errors%]
+    [%err%]<br>
+  [%END%]
+  </b>
+  </p>
+  <p class="text">
+  If the above error(s) were the result of inproper input, please use the back button on your browser, correct the input and re-submit the analysis. If the problem persists please use the Contact link to contact the site administrator.
+  </p>
+</form>

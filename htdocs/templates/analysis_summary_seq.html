@@ -1,0 +1,113 @@
+  <h2>Your sequence-based oPOSSUM analysis has been successfully submitted.<br> The results will be sent to [%email%]</h2>
+
+  <h3>Selected Parameters</h3>
+
+  <table border="0" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="table_title">Job ID:</td>
+      <td class="table_text">[%job_id%]</td>
+    </tr>
+
+    [%IF user_seq_file%]
+      <tr>
+        <td class="table_title">Target sequence file:</td>
+        <td class="table_text">[%user_seq_file%]</td>
+      </tr>
+    [%END%]
+
+    [%IF user_bg_seq_file%]
+      <tr>
+        <td class="table_title">Background sequence file:</td>
+        <td class="table_text">[%user_bg_seq_file%]</td>
+      </tr>
+    [%ELSIF bg_seq_set_name%]
+      <tr>
+        <td class="table_title">Background sequence set:</td>
+        <td class="table_text">[%bg_seq_set_name%]</td>
+      </tr>
+    [%END%]
+
+    [%IF tf_db%]
+      <tr>
+        <td class="table_title">TFBS profile matrix source:</td>
+        <td class="table_text">JASPAR</td>
+      </tr>
+
+      [%IF collection%]
+        <tr>
+          <td class="table_title">JASPAR collection:</td>
+          <td class="table_text">[%collection%]</td>
+        </tr>
+
+        [%IF tf_select_criteria == 'specific'%]
+          [%IF tf_set%]
+            [%matrix_list = tf_set.get_matrix_list('name')%]
+            <tr>
+              <td class="table_title">TFBS profiles:</td>
+              <td class="table_text">
+                [%FOREACH matrix = matrix_list%][%matrix.name()%] [%END%]
+              </td>
+            </tr>
+          [%END%]
+        [%ELSIF tf_select_criteria == 'min_ic'%]
+          [%IF tax_groups%]
+            <tr>
+              <td class="table_title">Taxonomic supergroup(s):</td>
+              <td class="table_text">
+                [%FOREACH tax_group = tax_groups%][%tax_group%]&nbsp;[%END%]
+              </td>
+            </tr>
+          [%END%]
+          [%IF min_ic%]
+            <tr>
+              <td class="table_title">Min. IC:</td>
+              <td class="table_text">[%min_ic%] bits</td>
+            </tr>
+          [%END%]
+        [%END%] <!-- if tf_select_criteria == ... -->
+      [%END%] <!-- if collection -->
+    [%ELSE%] <!-- !tf_db -->
+      <tr>
+        <td class="table_title">TFBS profile matrix source:</td>
+        <td class="table_text">User supplied</td>
+      </tr>
+
+      [%IF user_tf_file%]
+        <tr>
+          <td class="table_title">TFBS profile matrix file:</td>
+          <td class="table_text">[%user_tf_file%]</td>
+        </tr>
+      [%END%]
+    [%END%] <!-- if tf_db> -->
+
+    <tr>
+      <td class="table_title">Matrix score threshold:</td>
+      <td class="table_text">[%threshold%]%</td>
+    </tr>
+
+    [%IF sort_by == 'zscore'%]
+      [%display_sort_by = 'Z-score'%]
+    [%ELSIF sort_by == 'fisher'%]
+      [%display_sort_by = 'Fisher score'%]
+    [%ELSE%]
+      [%display_sort_by = sort_by%]
+    [%END%]
+    <tr>
+      <td class="table_title">Results returned:</td>
+      [%IF result_type == 'top_x_results'%]
+        [%IF num_results == 'All'%]
+          <td class="table_text">All results sorted by [%display_sort_by%]</td>
+        [%ELSE%]
+          <td class="table_text">Top [%num_results%] results by [%display_sort_by%]</td>
+        [%END%]
+      [%ELSIF result_type == 'significant_hits'%]
+        <td class="table_text">All results with a Z-score >= [%zscore_cutoff%] and a Fisher score <= [%fisher_cutoff%] sorted by [%display_sort_by%]</td>
+      [%END%]
+    </tr>
+
+    <tr>
+      <td class="table_title">The results will be sent to the following email:</td>
+      <td class="table_text">[%email%]</td>
+    </tr>
+
+  </table>

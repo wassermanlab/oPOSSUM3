@@ -1,0 +1,427 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+
+<link type="text/css" rel="stylesheet" href="./opossum.css"/>
+<link type="text/css" rel="stylesheet" href="./styles.css"/>
+
+<style type="text/css">
+  body {
+    margin:10px; 
+    background-color:#ffffff; 
+    font: Verdana, Arial, Helvetica, sans-serif; 
+    color:#666666;
+    font-size:10px;
+  }
+
+  a {color: #666699;}
+
+  a:hover {color: #343dfd;}
+
+  p {
+    font-family:Verdana, Arial, Helvetica, sans-serif; 
+    color:#474747; 
+    font-size:12px;
+  }
+    
+  .caption {font-family:Verdana, Arial, Helvetica, sans-serif; font-size:8pt;}
+
+  .warning {
+    font-family:Verdana, Arial, Helvetica, sans-serif; 
+    color:#ff0000;
+    text-align:center;
+  }
+
+  .bgssa {
+    background-color: #64C29C;
+  }
+
+  .bgseqbased {
+    background-color: #9999FF;
+  }
+
+  .bgcsa {
+    background-color: #009CC2;
+  }
+
+  img {
+    border:0px;
+    padding-left:2px;
+    padding-top:2px;
+    padding-bottom:2px;
+    padding-right:7px;
+  }
+
+  .PortalLink {
+    font-family: Verdana, Arial, Helvetica, sans-serif; 
+    font-size:13px; 
+    font-weight:bold;
+    float:center;
+    text-decoration:none;
+  }
+
+  .portalEnter {
+    font-family: Verdana, Arial, Helvetica, sans-serif; 
+    color:#000000; 
+    font-size:13px; 
+    font-weight:bold;
+    float:right;
+    text-decoration:none;
+  }
+
+  a.whitePortalLink:link {color: #fff; text-decoration:none;}
+  a.whitePortalLink:visited {color: #fff; text-decoration:none;}
+  a.whitePortalLink:hover {color: #ccc; text-decoration:none;}
+
+  a.blackPortalLink:link {color: #000; text-decoration:none;}
+  a.blackPortalLink:visited {color: #000; text-decoration:none;}
+  a.blackPortalLink:hover {color: #ccc; text-decoration:none;}
+
+  a.noPortalLink:link {color: #ccc; text-decoration:none;}
+  a.noPortalLink:visited {color: #ccc; text-decoration:none;}
+  a.noPortalLink:hover {color: #ccc; text-decoration:none;}
+
+  h1 {
+    font-family:Verdana, Arial, Helvetica, sans-serif; 
+    color:#9999FF; 
+    font-size:20px; 
+    font-weight:bold;
+  }
+
+  .t1 {
+    font-family:Verdana, Arial, Helvetica, sans-serif; 
+    color:#000000; 
+    font-size:16px; 
+    font-weight:bold;
+  }
+
+  td {
+    border: solid 0px gainsboro;
+    font-family:Verdana, Arial, Helvetica, sans-serif;
+    font-size:9pt;
+  }
+
+  #outer {
+    position: relative;
+    width: 800px;
+    padding-top: 20px;
+    padding-left: 10%;
+    padding-right: 10%;
+    font: Verdana, Arial, Helvetica, sans-serif; 
+    font-size: 12px;
+    color: #222222;
+  }
+
+  #header {
+    background: #ffffff;
+    position: relative;
+    width: 100%;
+    height: 80px;
+    padding: 0px 0px;
+  }
+
+  #sechead {
+    position: relative;
+    width: 100%;
+    height: 40px;
+    padding: 0px 10px;
+    font: Verdana, Arial, Helvetica, sans-serif; 
+    color: #000000;
+    font-size:12px;
+  }
+
+  #specimgrow {
+    background-color: #ffffff;
+    position: relative;
+    top: 10px;
+    left: 0px;
+    width: 100%;
+    height: 80px;
+  }
+
+  #spectxtrow {
+    background-color: #ffffff;
+    position: relative;
+    top: 5px;
+    left: 0px;
+    width: 100%;
+    height: 35px;
+    font: Verdana, Arial, Helvetica, sans-serif; 
+    font-size:12px;
+  }
+
+  #specbox {
+    background-color: #ffffff;
+    position: relative;
+    align: center;
+    float: left;
+    top: 0px;
+    left: 0px;
+    width: 16.66%;
+  }
+
+  #menu {
+    background-color: #ffffff;
+    position: relative;
+    align: right;
+    float: right;
+    top: 0px;
+    left: 0px;
+    padding-top: 40px;
+    width: 40%;
+  }
+
+</style>
+
+<head>
+<title>oPOSSUM 3.0 Home</title>
+</head>
+    
+<body>
+
+<center>
+<div id="outer">
+  <div id="header">
+    <!--<div align="left"><img src="images/logo.gif" alt="oPOSSUM"></div>-->
+    <div id="logo">
+      <a href="javascript:newWindow=window.open('templates/game.html','game','width=700,height=700,toolbar=0,location=0,directories=0,status=0,menuBar=0,scrollBars=0,resizable=0'); newWindow.focus()"><img src="images/logo.gif" border="0" alt="oPOSSUM"></a>
+    </div>
+    <div id="version">
+      Version 3.0
+    </div>
+    <div id="menu">
+      <a href="about.html">About</a>&nbsp;|&nbsp;
+      <a href="help.html">Help</a>&nbsp;|&nbsp;
+      <a href="faq.html">FAQ</a>&nbsp;|&nbsp;
+      <a href="download.html">Download</a>&nbsp;|&nbsp;
+      <a href="contact.html">Contact</a>
+    </div>
+  </div>
+
+  <div id="header">
+    <h1>Welcome to oPOSSUM</h1>
+    <p>
+      oPOSSUM is a web-based system for the detection of over-represented conserved transcription factor binding sites and binding site combinations in sets of genes or sequences. 
+    </p>
+  </div>	
+  <br>
+
+  <div id="sechead" class="bgc_gene_ssa">
+    <span class="t1">Single Site Analysis (SSA)</span><br>
+    Detect over-represented conserved transcription factor binding sites in a set of genes or sequences.
+  </div>
+
+  <div id="specimgrow">
+    <div id="specbox">
+      <a href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_human_ssa"><img src="index_files/human2.jpg" align="center" width="75" height="70"></a>
+    </div>
+    <div id="specbox">
+      <a href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_mouse_ssa"><img src="index_files/mouse2.jpg" align="center" width="75" height="70"></a>
+    </div>
+    <div id="specbox">
+      <a href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_fly_ssa"><img src="index_files/fly.jpg" border="0" align="center"  width="75" height="70"></a>
+    </div>
+    <div id="specbox">
+      <a href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_worm_ssa"><img src="index_files/worm.jpg" border="0" align="center"  width="75" height="70"></a>
+    </div>
+    <div id="specbox">
+      <a href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_yeast_ssa"><img src="index_files/yeast.gif" border="0" align="center" width="75" height="70"></a>
+    </div>
+    <div id="specbox">
+      <a href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_seq_ssa"><img src="index_files/DNA_sequence.png" align="center" width="75" height="70"></a>
+    </div>
+  </div>
+
+  <div id="spectxtrow">
+    <div id="specbox">
+      <span class="PortalLink"><a class="blackPortalLink" href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_human_ssa">Human</a></span>
+    </div>
+    <div id="specbox">
+      <span class="PortalLink"><a class="blackPortalLink" href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_mouse_ssa">Mouse</a></span>
+    </div>
+    <div id="specbox">
+      <span class="PortalLink"><a class="blackPortalLink" href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_fly_ssa">Fly</a></span>
+    </div>
+    <div id="specbox">
+      <span class="PortalLink"><a class="blackPortalLink" href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_worm_ssa">Worm</a></span>
+    </div>
+    <div id="specbox">
+      <span class="PortalLink"><a class="blackPortalLink" href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_yeast_ssa">Yeast</a></span>
+    </div>
+    <div id="specbox">
+      <span class="PortalLink"><a class="blackPortalLink" href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_seq_ssa">Sequence-based</a></span>
+    </div>
+  </div>
+
+  <div id="sechead" class="bgc_gene_acsa">
+    <span class="t1">Anchored Combination Site Analysis (aCSA)</span><br>
+    Detect over-represented <b>combinations</b> of conserved transcription factor binding sites in a set of genes or sequences.<br><span class="warning"></span>
+  </div>
+
+  <div id="specimgrow">
+    <div id="specbox">
+      <a href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_human_acsa"><img src="index_files/human2.jpg" align="center" width="75" height="70"></a>
+    </div>
+
+    <div id="specbox">
+      <a href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_mouse_acsa"><img src="index_files/mouse2.jpg" align="center" width="75" height="70"></a>
+    </div>
+
+    <div id="specbox">
+      <a href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_fly_acsa"><img src="index_files/fly.jpg" border="0" align="center"  width="75" height="70"></a>
+    </div>
+
+    <div id="specbox">
+      <a href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_worm_acsa"><img src="index_files/worm.jpg" border="0" align="center"  width="75" height="70"></a>
+    </div>
+
+    <div id="specbox">
+      <a href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_yeast_acsa"><img src="index_files/yeast.gif" border="0" align="center" width="75" height="70"></a>
+    </div>
+    <div id="specbox">
+      <a href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_seq_acsa"><img src="index_files/DNA_sequence.png" align="center" width="75" height="70"></a>
+    </div>
+  </div>
+
+  <div id="spectxtrow">
+    <div id="specbox">
+      <span class="PortalLink"><a class="blackPortalLink" href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_human_acsa">Human</a></span>
+    </div>
+    <div id="specbox">
+      <span class="PortalLink"><a class="blackPortalLink" href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_mouse_acsa">Mouse</a></span>
+    </div>
+    <div id="specbox">
+      <span class="PortalLink"><a class="blackPortalLink" href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_fly_acsa">Fly</a></span>
+    </div>
+    <div id="specbox">
+      <span class="PortalLink"><a class="blackPortalLink" href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_worm_acsa">Worm</a></span>
+    </div>
+    <div id="specbox">
+      <span class="PortalLink"><a class="blackPortalLink" href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_yeast_acsa">Yeast</a></span>
+    </div>
+    <div id="specbox">
+      <span class="PortalLink"><a class="blackPortalLink" href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_seq_acsa">Sequence-based</a></span>
+    </div>
+  </div>
+
+<!--
+  <div id="sechead" class="bgc_seq_ssa">
+    <span class="t1">Sequence-based Single Site Analysis</span><br>
+    Detect over-represented conserved transcription factor binding sites in a set of sequences.
+  </div>
+
+  <div id="specimgrow">
+    <div id="specbox">
+      <a href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_seq_ssa"><img src="index_files/DNA_sequence.png" align="center" width="75" height="70"></a>
+    </div>
+  </div>
+
+  <div id="spectxtrow">
+    <div id="specbox">
+      <span class="PortalLink"><a class="blackPortalLink" href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_seq_ssa">Sequence-based</a></span>
+    </div>
+  </div>
+-->
+
+  <div id="sechead" class="bgc_gene_tca">
+    <span class="t1">TFBS Cluster Analysis (TCA)</span><br>
+    Detect over-represented conserved transcription factor binding site clusters in a set of sequences. 
+  </div>
+
+  <div id="specimgrow">  
+    <div id="specbox">
+      <a href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_human_tca"><img src="index_files/human2.jpg" align="center" width="75" height="70"></a>
+    </div>
+    <div id="specbox">
+      <a href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_mouse_tca"><img src="index_files/mouse2.jpg" align="center" width="75" height="70"></a>
+    </div>
+    <div id="specbox">
+      <a href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_fly_tca"><img src="index_files/fly.jpg" align="center" width="75" height="70"></a>
+    </div>
+    <div id="specbox">
+      <a href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_worm_tca"><img src="index_files/worm.jpg" align="center" width="75" height="70"></a>
+    </div>
+    <div id="specbox">
+      <a href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_seq_tca"><img src="index_files/DNA_sequence.png" align="center" width="75" height="70"></a>
+    </div>
+  </div>
+  
+  <div id="spectxtrow">
+    <div id="specbox">
+      <span class="PortalLink"><a class="blackPortalLink" href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_human_tca">Human</a></span>
+    </div>
+    <div id="specbox">
+      <span class="PortalLink"><a class="blackPortalLink" href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_mouse_tca">Mouse</a></span>
+    </div>
+    <div id="specbox">
+      <span class="PortalLink"><a class="blackPortalLink" href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_fly_tca">Fly</a></span>
+    </div>
+    <div id="specbox">
+      <span class="PortalLink"><a class="blackPortalLink" href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_worm_tca">Worm</a></span>
+    </div>
+    <div id="specbox">
+      <span class="PortalLink"><a class="blackPortalLink" href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_seq_tca">Sequence-based</a></span>
+    </div>
+  </div>
+
+  <div id="sechead" class="bgc_gene_tca">
+    <span class="t1">Anchored Combination TFBS Cluster Analysis (aCTCA)</span><br>
+    Detect over-represented combinatons of conserved transcription factor binding site clusters in a set of sequences. 
+  </div>
+
+  <div id="specimgrow">  
+    <div id="specbox">
+      <a href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_human_actca"><img src="index_files/human2.jpg" align="center" width="75" height="70"></a>
+    </div>
+    <div id="specbox">
+      <a href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_mouse_actca"><img src="index_files/mouse2.jpg" align="center" width="75" height="70"></a>
+    </div>
+    <div id="specbox">
+      <a href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_fly_actca"><img src="index_files/fly.jpg" align="center" width="75" height="70"></a>
+    </div>
+    <div id="specbox">
+      <a href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_worm_actca"><img src="index_files/worm.jpg" align="center" width="75" height="70"></a>
+    </div>
+    <div id="specbox">
+      <a href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_seq_actca"><img src="index_files/DNA_sequence.png" align="center" width="75" height="70"></a>
+    </div>
+  </div>
+  
+  <div id="spectxtrow">
+    <div id="specbox">
+      <span class="PortalLink"><a class="blackPortalLink" href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_human_actca">Human</a></span>
+    </div>
+    <div id="specbox">
+      <span class="PortalLink"><a class="blackPortalLink" href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_mouse_actca">Mouse</a></span>
+    </div>
+    <div id="specbox">
+      <span class="PortalLink"><a class="blackPortalLink" href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_fly_actca">Fly</a></span>
+    </div>
+    <div id="specbox">
+      <span class="PortalLink"><a class="blackPortalLink" href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_worm_actca">Worm</a></span>
+    </div>
+    <div id="specbox">
+      <span class="PortalLink"><a class="blackPortalLink" href="http://www.cisreg.ca/cgi-bin/oPOSSUM3/opossum_seq_actca">Sequence-based</a></span>
+    </div>
+  </div>
+  
+  <!--
+  <div>
+    <p class="caption">
+      Reference: Huang, S., Fulton, D., <i>et al</i>. (2006). Identification of over-represented combinations of transcription factor binding sites in sets of co-expressed genes. <i>In</i> Advances in Bioinformatics and Computational Biology, Vol. 3. Imperial College Press, London, UK. 247-56. <a href="download/oPOSSUM2_Huang_etal.pdf" target="new">PDF</a>.
+    </p>
+  </div>
+  -->
+
+  <div>
+   <p>The previous release of oPOSSUM (version 2.0) is available <a href="http://www.cisreg.ca/oPOSSUM">here</a>.
+   </p>
+   <!--
+   <p>The original release of oPOSSUM (version 1.0) is available <a href="http://www.cisreg.ca/cgi-bin/oPOSSUM_old/opossum">here</a>.
+   -->
+  </div>
+</div>
+<center>
+
+</body>
+</html>
+
