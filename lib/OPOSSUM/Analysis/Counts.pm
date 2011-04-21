@@ -431,6 +431,49 @@ sub tfbs_gene_count
     return $gene_count;
 }
 
+=head2 set_all_gene_tfbs_counts
+
+ Title    : set_all_gene_tfbs_counts
+ Usage    : $count = $counts->set_all_gene_tfbs_counts($data);
+ Function : Set the count of the number of times sites for the given
+            TF were detected for the given gene/sequence.
+ Returns  : Nothing.
+ Args     : An arrayref of arrayrefs of gene ID, TF ID, count, e.g.
+            as returned by DBI->fetchall_arrayref.
+
+=cut
+
+sub set_all_gene_tfbs_counts
+{
+    my ($self, $data) = @_;
+
+    return if !defined $data;
+
+    foreach my $row (@$data) {
+        my $gene_id = $row->[0];
+        my $tf_id   = $row->[1];
+        my $count   = $row->[2];
+
+        $self->{_gene_tfbs_counts}->{$gene_id}->{$tf_id} = $count;
+
+        if ($count > 0) {
+            $self->{_tfbs_gene_exists}->{$tf_id}->{$gene_id} = 1;
+        }
+
+        #
+        # Removed checks for efficiency
+        # DJA 11/04/21
+        #
+        #unless ($self->gene_exists($gene_id)) {
+        #    $self->_add_gene($gene_id);
+        #}
+
+        #unless ($self->tf_exists($tf_id)) {
+        #    $self->_add_tf($tf_id);
+        #}
+    }
+}
+
 =head2 tfbs_gene_ids
 
  Title    : tfbs_gene_ids

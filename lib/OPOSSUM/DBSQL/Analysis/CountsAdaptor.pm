@@ -224,6 +224,8 @@ sub fetch_counts
         $sql .= "')";
     }
 
+    #print STDERR "\n\nsql:\n\t$sql\n\n";
+
     my $sth = $self->prepare($sql);
     if (!$sth) {
         carp "error fetching TFBS counts with\n$sql\n" . $self->errstr;
@@ -240,10 +242,21 @@ sub fetch_counts
         -tf_ids     => $tfids
     );
 	
-    while (my @row = $sth->fetchrow_array) {
-        $t_counts->gene_tfbs_count($row[0], $row[1], $row[2]);
+    #while (my @row = $sth->fetchrow_array) {
+    #    $t_counts->gene_tfbs_count($row[0], $row[1], $row[2]);
+    #}
+    #$sth->finish;
+
+    my $data = $sth->fetchall_arrayref();
+    if ($sth->err()) {
+        carp "Error fetching gene TFBS counts: " . $sth->errstr . "\n";
+        return;
     }
-    $sth->finish;
+
+    #foreach my $row (@$data) {
+    #    $t_counts->gene_tfbs_count($row->[0], $row->[1], $row->[2]);
+    #}
+    $t_counts->set_all_gene_tfbs_counts($data);
 
 	#
 	# Now, add the operon gene counts
