@@ -1,0 +1,90 @@
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=iso-8859-15">
+  <link rel="stylesheet" href="../styles.css" type="text/css">
+  <title>oPOSSUM 3.0 Help</title>
+</head>
+<style type="text/css">
+	body {
+		margin:20px;
+	}
+	.contents_level1 {
+		margin:5px;
+	}
+	.contents_level2 {
+		margin:25px;
+	}
+	.contents_level3 {
+		margin:45px;
+	}
+</style>
+
+<body class="text">
+
+<a name="top"></a>
+
+<h2><a name="tfbs_hits"></a>TFBS Hits Summary Table</h2>
+  
+  <p>This table contains the gene and promoter information where the TFBS prediction is found,
+  along with individual TFBS hit locations.</p>
+  
+  <p>The table is preceded by a header section listing the TF name, JASPAR ID, structural
+  class and family, taxonomic group, information content and GC content of the TFBS profile.</p>
+  
+  <p> Note that a gene may have multiple alternative promoters. In some cases, the 
+  region upstream of one TSS overlaps with the downstream region of an adjacent TSS (depending on the 
+  promoter upstream and downstream parameters selected). If a TFBS prediction resides in the overlapping 
+  region, it is marked with an asterisk (*) and highlighted in yellow.<p>
+  
+  <p>For operon genes in the <i>C. elegans</i> genome, the operon ID is displayed.</p>
+  
+<h4><a name="gene_id"></a>Gene ID(s)</h4>
+<p>The Gene ID/name for which the TFBS is predicted.</p>
+
+<h4><a name="ensembl_id"></a>Ensembl ID(s)</h4>
+<p>The Ensembl gene ID for which the TFBS is predicted.</p>
+
+<h4><a name="operon_id"></a>Operon ID (for <i> C. elegans</i>)</h4>
+<p>The ID for the operon containing the gene. When a gene occurs as part of an operon, the TFBSs upstream
+	of the first gene in the operon apply to all genes in the operon.</p>
+
+<h4><a name="chr"></a>Chr</h4>
+<p>The chromosome on which the gene is located.</p>
+
+<h4><a name="strand"></a>Strand</h4>
+<p>The chromosome strand on which the gene is located.</p>
+
+<h4><a name="gene_start"></a>Gene Start</h4>
+<p>The annotated start position of the gene.</p>
+
+<h4><a name="gene_end"></a>Gene End</h4>
+<p>The annotated end position of the gene.</p>
+
+<h4><a name="tss"></a>Nearest TSS</h4>
+<p>The annotated transcription start site (TSS) position located closest to the given TFBS hit.</p>
+
+<h4><a name="tfbs_start"></a>TFBS Start</h4>
+<p>The start position of the predicted TFBS.</p>
+
+<h4><a name="tfbs_end"></a>TFBS End</h4>
+<p>The end position of the predicted TFBS.</p>
+
+<h4><a name="tfbs_rel_start"></a>TFBS Rel. Start</h4>
+<p>The relative start position of the predicted TFBS to the neareset TSS.</p>
+
+<h4><a name="tfbs_rel_end"></a>TFBS Rel. End</h4>
+<p>The relative end position of the predicted TFBS to the nearest TSS.</p>
+
+<h4><a name="strand"></a>TFBS Strand</h4>
+<p>The chromosome strand on which the predicted TFBS is located.</p>
+
+<h4><a name="abs_score"></a>Abs. Score</h4>
+<p>The absolute score for the sequence given the weight matrix profile.</p>
+
+<h4><a name="rel_score"></a>Rel. Score</h4>
+<p>The relative score for the sequence given the weight matrix profile.</p>
+
+<h4><a name="tfbs_sequence"></a>TFBS sequence</h4>
+<p>The sequence matching the given TFBS profile above the threshold match score.</p>
+
+<p><hr noshade><br><a href="#top"><img src="../images/arrow-up.gif" align="right" /></a></p>

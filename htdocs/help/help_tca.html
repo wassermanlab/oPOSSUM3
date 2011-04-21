@@ -1,0 +1,396 @@
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=iso-8859-15">
+  <link rel="stylesheet" href="../styles.css" type="text/css">
+  <title>oPOSSUM 3.0 Help</title>
+</head>
+<style type="text/css">
+	body {
+		margin:20px;
+	}
+	.contents_level1 {
+		margin:5px;
+	}
+	.contents_level2 {
+		margin:25px;
+	}
+	.contents_level3 {
+		margin:45px;
+	}
+</style>
+
+<body class="text">
+
+<a name="top"></a>
+
+  <h1><a name="ssa_help"></a>oPOSSUM TFBS Cluster Analysis (TCA)</h1>
+  <p>
+  <b><center>Identification of over-represented transcription factor binding site
+  clusters in sets of genes or sequences</center></b>
+  </p>
+  
+  <a href="#analysis_input"><h2>Analysis Input</h2></a>
+  
+  <a class="contents_level1" href="#select_target">Entering Input Data Sets</a><br />
+  <a class="contents_level2" href="#select_background">Entering Background Data Sets</a><br />
+  
+  <a class="contents_level1" href="#select_tfbs">TFBS Cluster Selection Based on TF Families</a><br />
+  
+  <a class="contents_level1" href="search_tfbs">TFBS Cluster Search Parameters</a><br />
+  <a class="contents_level2" href="#conservation">Conservation level</a><br />
+  <a class="contents_level2" href="#threshold">Matrix match threshold</a><br />
+  <a class="contents_level2" href="#up_down_seq">Upstream / downstream sequence</a><br />
+  <a class="contents_level2" href="#num_results">Number of results to return</a><br />
+  <a class="contents_level2" href="#sort_by">Sorting results</a><br />
+  
+  <a href="#analysis_results"><h2>Analysis Results</h2></a>
+  
+  <a class="contents_level1" href="#selected_parameters">Selected Parameters</a><br />
+  <a class="contents_level2" href="#num_submitted_genes">Number of submitted genes/sequences</a><br />
+  <a class="contents_level2" href="#selected_tfbs">Selected TFBS clusters</a><br />
+  <a class="contents_level2" href="#search_parameters">Search parameters</a><br />
+  <a class="contents_level2" href="#gc_comp">GC composition</a><br />
+  <a class="contents_level2" href="sorted_by">Results returned</a><br />
+  
+  <a class="contents_level1" href="#opossum_results">Analysis Results Summary Table</a><br />
+  <a class="contents_level1" href="#tfbs_hits">TFBS Hits Table</a><br />
+   
+  <p><hr noshade><br><a href="#top"><img src="../images/arrow-up.gif" align="right" /></a></p>  
+  
+  <h2><a name="analysis_input"></a>Analysis Input</h2>
+
+  <p><br></p>
+  
+  <h3><a name="select_target"></a>Entering Target Data Sets</h3>    
+  <p>
+    Specify your list of target genes or sequences by either pasting them into
+	the text box or using the file upload option.
+  </p>
+  <p>
+	For gene-based analysis, the gene list should be separated by spaces, commas,
+	semi-colons, colons, newlines or some combination thereof.
+	  
+	For testing purposes, pressing the <b>Use sample genes</b> button will paste
+	a pre-defined set of test genes into the text area.
+	
+	Use the <b>Clear</b> button to clear the text area.
+
+    You need to choose the type of gene ID from the drop down menu. The gene ID
+	types available are:<br>
+	<ul>
+	  <li>Ensembl Gene ID
+	  <li>EntrezGene ID
+	  <li>RefSeq DNA/Protein ID
+	  <li>EMBL (GenBank) ID
+	  <li>Protein (GenBank) ID
+	  <li>Uniprot/TrEMBL Acc.
+	  <li>Uniprot/SwissProt Acc.
+	  <li>Unigene ID
+	</ul>
+	Depending on the species chosen, other species-specific database IDs are
+	available:
+	<ul>
+	  <li>HGNC Symbol (Human)
+	  <li>MGI Symbol (Mouse)
+	  <li>FlyBase Gene ID (Fly)
+	  <li>WormBase Gene Public Name (Worm)
+	  <li>WormBase Gene ID (Worm)
+	  <li>SGD (Yeast)
+	</ul>
+	Please note that while oPOSSUM attempts to use many different ways
+	of identifying genes, the difficulty in mapping between different gene
+	identification schemes means that not every gene in oPOSSUM is represented in
+	every scheme. Every gene in oPOSSUM has an Ensembl gene ID, so this is the
+	recommended gene ID type.
+  </p>
+  <p>
+	For sequence-based analysis, fasta-formatted sequences can be pasted into the
+	text area or uploaded as a file. If you need only have genomic coordinates for
+	your sequences, please use the <a href="http://main.g2.bx.psu.edu/">Galaxy
+	service</a> from the UCSC.
+  </p>
+
+  <p><hr noshade><br><a href="#top"><img src="../images/arrow-up.gif" align="right" /></a></p>
+  
+  <h3><a name="select_background"></a>Entering Background Data Sets</h3>
+  <p>
+	For both gene- and sequence-based systems, the same restrictions apply
+	as given in the Entering Target Data Sets section.
+  </p>
+  <p>
+  	For gene-based oPOSSUM systems, the background data sets were compiled by
+	selecting genes from Ensembl which were considered to be well known, i.e. the
+	"KNOWN" attribute was true and the genes had a gene symbol assigned (HGNC
+	symbol for human, MGI for mouse etc.). Transcription start sites (TSSs) were
+	assigned for each gene based on the core Ensembl gene TSS annotations.
+	You can paste in the list of gene ID's to be used as the background data set, or
+	upload a file containing the ID's. Alternatively, you can specify the number of
+	random genes to be picked as the background data set, where the maximum number
+	allowed is the number of genes annotated in the oPOSSUM system.
+  </p>
+  <p>
+	For sequence-based systems, you can either choose a pre-defined background
+	data set or supply your own. When choosing a background data set, it is important
+	to ascertain that its GC composition closely matches that of the target data set.
+	The pre-defined data sets include:
+	<ul>
+	  <li>Mouse fibroblast cells
+	  <li>Mouse liver cells
+	  <li>Mouse ES cells
+	  <li>Mouse bone marrow cells
+	  <li>Mouse combined cell lines
+	</ul>
+	Your own data sets can be pasted in or uploaded as a file.
+  </p>
+  
+  <p><hr noshade><br><a href="#top"><img src="../images/arrow-up.gif" align="right" /></a></p>
+
+  <h3><a name="select_tfbs"></a>
+    TFBS Cluster Selection Based on TF Families
+  </h3>
+    
+	<p>TFBS profiles from the JASPAR CORE, PBM and PENDING collections were grouped
+	according to their structural families and clustered within each family according
+	to their profilie similarities. 170 TFBS clusters were formed in total.
+    You can specify whether to use the entire set or a selected subset of the clusters
+	by specifying which TF families to include in your analysis. No custom TFBS input
+	is allowed, as this analysis relies on pre-computed TFBS clusters stored within
+	the oPOSSUM system.
+	</p>
+    
+  <p><hr noshade><br><a href="#top"><img src="../images/arrow-up.gif" align="right" /></a></p>
+
+  <h3><a name="search_tfbs"></a>TFBS Cluster Search Parameters</h3>
+  
+	<h4><a name="conservation"></a>Conservation level</h4>
+	<p>
+	  For gene-based systems, conservation was determined by using phastCons scores
+	  from the UCSC Genome Browser scoring above some minimum threshold and merging
+	  these into conserved regions of minimum length 20 bp such that the resulting
+	  average score over each region was still above threshold. The top 10th, 20th
+	  and 30th percentiles of windows, based on their phastCons scores, were selected
+	  if they met the	minimum required thresholds of 70%, 65%, and 60%, respectively. 
+	</p>
+	<p>
+	  The conserved regions that fell within 10,000 nucleotides upstream and downstream of the predicted
+	  transcription start site (TSS) were then scanned for binding sites using position weight matrice (PWM) models 
+	  of transcription factor (TF) binding specificity from the <a href="javascript:newWindow=window.open('http://mordor.cgb.ki.se/cgi-bin/jaspar2005/jaspar_db.pl','jaspar'); newWindow.focus()">JASPAR</a> 
+	  database. These TF sites were stored in the oPOSSUM database and comprise the background set for the default analysis.
+	  The background set was pre-computed with three levels of conservation filter. 
+	  <ul>
+		<li>Level 1 corresponds to the top 10 percentile of non-coding conserved regions with 
+			  an absolute minimum percent identity of 70%</li>
+		<li>Level 2 corresponds to the top 20 percentile with a minimum percent identity of 65%</li>
+		<li>Level 3 corresponds to the top 30 percentile with a minimum percent identity of 60%</li>
+	  </ul>
+	</p>
+	<p>No conservation filters are used for yeast oPOSSUM and sequence-based systems.</p>
+	<p><hr noshade><br><a href="#top"><img src="../images/arrow-up.gif" align="right" /></a></p>
+	
+	<h4><a name="threshold"></a>Matrix score threshold</h4>
+	  <p>
+		  TF sites are scanned by sliding the corresponding postion weight matrix (PWM) along the sequence 
+		  and scoring it at each position. The threshold is the minimum relative score used to report the 
+		  position as a putative binding site. The background set was computed using a threshold of 70%.
+	  </p>
+	  <p><hr noshade><br><a href="#top"><img src="../images/arrow-up.gif" align="right" /></a></p>
+	
+	<h4><a name="up_down_seq"></a>Upstream / Downstream sequence</h4>
+	  <p class="text">
+		  This refers to the size of the region around the transcription start site (TSS) which was analysed 
+		  for TF sites. The background set was computed using a region extending a maximum of 10000 bp 
+		  upstream and 10000 bp downstream of the TSS. 
+	  </p>
+	  
+	<h4><a name="sort_by"></a>Sort results by:</h4>
+	<p class="text">Results can be sorted by either Z-scores or Fisher scores. You
+	can opt to display all results or only those that scored above a minimum Z- or
+	Fisher score you specify. You need to be aware that if you select the score
+	threshold option, those results that scored below this value will be lost, even
+	those results that scored highly in the other scoring measure (i.e. low Z-score
+	and high Fisher and vice versa).</p>
+	
+  <p><hr noshade><br><a href="#top"><img src="../images/arrow-up.gif" align="right" /></a></p>
+  
+  <h2><a name="analysis_results"></a>Analysis Results</a></h2>
+  
+  <p><br></p>
+  
+	<p>
+	The results are returned in a table format, preceded by a summary of the
+	input parameters and the GC composition of the target and background
+	sequences used in the analysis. The results can be downloaded in a tab delimited
+	file format (link is provided at the bottom of the table). Those results that
+	do not have any hits in the background genes/sequences are flagged with a
+	warning.
+	</p>
+	
+    <h3><a name="selected_parameters"></a>Selected Parameters</h3>
+	
+	  <a name="user_seq_files"></a><h4>Sequence information (sequence-based analysis)</h4>
+	  <p>For sequence-based analysis, the following information on the analyzed
+	  sequences are displayed:
+	  <ul>
+		<li>If the user supplied target and/or background sequence files, the file
+	  names are displayed. If one of the pre-defined background sequence sets is
+	  used, its name is displayed.
+	    <li>The number of target and background sequences
+		<li>Total lengths of target and background sequences
+	  </ul>
+	  
+	  <a name="num_submitted_genes"></a><h4>Number of submitted genes (gene-based analysis)</h4>
+	  oPOSSUM systems are built based on Ensembl IDs. If external IDs are used for
+	  gene selection, oPOSSUM may not be able to map all IDs in an one-to-one manner.
+	  All calculations are based on the unique oPOSSUM genes found and their associated
+	  non-coding regions.
+	  <ul>
+		<li>Submitted for analysis: number of user-supplied target gene IDs
+		<li>Included in analysis: number of user-supplied IDs that oPOSSUM successfully
+	    mapped to its internal database of genes
+		<li>Missing from analysis: number of user-supplied IDs that oPOSSUM could not map
+		to its internal database of genes
+		<li>Unique oPOSSUM genes in analysis: number of unique genes identified by oPOSSUM
+		from the user-supplied IDs (some external IDs may map to a single gene)
+	  </ul>
+
+      <a name="selected_tfbs"></a><h4>Selected TFBS Clusters</h4>
+	  If a subset of the available TFBS clusters was specified, the included TF
+	  families are displayed.
+	  
+	  <a name="search_parameters"></a><h4>Search parameters</h4>
+	  For gene-based analysis, the conservation level and upstream/downstream sequence lengths
+	  chosen are summarized. For both the gene-based and sequence-based analyses, the matrix score
+	  threshold is shown.
+
+	  <a name="gc_comp"></a><h4>GC composition</h4>
+	  For both the target and background sets, the GC compositions of the sequences that were searched
+	  for motifs are shown. GC content less than 0.45 or greater than 0.55 is flagged red. For
+	  sequence-based analysis, it is important to make sure that both the target and background
+	  sequence sets to have similar levels of GC content, as sequence composition can affect
+	  TFBS search results. Please refer to the manuscript for more details.
+	  
+      <a name="sorted_by"></a><h4>Results returned</h4>
+	  How the results are sorted in the summary table.
+	  
+    <p><hr noshade><br><a href="#top"><img src="../images/arrow-up.gif" align="right" /></a></p>
+	  
+    <h3><a name="genes_analyzed"></a>Genes Included in Analysis (gene-based analysis)</h3>
+      <p>
+      This section lists the set of target and background genes that were entered by the user.
+	  The background gene list is shown only if you pasted in or uploaded a gene set to be used
+	  as the background (i.e. not randomly chosen). It is broken down into the sections
+	  <a href="#genes_analyzed">Analyzed</a> and 
+      <a href="#genes_excluded">Excluded</a>. Please see description under 
+      <a href="#target_genes">Target Genes</a> of what is meant by 'Analyzed' and 'Excluded' 
+      and how this may impact the results of the analysis.
+
+      <h4><a name="genes_analyzed"></a>Analyzed</h4>
+      <p>
+	  This is the sub-set of genes entered by the user which were found within 
+	  the oPOSSUM database, and therefore included in the analysis.
+	  </p>
+      <h4><a name="genes_excluded"></a>Excluded</h4>
+	  <p class="text">
+	  This is the sub-set of genes entered by the user which were not found within 
+	  the oPOSSUM database, and therefore had to be excluded from the analysis.
+	  </p>
+
+  <p><hr noshade><br><a href="#top"><img src="../images/arrow-up.gif" align="right" /></a></p>
+
+  <h2><a name="opossum_results"></a>Analysis Results Summary Table</h2>
+    
+	<p>
+      This table contains the results of both the Z-score and Fisher analyses. The results are 
+      ordered by Z-score from most to least significant (higher to lower z-score). Those columns
+	  that the table can be sorted by has double arrow icons in the header. The columns 
+      of the table are as follows:
+    </p>
+    
+	<h4><a name="tf_name"></a>TFBS Cluster ID</h4>
+	<p>The TFBS Cluster ID. A link is provided to a summary page for the given
+	cluster listing the individual member TFs.</p>
+  	
+	<h4><a name="tf_class"></a>Class</h4>
+    <p>The class of TFs to which this cluster belongs.</p>
+	
+    <h4><a name="tf_family"></a>Family</h4>
+	<p>The family of TFs to which this cluster belongs.</p>
+	
+    <h4><a name="t_gene_hits"></a>Target gene/sequence hits</h4>
+	<p>
+	The number of genes/sequences in the included target set for which this TFBS
+	cluster was predicted within the searched regions. A link is provided to the
+	<a href="#tfbs_hits">TFBS Hits</a> summary
+	table that lists the actual genomic locations of the hits.
+	</p>
+    
+	<h4><a name="t_gene_non_hits"></a>Target gene/sequence non-hits</h4>
+	<p>
+	The number of genes/sequences in the included target set for which this TFBS
+	cluster was NOT predicted within the searched regions.
+	</p>
+	
+    <h4><a name="bg_gene_hits"></a>Background gene/sequence hits</h4>
+	<p>
+	The number of genes/sequences in the background set for which this TFBS cluster
+	was	predicted within the searched regions. Results with 0 background hits are
+	flagged with a warning.
+	</p>
+      <h4><a name="bg_gene_non_hits"></a>Background gene/sequence non-hits</h4>
+	<p>
+	The number of genes/sequences in the background set for which this TFBS cluster
+	was	NOT predicted within the searched regions.
+	</p>
+	<h4><a name="bg_tfbs_hits"></a>Background cluster hits</h4>
+	<p>
+	The number of times this TFBS cluster was detected within the searched regions 
+	of the background set of genes/sequences. Results with 0 background hits are
+	flagged with a warning.
+	</p>
+	
+    <h4><a name="t_tfbs_hits"></a>Target cluster hits</h4>
+	<p>
+	The number of times this TFBS cluster was detected within the searched regions 
+	of the target set of genes/sequences. A link is provided to the
+	<a href="#tfbs_hits">TFBS Hits</a> summary
+	table that lists the actual genomic locations of the hits.
+	</p>
+    
+	<h4><a name="bg_tfbs_rate"></a>Background cluster rate</h4>
+	<p>
+	The rate of occurrence of this TFBS cluster within the searched regions of the background 
+	set of genes/sequences. The rate is equal to the number of times the site was
+	predicted (background hits) multiplied by the with of the TFBS cluster, divided
+	by the total number of nucleotides in the searched regions of the background set.
+	</p>
+    
+	<h4><a name="t_tfbs_rate"></a>Target cluster rate</h4>
+	<p>
+	The rate of occurrence of this TFBS cluster within the searched regions of the included 
+	target set of genes/sequences. The rate is equal to the number of times the site
+	was predicted (target hits) multiplied by the with of the TFBS cluster, divided
+	by the total number of nucleotides in the searched regions of the included target set.
+	</p>
+    
+	<h4><a name="zscore"></a>Z-score</h4>
+	<p>
+	The likelihood that the number of TFBS cluster nucleotides detected for the included target
+	genes/sequences	is significant as compared with the number of TFBS cluster nucleotides detected
+	for the background set. Z-score is expressed in units of magnitude of the standard deviation.
+	</p>
+    
+	<h4><a name="fisher_score"></a>Fisher score</h4>
+	<p>
+	The probability that the number of hits vs. non-hits for the included target genes/sequences 
+	could have occured by random chance based on the hits vs. non-hits for the background set.
+	Negative natural logarithm of the probabilities are returned as the scores.
+	</p>
+
+	<p><hr noshade><br><a href="#top"><img src="../images/arrow-up.gif" align="right" /></a></p>
+
+	<h3><a name="tfbs_hits"></a>TFBS Cluster Hits Summary Table</h3>
+      
+	  <p>This table contains the gene and promoter information where the TFBS cluster
+	  prediction is found, along with individual TFBS cluster hit locations.</p>
+	  <p><a href="help_tfbs_hits_gene_single.html">gene-based analysis</a></p>
+	  <p><a href="help_tfbs_hits_seq_single.html">sequence-based analysis</a></p>

@@ -131,7 +131,7 @@ sub input
     my $state = $self->state();
 
     my $species = $state->species() || $self->param('species');
-
+    
     #
     # Retrieve any previously entered values from state.
     #

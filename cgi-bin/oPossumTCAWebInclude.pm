@@ -42,13 +42,15 @@ sub write_cluster_results
 {
     my ($self, $filename, $results, $cluster_set) = @_;
 
-    my $text = "TFBS Cluster Name\tTarget gene hits\tTarget gene non-hits\tBackground gene hits\tBackground gene non-hits\tTarget Cluster hits\tTarget Cluster nucleotide rate\tBackground Cluster hits\tBackground Cluster nucleotide rate\tZ-score\tFisher score\n";
+    my $text = "TFBS Cluster\tTF Class\tTF Family\tTarget gene hits\tTarget gene non-hits\tBackground gene hits\tBackground gene non-hits\tTarget Cluster hits\tTarget Cluster nucleotide rate\tBackground Cluster hits\tBackground Cluster nucleotide rate\tZ-score\tFisher score\n";
 
     foreach my $result (@$results) {
         my $cl = $cluster_set->get_tf_cluster($result->id());
 
-        $text .= sprintf "%s\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%s\t%s\t%s\n",
-            $cl->name,
+        $text .= sprintf "%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%s\t%s\t%s\t%s\t%s\n",
+            'C' . $cl->id,
+			$cl->class,
+			$cl->family,
             $result->t_gene_hits() || 0,
             $result->t_gene_no_hits() || 0,
             $result->bg_gene_hits() || 0,

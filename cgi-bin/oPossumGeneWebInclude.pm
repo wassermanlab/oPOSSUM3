@@ -576,7 +576,7 @@ sub write_results
             $total_ic = 'N/A';
         }
 
-        $text .= sprintf "%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%s\t%s\t%s\n",
+        $text .= sprintf "%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%s\t%s\t%s\t%s\t%s\n",
             $tf->name,
             $tf->ID,
             $tf->class() || 'N/A',

@@ -862,7 +862,9 @@ sub results
 
     my $abs_result_file = "$results_dir/" . RESULTS_TEXT_FILENAME;
 
-    $self->write_cluster_results($abs_result_file, $results, $tf_cluster_set);
+	if ($results && $results->[0]) {
+		$self->write_cluster_results($abs_result_file, $results, $tf_cluster_set);
+	}
 	
     #print STDERR "results self:\n" . Data::Dumper::Dumper($self);
 
@@ -878,8 +880,7 @@ sub results
         bg_color_class      => $state->bg_color_class(),
         rel_htdocs_tmp_path => REL_HTDOCS_TMP_PATH,
         rel_htdocs_results_path => REL_HTDOCS_RESULTS_PATH,
-		rel_htdocs_data_path    => REL_HTDOCS_DATA_PATH,
-        results_text_filename   => RESULTS_TEXT_FILENAME,
+        result_file		    => RESULTS_TEXT_FILENAME,
         jaspar_url          => JASPAR_URL,
         low_matrix_ic       => LOW_MATRIX_IC,
         high_matrix_ic      => HIGH_MATRIX_IC,

@@ -114,7 +114,13 @@ function verify(f)
 </script>
 
 <form name="input" enctype="multipart/form-data" method="post" onSubmit="return verify(this)" target="_blank">
-  <h3>STEP 1a: Enter your sequences</h3>
+
+  <p class="text">[
+    <a href="javascript:newWindow=window.open('[%rel_htdocs_path%]/help/help_acsa.html#select_target',
+    'help','width=800,height=800,toolbar=1,location=0,directories=0,status=0,menuBar=0,scrollBars=1,resizable=1'); newWindow.focus()">HELP</a>
+  ]</p>
+
+  <h3>STEP 1: Enter your sequences</h3>
   <p class="text">
     <input type="radio" name="seq_input_method" value="paste" checked>
     Paste fasta formatted sequences (retrieve from <a href="http://main.g2.bx.psu.edu/" target="_blank">Galaxy</a>):<br>
@@ -147,7 +153,13 @@ function verify(f)
     <br><br>
   </p>
 
-  <h3>STEP 1b: Enter a background list of sequences</h3>
+  <h3>STEP 2: Enter a background list of sequences</h3>
+  
+  <p class="text">[
+    <a href="javascript:newWindow=window.open('[%rel_htdocs_path%]/help/help_acsa.html#select_background',
+    'help','width=800,height=800,toolbar=1,location=0,directories=0,status=0,menuBar=0,scrollBars=1,resizable=1'); newWindow.focus()">HELP</a>
+  ]</p>
+
   <p class="text">
     <input type="radio" name="bg_seq_input_method" value="default" checked>
     Choose a background (sequences randomly selected from experimental control peaks)
@@ -188,7 +200,12 @@ function verify(f)
 
   <hr noshade><br>
 
-  <h3>STEP 2: Select transcription factor binding site matrices</h3> 
+  <h3>STEP 3: Select transcription factor binding site matrices</h3> 
+
+  <p class="text">[
+    <a href="javascript:newWindow=window.open('[%rel_htdocs_path%]/help/help_acsa.html#select_tfbs',
+    'help','width=800,height=800,toolbar=1,location=0,directories=0,status=0,menuBar=0,scrollBars=1,resizable=1'); newWindow.focus()">HELP</a>
+  ]</p>
 
   <p class="text">
     <h4>Select anchoring TF</h4>
@@ -396,7 +413,13 @@ function verify(f)
 -->
       
   <hr noshade><br>
-  <h3>STEP 3: Select parameters</h3>
+  <h3>STEP 4: Select parameters</h3>
+  
+  <p class="text">[
+    <a href="javascript:newWindow=window.open('[%rel_htdocs_path%]/help/help_acsa.html#search_tfbs',
+    'help','width=800,height=800,toolbar=1,location=0,directories=0,status=0,menuBar=0,scrollBars=1,resizable=1'); newWindow.focus()">HELP</a>
+  ]</p>
+
   <p class="text">
     Matrix match threshold (min. [%min_threshold%]%):<br>
     <input type="text" name="threshold" value=[%dflt_threshold%] size="4">%

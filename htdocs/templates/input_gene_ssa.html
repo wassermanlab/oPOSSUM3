@@ -24,15 +24,15 @@ function verify(f)
             errors += "No gene IDs were pasted into the target Paste Gene IDs";
             errors += " box\n";
         }
-
+        
         var EnsemblID;
-        if (f.species == 'worm') {
-          EnsemblID = /\w+\.\d+/;
+        if (f.species.value == 'worm') {
+          EnsemblID = /(\b[A-Z]\w+\.\d+)+/;
         } else {
           EnsemblID = /(\bENS\w+\d+)+/;
         }
         var RefseqID = /(\b\w{2}_\d+\b)+/;
-
+        
         if (   f.t_gene_id_type[0].selected
             && !EnsemblID.test(f.t_gene_text.value)
         ) {
@@ -68,8 +68,8 @@ function verify(f)
         }
 
         var EnsemblID;
-        if (f.species == 'worm') {
-          EnsemblID = /\w+\.\d+/;
+        if (f.species.value == 'worm') {
+          EnsemblID = /(\b[A-Z]\w+\.\d+)+/;
         } else {
           EnsemblID = /(\bENS\w+\d+)+/;
         }
@@ -163,6 +163,9 @@ function verify(f)
 
 <form name="input" enctype="multipart/form-data" method="post" onSubmit="return verify(this)" target="_blank">
 
+<!-- Andrew: bit of a hack. need to know the species in javascript function verify() -->
+<input type="hidden" name="species" value=[%species%]>
+    
 <input type="hidden" id="sample_genes_human"
 value="AASS
 ACSM1
@@ -442,6 +445,11 @@ epa-18">
 
   <h3>STEP 1: Enter target (co-expressed) genes</h3>
 
+  <p class="text">[
+    <a href="javascript:newWindow=window.open('[%rel_htdocs_path%]/help/help_ssa.html#select_target',
+    'help','width=800,height=800,toolbar=1,location=0,directories=0,status=0,menuBar=0,scrollBars=1,resizable=1'); newWindow.focus()">HELP</a>
+  ]</p>
+  
   <p class="text">
     <input type="radio" name="t_id_input_method" value="paste" checked>
     Paste gene IDs:
@@ -491,7 +499,12 @@ epa-18">
   <hr noshade><br>
 
   <h3>STEP 2: Enter background genes</h3>
-
+  
+  <p class="text">[
+    <a href="javascript:newWindow=window.open('[%rel_htdocs_path%]/help/help_ssa.html#select_background',
+    'help','width=800,height=800,toolbar=1,location=0,directories=0,status=0,menuBar=0,scrollBars=1,resizable=1'); newWindow.focus()">HELP</a>
+  ]</p>
+  
   <p class="text">
     <input type="radio" name="bg_id_input_method" value="all" checked>All <b>[%total_genes%]</b> genes in the oPOSSUM database
     <br><br>
@@ -546,6 +559,11 @@ epa-18">
   <hr noshade><br>
 
   <h3>STEP 3: Select transcription factor binding site profiles</h3> 
+
+  <p class="text">[
+    <a href="javascript:newWindow=window.open('[%rel_htdocs_path%]/help/help_ssa.html#select_tfbs',
+    'help','width=800,height=800,toolbar=1,location=0,directories=0,status=0,menuBar=0,scrollBars=1,resizable=1'); newWindow.focus()">HELP</a>
+  ]</p>
 
   <h4>JASPAR CORE Profiles</h4>
 
@@ -705,6 +723,11 @@ epa-18">
   <br><hr noshade><br>
 
   <h3>STEP 4: Select TFBS search parameters</h3>
+
+  <p class="text">[
+    <a href="javascript:newWindow=window.open('[%rel_htdocs_path%]/help/help_ssa.html#search_tfbs',
+    'help','width=800,height=800,toolbar=1,location=0,directories=0,status=0,menuBar=0,scrollBars=1,resizable=1'); newWindow.focus()">HELP</a>
+  ]</p>
 
   <p class="text">
     [%UNLESS species == 'yeast'%]

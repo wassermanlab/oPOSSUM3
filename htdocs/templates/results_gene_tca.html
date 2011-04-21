@@ -205,12 +205,16 @@
 	</tr>
   [%END%]
 </table>
-[%END%]
+
 <p class="text" align="center">
-<a href="[%rel_htdocs_tmp_path%]/[%results_subdir%][%result_file%]" target="_blank">Download as a tab delimited text file</a> (results will be kept on the server for [%result_retain_days%] days after analysis)
+  
+<a href="[%rel_htdocs_results_path%]/[%results_subdir%]/[%result_file%]" target="_blank">Download as a tab delimited text file</a> (results will be kept on the server for [%result_retain_days%] days after analysis)
 </p>
 <p align="center"><a href="#top"><img src="[%rel_htdocs_path%]/images/arrow-up.gif" border="0" alt="Back to top"></a></p>
 <p class="text">
 Consult the <a href="javascript:newWindow=window.open('[%rel_htdocs_path%]/help.html','help','width=600,height=800,toolbar=1\
-,location=0,directories=0,status=0,menuBar=0,scrollBars=1,resizable=0'); newWindow.focus()">help file</a> for an explanation of the column headings. To perform another analysis, please use the <b>Back</b> button on your browser or click the <b>Main</b> or <b>Custom Analysis</b> link at the top of the page to return to the <b>Select Analysis Parameters</b> form.
+,location=0,directories=0,status=0,menuBar=0,scrollBars=1,resizable=0'); newWindow.focus()">help file</a> for an explanation of the column headings.
 </p>
+[%ELSE%]
+  <p class="warn_text">No TFBSs were found which matched your search criteria</p>
+[%END%]

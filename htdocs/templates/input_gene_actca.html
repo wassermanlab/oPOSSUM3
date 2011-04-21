@@ -22,17 +22,21 @@ function verify(f)
             errors += "No gene IDs were pasted into the Paste Gene IDs box\n";
         }
 
-        /*var EnsemblID;
-        if (f.species != 'worm') {
+        var EnsemblID;
+        if (f.species.value == 'worm') {
+          EnsemblID = /(\b[A-Z]\w+\.\d+)+/;
+        } else {
           EnsemblID = /(\bENS\w+\d+)+/;
-          if (f.t_gene_id_type[0].selected
-              && !EnsemblID.test(f.t_gene_text.value))
-          {
-              errors += "Target genes entered do not appear to be Ensembl IDs.\n";
-              errors += " Please check to see that you've entered valid"
-              errors += " Ensembl IDs or change the target Gene ID type.\n";
-          }
-        }*/
+        }
+        var RefseqID = /(\b\w{2}_\d+\b)+/;
+        
+        if (f.t_gene_id_type[0].selected
+            && !EnsemblID.test(f.t_gene_text.value)
+        ) {
+            errors += "Target genes entered do not appear to be Ensembl IDs.\n";
+            errors += " Please check to see that you've entered valid"
+            errors += " Ensembl IDs or change the target Gene ID type.\n";
+        }
       } else if (f.t_id_input_method[1].checked) {
           if (   f.t_gene_file.value == null || f.t_gene_file.value == ""
               || isblank(f.t_gene_file.value)
@@ -59,17 +63,21 @@ function verify(f)
             errors += " Paste Gene IDs box\n";
         }
 
-        /*var EnsemblID;
-        if (f.species != 'worm') {
+        var EnsemblID;
+        if (f.species.value == 'worm') {
+          EnsemblID = /(\b[A-Z]\w+\.\d+)+/;
+        } else {
           EnsemblID = /(\bENS\w+\d+)+/;
-          if (f.bg_gene_id_type[0].selected
-              && !EnsemblID.test(f.bg_gene_text.value))
-          {
-              errors += "Background genes entered do not appear to be Ensembl IDs.\n";
-              errors += " Please check to see that you've entered valid"
-              errors += " Ensembl IDs or change the target Gene ID type.\n";
-          }
-        }*/
+        }
+        var RefseqID = /(\b\w{2}_\d+\b)+/;
+        
+        if (   f.t_gene_id_type[0].selected
+            && !EnsemblID.test(f.t_gene_text.value)
+        ) {
+            errors += "Target genes entered do not appear to be Ensembl IDs.\n";
+            errors += " Please check to see that you've entered valid"
+            errors += " Ensembl IDs or change the target Gene ID type.\n";
+        }
     } else if (f.bg_id_input_method[3].checked) {
         if (   f.bg_gene_file.value == null
             || f.bg_gene_file.value == ""
@@ -123,6 +131,9 @@ function verify(f)
 </script>
 
 <form name="input" enctype="multipart/form-data" method="post" onSubmit="return verify(this)" target="_blank">
+
+<!-- Andrew: bit of a hack. need to know the species in javascript function verify() -->
+<input type="hidden" name="species" value=[%species%]>
 
 <input type="hidden" id="sample_genes_human"
 value="AASS
@@ -403,6 +414,11 @@ epa-18">
 
   <h3>STEP 1: Enter target (co-expressed) genes</h3>
 
+  <p class="text">[
+    <a href="javascript:newWindow=window.open('[%rel_htdocs_path%]/help/help_actca.html#select_target',
+    'help','width=800,height=800,toolbar=1,location=0,directories=0,status=0,menuBar=0,scrollBars=1,resizable=1'); newWindow.focus()">HELP</a>
+  ]</p>
+
   <p class="text">
     <input type="radio" name="t_id_input_method" value="paste" checked>
     Paste gene IDs:
@@ -452,6 +468,11 @@ epa-18">
   <hr noshade><br>
 
   <h3>STEP 2: Enter background genes</h3>
+
+  <p class="text">[
+    <a href="javascript:newWindow=window.open('[%rel_htdocs_path%]/help/help_actca.html#select_background',
+    'help','width=800,height=800,toolbar=1,location=0,directories=0,status=0,menuBar=0,scrollBars=1,resizable=1'); newWindow.focus()">HELP</a>
+  ]</p>
 
   <p class="text">
     <input type="radio" name="bg_id_input_method" value="all" checked>All <b>[%total_genes%]</b> genes in the oPOSSUM database
@@ -508,6 +529,11 @@ epa-18">
 
   <h3>STEP 3: Select transcription factor binding site cluster parameters</h3> 
 
+  <p class="text">[
+    <a href="javascript:newWindow=window.open('[%rel_htdocs_path%]/help/help_actca.html#select_tfbs',
+    'help','width=800,height=800,toolbar=1,location=0,directories=0,status=0,menuBar=0,scrollBars=1,resizable=1'); newWindow.focus()">HELP</a>
+  ]</p>
+
   <h4>Select the anchoring TF</h4>
 
   <p class="text">
@@ -563,6 +589,11 @@ epa-18">
   <br><hr noshade><br>
 
   <h3>STEP 4: Select TFBS cluster search parameters</h3>
+
+  <p class="text">[
+    <a href="javascript:newWindow=window.open('[%rel_htdocs_path%]/help/help_actca.html#search_tfbs',
+    'help','width=800,height=800,toolbar=1,location=0,directories=0,status=0,menuBar=0,scrollBars=1,resizable=1'); newWindow.focus()">HELP</a>
+  ]</p>
 
   <p class="text">
     [%UNLESS species == 'yeast'%]
