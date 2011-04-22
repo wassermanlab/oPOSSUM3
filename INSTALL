@@ -41,7 +41,12 @@ by oPOSSUM.
    Alternatively, of course you could copy the oPOSSUM htdocs and cgi-bin
    directories directly into the apache tree.
 
-4) For web-based oPOSSUM, edit the configuration constants in the main web
+4) For web-based oPOSSUM, create the following directories:
+    htdocs/tmp
+    htdocs/results
+   Make these directories read/write/executable to everyone (chmod 777).
+
+5) For web-based oPOSSUM, edit the configuration constants in the main web
    options file cgi-bin/oPossumWebOpt.pm to reflect your specific
    installation.
 
