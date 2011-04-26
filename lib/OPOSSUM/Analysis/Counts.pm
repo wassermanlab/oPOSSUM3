@@ -61,6 +61,10 @@ sub new
 {
     my ($class, %args) = @_;
 
+    my $gene_ids = $args{-gene_ids};
+    my $tf_ids   = $args{-tf_ids};
+    my $counts   = $args{-counts};
+
     if ($args{-tf_info_set}) {
         carp "Support for TFInfoSet is deprecated.\n";
     }
@@ -68,9 +72,6 @@ sub new
     if ($args{-conserved_region_length_set}) {
         carp "Support for ConservedRegionLengthSet is deprecated.\n";
     }
-
-    my $gene_ids = $args{-gene_ids};
-    my $tf_ids   = $args{-tf_ids};
 
     my $self = bless {
         -gene_ids           => undef,
@@ -82,15 +83,23 @@ sub new
         _params             => {}
     }, ref $class || $class;
 
-    #
-    # If gene ID and TF ID list provided, initialize counts with 0's
-    #
     if ($gene_ids && $tf_ids) {
+        #
+        # If gene ID and TF ID list provided, initialize counts with 0's
+        #
         foreach my $gene_id (@$gene_ids) {
             foreach my $tf_id (@$tf_ids) {
                 $self->gene_tfbs_count($gene_id, $tf_id, 0);
             }
         }
+    }
+
+    if ($counts) {
+        #
+        # $counts should be an array ref of array refs to gene_id, tf_id,
+        # and count
+        #
+        $self->set_all_gene_tfbs_counts($counts);
     }
 
     return $self;
@@ -382,18 +391,13 @@ sub gene_tfbs_count
     return if !defined $gene_id || !defined $tf_id;
 
     if (defined $count) {
+        $self->_add_gene($gene_id);
+        $self->_add_tf($tf_id);
+
         $self->{_gene_tfbs_counts}->{$gene_id}->{$tf_id} = $count;
 
         if ($count > 0) {
             $self->{_tfbs_gene_exists}->{$tf_id}->{$gene_id} = 1;
-        }
-
-        unless ($self->gene_exists($gene_id)) {
-            $self->_add_gene($gene_id);
-        }
-
-        unless ($self->tf_exists($tf_id)) {
-            $self->_add_tf($tf_id);
         }
     }
 
@@ -445,32 +449,23 @@ sub tfbs_gene_count
 
 sub set_all_gene_tfbs_counts
 {
-    my ($self, $data) = @_;
+    my ($self, $counts) = @_;
 
-    return if !defined $data;
+    return if !defined $counts;
 
-    foreach my $row (@$data) {
+    foreach my $row (@$counts) {
         my $gene_id = $row->[0];
         my $tf_id   = $row->[1];
         my $count   = $row->[2];
+
+        $self->_add_gene($gene_id);
+        $self->_add_tf($tf_id);
 
         $self->{_gene_tfbs_counts}->{$gene_id}->{$tf_id} = $count;
 
         if ($count > 0) {
             $self->{_tfbs_gene_exists}->{$tf_id}->{$gene_id} = 1;
         }
-
-        #
-        # Removed checks for efficiency
-        # DJA 11/04/21
-        #
-        #unless ($self->gene_exists($gene_id)) {
-        #    $self->_add_gene($gene_id);
-        #}
-
-        #unless ($self->tf_exists($tf_id)) {
-        #    $self->_add_tf($tf_id);
-        #}
     }
 }
 
