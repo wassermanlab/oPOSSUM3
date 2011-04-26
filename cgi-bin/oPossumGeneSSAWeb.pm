@@ -64,11 +64,17 @@ sub setup
         # Existing session. Load state from file.
         #
         my $filename = _session_tmp_file($sid);
+
+        #printf STDERR "%s: loading state\n", scalar localtime;
+
         $state = OPOSSUM::Web::State->new(__Fn => $filename);
     } else {
         #
         # New session. Create new session ID and state object.
         #
+
+        #printf STDERR "%s: creating state\n", scalar localtime;
+
         $sid = $$ . time;
         my $filename = _session_tmp_file($sid);
 
@@ -76,6 +82,8 @@ sub setup
             -sid => $sid,
             __Fn => $filename
         );
+
+        #printf STDERR "%s: initializing state\n", scalar localtime;
 
         $self->initialize_state($state);
     }
@@ -85,6 +93,8 @@ sub setup
     #printf STDERR sprintf("\n\noPOSSUM State:\n%s\n\n",
     #    Data::Dumper::Dumper($self->state())
     #);
+
+    #printf STDERR "%s: connecting to oPOSSUM DB\n", scalar localtime;
 
     unless ($self->opossum_db_connect()) {
         return $self->error("Could not connect to oPOSSUM DB");
@@ -295,7 +305,7 @@ sub results
 {
     my $self = shift;
 
-    #print STDERR "results\n";
+    #printf STDERR "%s: results\n", scalar localtime;
 
     my $q = $self->query;
     #print STDERR "results query:\n"
@@ -376,6 +386,8 @@ sub results
     return $self->error("Error parsing target gene IDs") unless $t_gene_ids;
 
     $state->t_gene_ids($t_gene_ids);
+
+    #printf STDERR "%s: fetching target opossum gene IDs\n", scalar localtime;
     
     # t_operon_gids would be empty for species without any operons
     my (
@@ -408,11 +420,11 @@ sub results
         ));
     }
 
-    printf STDERR "t_gids:\n%s\n\n", Data::Dumper::Dumper($t_gids);
-    printf STDERR "t_operon_gids:\n%s\n\n",
-        Data::Dumper::Dumper($t_operon_gids);
-    printf STDERR "t_operon_unique_gids:\n%s\n\n",
-        Data::Dumper::Dumper($t_operon_unique_gids);
+    #printf STDERR "t_gids:\n%s\n\n", Data::Dumper::Dumper($t_gids);
+    #printf STDERR "t_operon_gids:\n%s\n\n",
+    #    Data::Dumper::Dumper($t_operon_gids);
+    #printf STDERR "t_operon_unique_gids:\n%s\n\n",
+    #    Data::Dumper::Dumper($t_operon_unique_gids);
 
     $state->t_gids($t_gids);
     $state->t_included_gene_ids($t_included_gene_ids);
@@ -479,6 +491,8 @@ sub results
     if ($bg_gene_ids) {
 #        printf STDERR "\nbg gene IDs:\n%s\n\n",
 #            Data::Dumper::Dumper($bg_gene_ids) if $bg_gene_ids;
+
+        #printf STDERR "%s: fetching background opossum gene IDs\n", scalar localtime;
 
         ($bg_gids,
          $bg_included_gene_ids,
@@ -761,6 +775,8 @@ sub results
     # Here, you are retrieving tfs for the second time.
     # this could be reworked to minimize db access
 
+    #printf STDERR "%s: connecting to JASPAR DB\n", scalar localtime;
+
     $self->jaspar_db_connect();
 
     my %matrix_args = (
@@ -791,6 +807,8 @@ sub results
             $matrix_args{-min_ic} = $pending_min_ic || $min_ic;
         }
     }
+
+    #printf STDERR "%s: fetching matrices\n", scalar localtime;
 
     my $tf_set = $self->fetch_tf_set(%matrix_args);
     # let's try minimizing db access
@@ -829,15 +847,23 @@ sub results
     #
     # fetch target and background conserved region GC content
     #
-    my $t_cr_gc_content = $self->fetch_cr_gc_content(
-        $state->t_gids, $state->conservation_level,
-        $state->upstream_bp, $state->downstream_bp,
-        $state->biotype);
+    #printf STDERR "%s: fetching target conserved region GC\n", scalar localtime;
+
+    my $t_cr_gc_content = 0;
+    #$t_cr_gc_content = $self->fetch_cr_gc_content(
+    #    $state->t_gids, $state->conservation_level,
+    #    $state->upstream_bp, $state->downstream_bp,
+    #    $state->biotype
+    #);
+
+    #printf STDERR "%s: fetching background conserved region GC\n", scalar localtime;
     
-    my $bg_cr_gc_content = $self->fetch_cr_gc_content(
-        $state->bg_gids, $state->conservation_level,
-        $state->upstream_bp, $state->downstream_bp,
-        $state->biotype);
+    my $bg_cr_gc_content = 0;
+    #$bg_cr_gc_content = $self->fetch_cr_gc_content(
+    #    $state->bg_gids, $state->conservation_level,
+    #    $state->upstream_bp, $state->downstream_bp,
+    #    $state->biotype
+    #);
     
     # if operon genes present, the retrieved gene counts are all based on
     # the first gene search region, taken care by the CountsAdaptor.
@@ -848,6 +874,8 @@ sub results
     my $bg_cr_length;
     my $crla = $opdba->get_ConservedRegionLengthAdaptor();
     if ($analysis_type eq 'default') {
+        #printf STDERR "%s: fetching target TFBS counts\n", scalar localtime;
+
         $t_counts = $self->fetch_analysis_counts(
             $analysis_type,
             -gene_ids               => $state->t_gids(),
@@ -861,6 +889,8 @@ sub results
 
         return $self->error("Error fetching target gene TFBS counts")
             unless $t_counts;
+
+        #printf STDERR "%s: fetching background TFBS counts\n", scalar localtime;
 
         $bg_counts = $self->fetch_analysis_counts(
             $analysis_type,
@@ -876,6 +906,8 @@ sub results
         return $self->error("Error fetching background gene TFBS counts")
             unless $bg_counts;
 
+        #printf STDERR "%s: fetching target total conserved region length\n", scalar localtime;
+
         $t_cr_length = $crla->fetch_total_length(
             -conservation_level     => $state->conservation_level(),
             -search_region_level    => $state->search_region_level(),
@@ -887,6 +919,8 @@ sub results
         return $self->error(
             "Error fetching target gene total conserved region length"
         ) unless $t_cr_length;
+
+        #printf STDERR "%s: fetching background total conserved region length\n", scalar localtime;
 
         $bg_cr_length = $crla->fetch_total_length(
             -conservation_level     => $state->conservation_level(),
@@ -970,6 +1004,8 @@ sub results
     my $fisher = OPOSSUM::Analysis::Fisher->new();
     return $self->error("Error initializing Fisher analysis") unless $fisher;
 
+    #printf STDERR "%s: calculating fisher probability\n", scalar localtime;
+
     my $fresult_set = $fisher->calculate_Fisher_probability(
         $bg_counts,
         $t_counts
@@ -980,6 +1016,8 @@ sub results
     my $zscore = OPOSSUM::Analysis::Zscore->new();
     return $self->error("Error initializing z-score analysis") unless $zscore;
 
+    #printf STDERR "%s: calculating z-score\n", scalar localtime;
+
     my $zresult_set = $zscore->calculate_Zscore(
         $bg_counts,
         $t_counts,
@@ -988,6 +1026,8 @@ sub results
         $tf_set
     );
     return $self->error("Error computing z-score") unless $zresult_set;
+
+    #printf STDERR "%s: combining fisher and z-scores\n", scalar localtime;
 
     my $result_set = OPOSSUM::Analysis::CombinedResultSet->new(
         -fisher_result_set  => $fresult_set,
@@ -1012,6 +1052,8 @@ sub results
     #}
     my $result_sort_reverse = 1;
 
+    #printf STDERR "%s: getting results as list\n", scalar localtime;
+
     my $results = $result_set->get_list(
         -num_results    => $state->num_display_results(),
         -zscore_cutoff  => $state->zscore_cutoff(),
@@ -1021,6 +1063,8 @@ sub results
     );
 
     #printf STDERR "\nresult list:\n%s\n\n", Data::Dumper::Dumper($results);
+
+    #printf STDERR "%s: creating results dir\n", scalar localtime;
 
     #
     # Create a temporary working directory for all the temp. input files and
@@ -1034,6 +1078,8 @@ sub results
     $state->results_subdir($results_subdir);
 
     my $abs_result_file = "$results_dir/" . RESULTS_TEXT_FILENAME;
+
+    #printf STDERR "%s: writing results to results dir\n", scalar localtime;
 
     if ($results && $results->[0]) {
         $self->write_results($abs_result_file, $results, $tf_set);
@@ -1129,7 +1175,11 @@ sub results
 
     #print STDERR "results vars:\n" . Data::Dumper::Dumper($vars);
 
+    #printf STDERR "%s: processing html template\n", scalar localtime;
+
     my $output = $self->process_template('master.html', $vars);
+
+    #printf STDERR "%s: returning html\n", scalar localtime;
 
     return $output;
 }
