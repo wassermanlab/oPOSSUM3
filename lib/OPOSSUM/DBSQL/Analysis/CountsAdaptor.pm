@@ -135,22 +135,23 @@ sub fetch_counts
             . " search_region_level\n";
         return;
     }
+
+    #
+    # Keep track of whether gene IDs were passed in initially, i.e. if
+    # none were then we are fetching counts for all genes in the oPOSSUM DB
+    # (full background set)
+    # DJA 2011/04/26
+    #
+    my $all_genes = 0;
+    unless ($gids && $gids->[0]) {
+        $all_genes = 1;
+    }
 	
     #my $crla = $self->db->get_ConservedRegionLengthAdaptor();
     #if (!$crla) {
     #    carp "error getting ConservedRegionLengthAdaptor\n";
     #    return;
     #}
-
-    my $sql = qq{
-		select gene_id, tf_id, count
-		from tfbs_counts
-		where conservation_level = $cons_level
-		and threshold_level = $thresh_level
-		and search_region_level = $sr_level
-    };
-
-    #print STDERR $sql ."\n";
 
     #
     # If no gene IDs are passed in, get all the gene IDs from the database
@@ -177,6 +178,7 @@ sub fetch_counts
 				carp "error getting OperonAdaptor\n";
 				return;
 			}
+
 			my $operons = $oa->fetch_where();
 			foreach my $operon (@$operons) {
 				my $fgene = $operon->fetch_first_gene();
@@ -213,10 +215,26 @@ sub fetch_counts
 	} else {
 		@t_gids = @$gids;
 	}
+
+    my $sql = qq{
+		select gene_id, tf_id, count
+		from tfbs_counts
+		where conservation_level = $cons_level
+		and threshold_level = $thresh_level
+		and search_region_level = $sr_level
+    };
         
-	$sql .= " and gene_id in (";
-    $sql .= join ',', @t_gids;
-    $sql .= ")";
+    #
+    # For efficiency, if we are fetching counts for all genes in the DB and
+    # we are not dealing with operons, then don't add the "in" clause for gene
+    # IDs to the SQL query.
+    # DJA 2011/04/26
+    #
+    unless ($all_genes && !$has_operon) {
+        $sql .= " and gene_id in (";
+        $sql .= join ',', @t_gids;
+        $sql .= ")";
+    }
 	
     if ($tfids && $tfids->[0]) {
         $sql .= " and tf_id in ('";
@@ -226,37 +244,36 @@ sub fetch_counts
 
     #print STDERR "\n\nsql:\n\t$sql\n\n";
 
+    #printf STDERR "%s: preparing fetch TFBS counts\n", scalar localtime;
+
     my $sth = $self->prepare($sql);
     if (!$sth) {
-        carp "error fetching TFBS counts with\n$sql\n" . $self->errstr;
+        carp "Error preparing fetch TFBS counts with\n$sql\n" . $self->errstr;
         return;
     }
+
+    #printf STDERR "%s: executing fetch TFBS counts\n", scalar localtime;
 
     if (!$sth->execute) {
-        carp "error fetching TFBS counts with\n$sql\n" . $sth->errstr;
+        carp "Error executing fetch TFBS counts with\n$sql\n" . $sth->errstr;
         return;
     }
 	
-    my $t_counts = OPOSSUM::Analysis::Counts->new(
-        -gene_ids   => \@t_gids,
-        -tf_ids     => $tfids
-    );
-	
-    #while (my @row = $sth->fetchrow_array) {
-    #    $t_counts->gene_tfbs_count($row[0], $row[1], $row[2]);
-    #}
-    #$sth->finish;
+    #printf STDERR "%s: fetching TFBS counts\n", scalar localtime;
 
-    my $data = $sth->fetchall_arrayref();
+    my $counts = $sth->fetchall_arrayref();
     if ($sth->err()) {
         carp "Error fetching gene TFBS counts: " . $sth->errstr . "\n";
         return;
     }
 
-    #foreach my $row (@$data) {
-    #    $t_counts->gene_tfbs_count($row->[0], $row->[1], $row->[2]);
-    #}
-    $t_counts->set_all_gene_tfbs_counts($data);
+    #printf STDERR "%s: setting analysis counts object\n", scalar localtime;
+	
+    my $t_counts = OPOSSUM::Analysis::Counts->new(
+        -gene_ids   => \@t_gids,
+        -tf_ids     => $tfids,
+        -counts     => $counts
+    );
 
 	#
 	# Now, add the operon gene counts
@@ -302,6 +319,8 @@ sub fetch_counts
     $counts->param('conservation_level',  $cons_level);
     $counts->param('threshold_level',     $thresh_level);
     $counts->param('search_region_level', $sr_level);
+
+    #printf STDERR "%s: returning analysis counts object\n", scalar localtime;
 
     return $counts;
 }
