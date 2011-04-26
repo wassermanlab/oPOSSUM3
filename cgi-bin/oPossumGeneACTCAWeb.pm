@@ -689,6 +689,7 @@ sub process
         rel_htdocs_tmp_path => REL_HTDOCS_TMP_PATH,
         bg_color_class      => BG_COLOR_CLASS,
         rel_htdocs_results_path => REL_HTDOCS_RESULTS_PATH,
+        rel_htdocs_data_path => REL_HTDOCS_DATA_PATH,
         version             => VERSION,
         devel_version       => DEVEL_VERSION,
         heading             => $state->heading(),

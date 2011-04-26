@@ -425,6 +425,7 @@ sub process
         rel_cgi_bin_path    => REL_CGI_BIN_PATH,
         rel_htdocs_tmp_path => REL_HTDOCS_TMP_PATH,
         rel_htdocs_results_path => REL_HTDOCS_RESULTS_PATH,
+        rel_htdocs_data_path => REL_HTDOCS_DATA_PATH,
         version             => VERSION,
         devel_version       => DEVEL_VERSION,
         bg_color_class      => $state->bg_color_class(),
