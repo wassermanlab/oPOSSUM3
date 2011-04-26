@@ -25,6 +25,7 @@ The following software and databases are required by oPOSSUM3.
 	DBI
 	File::Temp
 	Log::Log4perl
+	Log::Dispatch::File
 	Persistence::Object::Simple
 	Statistics::Distributions
 	Template
