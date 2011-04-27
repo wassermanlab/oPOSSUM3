@@ -647,15 +647,19 @@ sub results
     #
     # fetch target and background conserved region GC content
     #
-    my $t_cr_gc_content = $self->fetch_cr_gc_content(
-        $state->t_gids, $state->conservation_level,
-        $state->upstream_bp, $state->downstream_bp,
-		$state->biotype);
+    my $t_cr_gc_content = 0;
+    #$t_cr_gc_content = $self->fetch_cr_gc_content(
+    #    $state->t_gids, $state->conservation_level,
+    #    $state->upstream_bp, $state->downstream_bp,
+	#	$state->biotype
+    #);
     
-    my $bg_cr_gc_content = $self->fetch_cr_gc_content(
-        $state->bg_gids, $state->conservation_level,
-        $state->upstream_bp, $state->downstream_bp,
-		$state->biotype);
+    my $bg_cr_gc_content = 0;
+    #$bg_cr_gc_content = $self->fetch_cr_gc_content(
+    #    $state->bg_gids, $state->conservation_level,
+    #    $state->upstream_bp, $state->downstream_bp,
+	#	$state->biotype
+    #);
 
     # if operon genes present, the retrieved gene counts are all based on
     # the first gene search region, taken care by the CountsAdaptor.

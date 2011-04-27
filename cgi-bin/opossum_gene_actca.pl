@@ -514,21 +514,23 @@ unless ($bg_cr_length) {
     );
 }
 
-my $t_cr_gc_content = fetch_cr_gc_content(
-        $t_gids, $conservation_level,
-        $upstream_bp, $downstream_bp,
-        $biotype
-);
+my $t_cr_gc_content = 0;
+#$t_cr_gc_content = fetch_cr_gc_content(
+#        $t_gids, $conservation_level,
+#        $upstream_bp, $downstream_bp,
+#        $biotype
+#);
 
 unless (defined $t_cr_gc_content) {
     $logger->warn("Could not fetch target gene conserved region GC content");
 }
 
-my $bg_cr_gc_content = fetch_cr_gc_content(
-        $bg_gids, $conservation_level,
-        $upstream_bp, $downstream_bp,
-        $biotype
-);
+my $bg_cr_gc_content = 0;
+#$bg_cr_gc_content = fetch_cr_gc_content(
+#        $bg_gids, $conservation_level,
+#        $upstream_bp, $downstream_bp,
+#        $biotype
+#);
 
 unless (defined $bg_cr_gc_content) {
     $logger->warn(
