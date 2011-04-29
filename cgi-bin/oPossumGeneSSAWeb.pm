@@ -250,6 +250,21 @@ sub input
 
     #printf STDERR "input_gene_ids:\n" . Data::Dumper::Dumper(\@input_gene_ids);
 
+    #
+    # Format a tax group list for display on the web page. The $tax_group
+    # variable is obtained from the db and may be a single value or a comma
+    # separated list (no space after comma).
+    #
+    my @s_tax_groups;
+    foreach my $tg (@tax_groups) {
+        # remove trailing 's' (un-pluralize)
+        my $stg = $tg;
+        $stg =~ s/s$//;
+        push @s_tax_groups, $stg;
+    }
+
+    my $tax_group_list = join ' / ', @s_tax_groups;
+
     my $vars = {
         abs_htdocs_path         => ABS_HTDOCS_PATH,
         rel_htdocs_path         => REL_HTDOCS_PATH,
@@ -284,6 +299,7 @@ sub input
         srl_levels              => \@srl_levels,
         tax_groups              => \@tax_groups,
         num_tax_groups          => $num_tax_groups,
+        tax_group_list          => $tax_group_list,
         core_tf_sets            => \%core_tf_sets,
         pbm_tf_sets             => \%pbm_tf_sets,
         pending_tf_sets         => \%pending_tf_sets,

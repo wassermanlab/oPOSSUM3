@@ -614,12 +614,12 @@ YPR156C">
       <br>
       [%first_tax_group = 1%]
       [%FOREACH tax = tax_groups%]
-        &nbsp;&nbsp;<input type="checkbox" name="core_tax_groups" value="[%tax%]" [%IF first_tax_group == 1%]checked[%END%] onClick="{if (checked) {input.tf_select_method[0].checked=true}}">[%tax%]
+        &nbsp;&nbsp;<input type="checkbox" name="core_tax_groups" value="[%tax%]" [%IF first_tax_group == 1%]checked[%END%] onClick="{if (checked) {input.tf_select_method[0].checked=true}}"><b>[%tax%]</b>
         [%first_tax_group = 0%]
       [%END%]
       &nbsp;with a minimum specificity of&nbsp;
     [%ELSE%]
-      All [%tax_groups.0%] profiles with a minimum specificity of&nbsp;
+      All <b>[%tax_group_list%]</b> profiles with a minimum specificity of&nbsp;
     [%END%]
     <input type="text" name="core_min_ic" value=[%db_info.min_ic()%]
       size="2" onFocus="{input.tf_select_method[0].checked=true}"> bits (min. [%db_info.min_ic()%] bits)
@@ -627,14 +627,18 @@ YPR156C">
     <br><br>
 	
     <input type="radio" name="tf_select_method" value="core_specific">
-    <b>OR</b> select specific profiles:
+    [%IF num_tax_groups > 1%]
+      <b>OR</b> select specific profiles:
+    [%ELSE%]
+      <b>OR</b> select specific <b>[%tax_group_list%]</b> profiles:
+    [%END%]
     <br>
     <table>
       [%IF num_tax_groups > 1%]
         <tr>
         [%FOREACH tax = tax_groups%]
           [%IF core_tf_sets.$tax.size > 0%]
-            <td class="table_text" align="center">[%tax%]</td>
+            <td class="table_text" align="center"><b>[%tax%]</b></td>
           [%END%]
         [%END%]
         </tr>
@@ -675,7 +679,7 @@ YPR156C">
       <tr>
       [%FOREACH tax = tax_groups%]
         [%IF pbm_tf_sets.$tax.size > 0%]
-          <td class="table_text" align="center">[%tax%]</td>
+          <td class="table_text" align="center"><b>[%tax%]</b></td>
         [%END%]
       [%END%]
       </tr>
@@ -731,7 +735,7 @@ YPR156C">
     <tr>
     [%FOREACH tax = tax_groups%]
       [%IF pending_tf_sets.$tax.size > 0%]
-        <td class="table_text" align="center">[%tax%]</td>
+        <td class="table_text" align="center"><b>[%tax%]</b></td>
       [%END%]
     [%END%]
     </tr>

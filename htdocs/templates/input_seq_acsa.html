@@ -207,12 +207,14 @@ function verify(f)
     'help','width=800,height=800,toolbar=1,location=0,directories=0,status=0,menuBar=0,scrollBars=1,resizable=1'); newWindow.focus()">HELP</a>
   ]</p>
 
+  <h4>Select anchoring TF</h4>
+
   <p class="text">
-    <h4>Select anchoring TF</h4>
     <input type="radio" name="anchor_tf_select_method" value="core_specific" checked>
     Select specific JASPAR CORE profile:
     <br>
-    <table>
+    <table class="table_text">
+      <tr><td><b>[%tax_group_list%]</b></td></tr>
       <tr>
         [%tf_list = tf_set.get_matrix_list('name')%]
         <td>
@@ -224,7 +226,9 @@ function verify(f)
         </td>
       </tr>
     </table>
-    <br>
+  </p>
+
+  <p class="text">
     <input type="radio" name="anchor_tf_select_method" value="paste">
     <b>OR</b> paste a TFBS profile (retrieve from <a href="http://www.pazar.info/" target="_blank">PAZAR</a>)
     <br>
@@ -239,9 +243,9 @@ function verify(f)
     <br>
     <input type="button" name="clear_profiles" value="Clear"
       onClick="{input.anchor_matrix_paste_text.value=''}">
-    <br>
-    <br>
+  </p>
 
+  <p class="text">
     <input type="radio" name="anchor_tf_select_method" value="upload">
     <b>OR</b> upload a file containing a TFBS profile
     <br>
@@ -256,15 +260,16 @@ function verify(f)
       }">
   </p>
 
+  <h4>Select TFs to find in combination with anchoring TF</h4>
+
   <p class="text"> 
-    <h4>Select TFs to find in combination with anchoring TF</h4>
     <input type="radio" name="tf_select_method" value="core_min_ic" checked>
     [%IF num_tax_groups > 1%]
       All JASPAR CORE profiles from the following tax groups:
       <br>
       [%first_tax_group = 1%]
       [%FOREACH tax = tax_groups%]
-        &nbsp;&nbsp;<input type="checkbox" name="core_tax_groups" value="[%tax%]" [%IF first_tax_group == 1%]checked[%END%] onClick="{if (checked) {input.tf_select_method[0].checked=true}}">[%tax%]
+        &nbsp;&nbsp;<input type="checkbox" name="core_tax_groups" value="[%tax%]" [%IF first_tax_group == 1%]checked[%END%] onClick="{if (checked) {input.tf_select_method[0].checked=true}}"><b>[%tax%]</b>
         [%first_tax_group = 0%]
       [%END%]
       <br>&nbsp;&nbsp;with a minimum specificity of&nbsp;
@@ -273,8 +278,9 @@ function verify(f)
     [%END%]
     <input type="text" name="core_min_ic" value=[%min_ic%]
       size="2" onFocus="{input.tf_select_method[0].checked=true}"> bits (min. [%min_ic%] bits)
-    <br><br>
+  </p>
 
+  <p class="text"> 
     <input type="radio" name="tf_select_method" value="core_specific">
     <b>OR</b> select specific profiles:
     <br>
@@ -282,7 +288,7 @@ function verify(f)
       <tr>
       [%FOREACH tax = tax_groups%]
         [%IF tax_tf_sets.$tax.size > 0%]
-          <td class="table_text" align="center">[%tax%]</td>
+          <td class="table_text" align="center"><b>[%tax%]</b></td>
         [%END%]
       [%END%]
       </tr>
@@ -301,7 +307,9 @@ function verify(f)
       [%END%]
       </tr>
     </table>
+  </p>
 
+  <p class="text"> 
     <input type="radio" name="tf_select_method" value="paste">
     <b>OR</b> paste one or more TFBS profiles (retrieve from <a href="http://www.pazar.info/" target="_blank">PAZAR</a>)
     <br>
@@ -316,8 +324,9 @@ function verify(f)
     <br>
     <input type="button" name="clear_profiles" value="Clear"
       onClick="{input.matrix_paste_text.value=''}">
-    <br><br>
+  </p>
 
+  <p class="text"> 
     <input type="radio" name="tf_select_method" value="upload">
     <b>OR</b> upload a file containing one or more TFBS profiles
     <br>
@@ -438,15 +447,15 @@ function verify(f)
     <br>
     <input type="radio" name="result_type" value="significant_hits"> <b>OR</b> only results with <b>Z-score >= </b>
     <select name="zscore_cutoff">
-      <option value="5">5</option>
-      <option value="10" selected>10</option>
-      <option value="15">15</option>
+      [%FOREACH cutoff = zcutoffs%]
+        <option value=[%cutoff%] [%IF cutoff == dflt_zcutoff%]selected[%END%]>[%cutoff%]</option>
+      [%END%]
     </select>
     and <b>Fisher score <= </b>
     <select name="fisher_cutoff">
-      <option value="0.05">0.05</option>
-      <option value="0.01" selected>0.01</option>
-      <option value="0.001">0.001</option>
+      [%FOREACH cutoff = fcutoffs%]
+        <option value=[%cutoff%] [%IF cutoff == dflt_fcutoff%]selected[%END%]>[%cutoff%]</option>
+      [%END%]
     </select>
     (Default values have been chosen based on empirical studies)
     <br>

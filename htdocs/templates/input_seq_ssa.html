@@ -237,6 +237,7 @@ function verify(f)
   ]</p>
 
   <h4>JASPAR CORE Profiles</h4>
+
   <p class="text"> 
     <input type="radio" name="tf_select_method" value="core_min_ic" checked>
     [%IF num_tax_groups > 1%]
@@ -244,12 +245,12 @@ function verify(f)
       <br>
       [%first_tax_group = 1%]
       [%FOREACH tax = tax_groups%]
-        &nbsp;&nbsp;<input type="checkbox" name="core_tax_groups" value="[%tax%]" [%IF first_tax_group == 1%]checked[%END%] onClick="{if (checked) {input.tf_select_method[0].checked=true}}">[%tax%]
+        &nbsp;&nbsp;<input type="checkbox" name="core_tax_groups" value="[%tax%]" [%IF first_tax_group == 1%]checked[%END%] onClick="{if (checked) {input.tf_select_method[0].checked=true}}"><b>[%tax%]</b>
         [%first_tax_group = 0%]
       [%END%]
       <br>&nbsp;&nbsp;with a minimum specificity of&nbsp;
     [%ELSE%]
-      All [%tax_groups.0%] profiles with a minimum specificity of&nbsp;
+      All <b>[%tax_group_list%]</b> profiles with a minimum specificity of&nbsp;
     [%END%]
     <input type="text" name="core_min_ic" value=[%min_ic%]
       size="2" onFocus="{input.tf_select_method[0].checked=true}"> bits (min. [%min_ic%] bits)
@@ -262,7 +263,7 @@ function verify(f)
       <tr>
       [%FOREACH tax = tax_groups%]
         [%IF core_tf_sets.$tax.size > 0%]
-          <td class="table_text" align="center">[%tax%]</td>
+          <td class="table_text" align="center"><b>[%tax%]</b></td>
         [%END%]
       [%END%]
       </tr>
@@ -300,7 +301,7 @@ function verify(f)
     <tr>
     [%FOREACH tax = tax_groups%]
       [%IF pbm_tf_sets.$tax.size > 0%]
-        <td class="table_text" align="center">[%tax%]</td>
+        <td class="table_text" align="center"><b>[%tax%]</b></td>
       [%END%]
     [%END%]
     </tr>
@@ -339,7 +340,7 @@ function verify(f)
     <tr>
     [%FOREACH tax = tax_groups%]
       [%IF pending_tf_sets.$tax.size > 0%]
-        <td class="table_text" align="center">[%tax%]</td>
+        <td class="table_text" align="center"><b>[%tax%]</b></td>
       [%END%]
     [%END%]
     </tr>
@@ -420,15 +421,15 @@ function verify(f)
     <br>
     <input type="radio" name="result_type" value="significant_hits"> <b>OR</b> only results with <b>Z-score >= </b>
     <select name="zscore_cutoff">
-      <option value="5">5</option>
-      <option value="10" selected>10</option>
-      <option value="15">15</option>
+      [%FOREACH cutoff = zcutoffs%]
+        <option value=[%cutoff%] [%IF cutoff == dflt_zcutoff%]selected[%END%]>[%cutoff%]</option>
+      [%END%]
     </select>
     and <b>Fisher score <= </b>
     <select name="fisher_cutoff">
-      <option value="0.05">0.05</option>
-      <option value="0.01" selected>0.01</option>
-      <option value="0.001">0.001</option>
+      [%FOREACH cutoff = fcutoffs%]
+        <option value=[%cutoff%] [%IF cutoff == dflt_fcutoff%]selected[%END%]>[%cutoff%]</option>
+      [%END%]
     </select>
     (Default values have been chosen based on empirical studies)
     <br>

@@ -201,26 +201,26 @@ function verify(f)
 -->
     <div style="float:left;">
       
-      Collections:
+      <b>Collections:</b>
       [%FOREACH col = collections%]
         &nbsp;&nbsp;<input type="checkbox" name="tf_collections" value="[%col%]" checked>[%col%]
       [%END%]
       
       <br><br>
       
-      Tax groups:
+      <b>Tax groups:</b>
       [%FOREACH tax = tax_groups%]
         &nbsp;&nbsp;<input type="checkbox" name="tf_tax_groups" value="[%tax%]" checked>[%tax%]
       [%END%]
       
       <br><br>
       
-      Minimum specificity: &nbsp;
+      <b>Minimum specificity:</b>&nbsp;
       <input type="text" name="tf_min_ic" value=[%min_ic%] size="2"> bits (min. [%min_ic%] bits)
     
       <br><br>
       
-      TFBS families:<br>
+      <b>TFBS Families:</b><br>
       <div class="">
         <input type="radio" name="tf_cluster_select_method" value="all" checked>
         All TFBS families
@@ -266,15 +266,15 @@ function verify(f)
     <br>
     <input type="radio" name="result_type" value="significant_hits"> <b>OR</b> only results with <b>Z-score >= </b>
     <select name="zscore_cutoff">
-      <option value="5">5</option>
-      <option value="10" selected>10</option>
-      <option value="15">15</option>
+      [%FOREACH cutoff = zcutoffs%]
+        <option value=[%cutoff%] [%IF cutoff == dflt_zcutoff%]selected[%END%]>[%cutoff%]</option>
+      [%END%]
     </select>
     and <b>Fisher score <= </b>
     <select name="fisher_cutoff">
-      <option value="0.05">0.05</option>
-      <option value="0.01" selected>0.01</option>
-      <option value="0.001">0.001</option>
+      [%FOREACH cutoff = fcutoffs%]
+        <option value=[%cutoff%] [%IF cutoff == dflt_fcutoff%]selected[%END%]>[%cutoff%]</option>
+      [%END%]
     </select>
     (Default values have been chosen based on empirical studies)
     <br>

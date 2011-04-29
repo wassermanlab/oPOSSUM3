@@ -149,6 +149,21 @@ sub input
 
     #printf STDERR "tf_set:\n%s\n", Data::Dumper::Dumper($tf_set);
 
+    #
+    # Format a tax group list for display on the web page. The $tax_group
+    # variable is obtained from the db and may be a single value or a comma
+    # separated list (no space after comma).
+    #
+    my @s_tax_groups;
+    foreach my $tg (@$tax_groups) {
+        # remove trailing 's' (un-pluralize)
+        my $stg = $tg;
+        $stg =~ s/s$//;
+        push @s_tax_groups, $stg;
+    }
+
+    my $tax_group_list = join ' / ', @s_tax_groups;
+
     my $vars = {
         abs_htdocs_path         => ABS_HTDOCS_PATH,
         rel_htdocs_path         => REL_HTDOCS_PATH,
@@ -175,6 +190,7 @@ sub input
         bg_seq_set_names        => BG_SEQ_SET_NAMES,
         sid                     => $state->sid(),
         tax_groups              => $tax_groups,
+        tax_group_list          => $tax_group_list,
         min_ic                  => $min_ic,
         tf_cluster_set          => $tf_cluster_set,
         tf_set                  => $tf_set,

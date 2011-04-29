@@ -209,6 +209,22 @@ sub input
         $tax_tf_sets{$tax_group} = $tf_set->subset(-tax_groups => $tax_group);
     }
 
+    #
+    # Format a tax group list for display on the web page. The $tax_group
+    # variable is obtained from the db and may be a single value or a comma
+    # separated list (no space after comma).
+    #
+    my @s_tax_groups;
+    foreach my $tg (@tax_groups) {
+        # remove trailing 's' (un-pluralize)
+        my $stg = $tg;
+        $stg =~ s/s$//;
+        push @s_tax_groups, $stg;
+    }
+
+    my $tax_group_list = join ' / ', @s_tax_groups;
+
+
     #printf STDERR "tax_tf_sets:\n%s\n", Data::Dumper::Dumper(%tax_tf_sets);
 
     #printf STDERR "\ntf_set:\n"
@@ -252,6 +268,7 @@ sub input
         srl_levels              => \@srl_levels,
         tax_groups              => \@tax_groups,
         num_tax_groups          => $num_tax_groups,
+        tax_group_list          => $tax_group_list,
         tf_set                  => $tf_set,
         tax_tf_sets             => \%tax_tf_sets,
         in_t_gene_id_type       => $in_t_gene_id_type,
