@@ -223,7 +223,11 @@ sub get_list
             $include = 0;
         }
 
-        if (defined $fcut && $fisher_p_value > $fcut) {
+        #
+        # Fisher score is now -ln of the p-value.
+        # DJA 2011/04/28
+        #
+        if (defined $fcut && $fisher_p_value < $fcut) {
             $include = 0;
         }
 
