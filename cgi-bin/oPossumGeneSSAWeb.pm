@@ -374,7 +374,8 @@ sub results
     $state->bg_id_input_method($bg_id_input_method);
 
     my $bg_gene_id_type = DFLT_GENE_ID_TYPE;
-    unless ($bg_id_input_method eq 'all') {
+    if ($bg_id_input_method eq 'paste' || $bg_id_input_method eq 'upload') {
+        $bg_gene_id_type = $q->param("bg_gene_id_type");
         if (!defined $bg_gene_id_type) {
             return $self->error("Background gene ID type not specified");
         }
@@ -505,8 +506,9 @@ sub results
     $state->bg_gene_ids($bg_gene_ids);
 
     if ($bg_gene_ids) {
-#        printf STDERR "\nbg gene IDs:\n%s\n\n",
-#            Data::Dumper::Dumper($bg_gene_ids) if $bg_gene_ids;
+        #printf STDERR "bg_gene_id_type = $bg_gene_id_type\n";
+        #printf STDERR "\nbg gene IDs:\n%s\n\n",
+        #    Data::Dumper::Dumper($bg_gene_ids) if $bg_gene_ids;
 
         #printf STDERR "%s: fetching background opossum gene IDs\n", scalar localtime;
 

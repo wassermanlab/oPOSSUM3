@@ -333,8 +333,9 @@ sub process
     $state->bg_id_input_method($bg_id_input_method);
 
     my $bg_gene_id_type = DFLT_GENE_ID_TYPE;
-    unless ($bg_id_input_method eq 'all') {
-        if (!defined $bg_gene_id_type) {
+    if ($bg_id_input_method eq 'paste' || $bg_id_input_method eq 'upload') {
+        $bg_gene_id_type = $q->param("bg_gene_id_type");
+        unless (defined $bg_gene_id_type) {
             return $self->error("Background gene ID type not specified");
         }
     }
