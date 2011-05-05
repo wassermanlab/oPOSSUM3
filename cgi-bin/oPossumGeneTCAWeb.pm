@@ -1084,7 +1084,7 @@ sub tfbs_cluster_details
 
     my $result_file = "Cluster_" . $cl->id . ".txt";
 	
-	my $abs_result_file = sprintf("%s/%s/%s.txt",
+	my $abs_result_file = sprintf("%s/%s/%s",
 		ABS_HTDOCS_RESULTS_PATH,
 		$results_subdir,
 		$result_file
