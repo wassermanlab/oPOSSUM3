@@ -707,7 +707,7 @@ sub write_tfbs_details
             foreach my $in_gene (@{$operon_genes->{$gid}}){
                 push @ensembl_ids, $in_gene->ensembl_id();
             }
-            $text .= join(',', @ensembl_ids) . "\t";
+            $text .= join(',', @ensembl_ids);
         } else {
             unless (defined $gene_id_type
                     && $gene_id_type == DFLT_GENE_ID_TYPE)
@@ -716,7 +716,7 @@ sub write_tfbs_details
             }
             $text .= "\t";
 
-            $text .= $gene->ensembl_id() . "\t";
+            $text .= $gene->ensembl_id();
         }
             
         if ($has_operon) {
@@ -794,7 +794,7 @@ sub write_tfbs_details
             }
 
             unless ($first) {
-                $text .= "\t\t\t\t\t";
+                $text .= "\t\t\t\t";
                 if ($has_operon) {
                     $text .= "\t";
                 }

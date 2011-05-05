@@ -893,7 +893,8 @@ sub write_tfbs_details_text
 
     print FH "\n\nConserved $tf_name Binding Sites\n\n";
 
-    printf FH "\n\n%-31s\t%7s\t%7s\t%7s\t%7s\t%7s\t%s\n",
+    #printf FH "\n\n%-31s\t%7s\t%7s\t%7s\t%7s\t%7s\t%s\n",
+    printf FH "\n\n%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
         'Sequence ID', 'Start', 'End', 'Strand', 'Score', '%Score', 'TFBS Sequence';
 
     foreach my $seq_id (@$seq_ids) {
@@ -904,18 +905,18 @@ sub write_tfbs_details_text
         next if !$siteset || $siteset->size == 0;
 
         my $first = 1;
-        printf FH "%-31s", $display_id;
+        printf FH "%s", $display_id;
 
         my $iter = $siteset->Iterator(-sort_by => 'start');
         while (my $site = $iter->next()) {
             # Do not reprint sequence ID for subsequent sites
             unless ($first) {
-                printf FH "%-31s", '';
+                printf FH "%s", '';
             }
             $first = 0;
 
-            #printf FH "%s\t%d\t%d\t%d\t%.3f\t%.1f%%\t%s\n",
-            printf FH "\t%7d\t%7d\t%7d\t%7.3f\t%6.1f%%\t%s\n",
+            #printf FH "\t%7d\t%7d\t%7d\t%7.3f\t%6.1f%%\t%s\n",
+            printf FH "\t%d\t%d\t%d\t%.3f\t%.1f%%\t%s\n",
                 $site->start(),
                 $site->end(),
                 $site->strand(),

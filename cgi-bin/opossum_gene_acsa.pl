@@ -1152,16 +1152,16 @@ sub write_tfbs_details_text
     unless (defined $t_gene_id_type
             && $t_gene_id_type == DFLT_GENE_ID_TYPE)
     {
-        $text .= "Gene ID(s)";
+        $text .= "Gene ID(s)\t";
     }
 
-    $text .= "\tEnsembl ID";
+    $text .= "Ensembl ID";
 
     if ($has_operon) {
         $text .= "\tOperon ID";
     }
 
-    $text .= qq{\tChr\tStart\tEnd\tStrand\tNearest TSS\tAnchoring TF\tStart\tEnd\tRel. Start\tRel. End\tStrand\tScore\t%%Score\tSequence\tAnchored TF\tStart\tEnd\tRel. Start\tRel. End\tStrand\tScore\t%%Score\tSequence\tDistance\n};
+    $text .= qq{\tChr\tStart\tEnd\tStrand\tNearest TSS\tAnchoring TF\tStart\tEnd\tRel. Start\tRel. End\tStrand\tScore\t%Score\tSequence\tAnchored TF\tStart\tEnd\tRel. Start\tRel. End\tStrand\tScore\t%Score\tSequence\tDistance\n};
 
     foreach my $gene (@$genes) {
         my $gid = $gene->id();
@@ -1204,7 +1204,7 @@ sub write_tfbs_details_text
                 #push @ensembl_ids, $t_gid_ens_ids->{$in_gene->id()};
                 push @ensembl_ids, $in_gene->ensembl_id();
             }
-            $text .= join(',', @ensembl_ids) . "\t";
+            $text .= join(',', @ensembl_ids);
         } else {
             unless (defined $t_gene_id_type
                     && $t_gene_id_type == DFLT_GENE_ID_TYPE)
@@ -1217,7 +1217,7 @@ sub write_tfbs_details_text
             $chr         = $gene->chr();
             $tss         = $gene->tss(); # this tss is not used.
                                          # overwritten later.
-            $text .= "$ensembl_id\t";
+            $text .= "$ensembl_id";
         }
         
         if ($has_operon) {
@@ -1367,7 +1367,7 @@ sub write_tfbs_details_text
             }
 
             unless ($first) {
-                $text .= "\t\t\t\t\t";
+                $text .= "\t\t\t\t";
                 if ($has_operon) {
                     $text .= "\t";
                 }
@@ -1478,6 +1478,7 @@ sub write_tfbs_details_html
         gene_id_type        => $t_gene_id_type,
         dflt_gene_id_type   => DFLT_GENE_ID_TYPE,
         genes               => $genes,
+        gid_gene_ids        => $t_gid_gene_ids,
         gid_sitepairs       => $gid_sitepairs,
         has_operon          => $has_operon,
         operon_genes        => $operon_genes,

@@ -1000,10 +1000,10 @@ sub write_tfbs_details_text
     if ($tf_db) {
         printf  FH "JASPAR ID:\t$anchor_id\n";
     }
-    printf FH "Class:    \t%s\n", $anchor_matrix->class() || 'N/A',
-    printf FH "Family:   \t%s\n", $anchor_matrix->tag('family') || 'N/A',
-    printf FH "Sysgroup: \t%s\n", $anchor_matrix->tag('tax_group') || 'N/A',
-    printf FH "IC:       \t%s\n", $anchor_total_ic;
+    printf FH "Class:\t%s\n", $anchor_matrix->class() || 'N/A',
+    printf FH "Family:\t%s\n", $anchor_matrix->tag('family') || 'N/A',
+    printf FH "Sysgroup:\t%s\n", $anchor_matrix->tag('tax_group') || 'N/A',
+    printf FH "IC:\t%s\n", $anchor_total_ic;
 
     print FH "\n\n";
 
@@ -1012,14 +1012,15 @@ sub write_tfbs_details_text
     if ($tf_db) {
         print  FH "JASPAR ID:\t$tf_id\n";
     }
-    printf FH "Class:    \t%s\n", $tf->class() || 'N/A',
-    printf FH "Family:   \t%s\n", $tf->tag('family') || 'N/A',
-    printf FH "Sysgroup: \t%s\n", $tf->tag('tax_group') || 'N/A',
-    printf FH "IC:       \t%s\n", $tf_total_ic;
+    printf FH "Class:\t%s\n", $tf->class() || 'N/A',
+    printf FH "Family:\t%s\n", $tf->tag('family') || 'N/A',
+    printf FH "Sysgroup:\t%s\n", $tf->tag('tax_group') || 'N/A',
+    printf FH "IC:\t%s\n", $tf_total_ic;
 
     print FH "\n\n$anchor_name - $tf_name Binding Site Combinations\n\n";
 
-    printf FH "\n\n%-31s\t%s\t%s\t%s\t%s\t%s\%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
+    #printf FH "\n\n%-31s\t%s\t%s\t%s\t%s\t%s\%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
+    printf FH "\n\n%s\t%s\t%s\t%s\t%s\t%s\%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
         'Sequence ID', 'Anchoring TF', 'Start', 'End', 'Strand', 'Score', '%Score', 'TFBS Sequence', 'Anchored TF', 'Start', 'End', 'Strand', 'Score', '%Score', 'TFBS Sequence', 'Distance';
 
     foreach my $seq_id (@$seq_ids) {
@@ -1029,7 +1030,8 @@ sub write_tfbs_details_text
         my $display_id = $seq_id_display_ids->{$seq_id};
 
         my $first = 1;
-        printf FH "%-31s", $display_id;
+        #printf FH "%-31s", $display_id;
+        printf FH "%s", $display_id;
 
         foreach my $pair (@$sitepairs) {
             my $anchor_site = $pair->{anchor_site};
@@ -1037,13 +1039,14 @@ sub write_tfbs_details_text
             my $distance    = $pair->{distance};
 
             # Do not reprint sequence ID for subsequent sites
-            unless ($first) {
-                printf FH "%-31s", '';
-            }
+            #unless ($first) {
+            #    #printf FH "%-31s", '';
+            #    printf FH "\t";
+            #}
             $first = 0;
 
-            #printf FH "%s\t%d\t%d\t%d\t%.3f\t%.1f%%\t%s\n",
-            printf FH "\t%s\t%7d\t%7d\t%7d\t%7.3f\t%6.1f%%\t%s\t%s\t%7d\t%7d\t%7d\t%7.3f\t%6.1f%%\t%s\t%7d\n",
+            #printf FH "\t%s\t%7d\t%7d\t%7d\t%7.3f\t%6.1f%%\t%s\t%s\t%7d\t%7d\t%7d\t%7.3f\t%6.1f%%\t%s\t%7d\n",
+            printf FH "\t%s\t%d\t%d\t%d\t%.3f\t%.1f%%\t%s\t%s\t%d\t%d\t%d\t%.3f\t%.1f%%\t%s\t%d\n",
                 $anchor_name,
                 $anchor_site->start(),
                 $anchor_site->end(),

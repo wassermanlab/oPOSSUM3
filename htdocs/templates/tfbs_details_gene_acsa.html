@@ -135,59 +135,98 @@
 
     [%FOREACH gene = genes%]
       [%gid = gene.id%]
-      [%promoters = gene.promoters()%]
 
-      [%IF gene.strand == 1%]
-        [%prom_start = gene.tss%]
-        [%prom_end   = gene.end%]
+      [%ensembl_id  = gene.ensembl_id()%]
+      [%chr         = gene.chr()%]
+      [%gene_start  = gene.start()%]
+      [%gene_end    = gene.end()%]
+      [%strand      = gene.strand()%]
+      [%tss         = gene.tss()%]
+      [%promoters   = gene.fetch_promoters()%]
+
+      [%IF has_operon%]
+        [%operon = gene.fetch_operon()%]
+      [%END%]
+
+      [%IF operon%]
+        [%operon_start  = operon.start()%]
+        [%operon_end    = operon.end()%]
+
+        [%IF strand == 1%]
+          [%prom_start = tss%]
+          [%prom_end   = operon_end%]
+        [%ELSE%]
+          [%prom_start = operon_start%]
+          [%prom_end   = tss%]
+        [%END%]
       [%ELSE%]
-        [%prom_start = gene.start%]
-        [%prom_end   = gene.tss%]
+        [%IF strand == 1%]
+          [%prom_start = tss%]
+          [%prom_end   = gene_end%]
+        [%ELSE%]
+          [%prom_start = gene_start%]
+          [%prom_end   = tss%]
+        [%END%]
       [%END%]
 
       <tr align="left" class="table_text">
-
         [%IF has_operon and operon_genes.$gid%]
-          
           [%UNLESS gene_id_type == dflt_gene_id_type%]
+            [%id_str = ''%]
+            [%first_id = 1%]
             [%FOREACH input_gene = operon_genes.$gid%]
               [%input_gid = input_gene.id%]
               [%gene_ids = gid_gene_ids.$input_gid%]
-              <td>
-              [%FOREACH gene_id = gene_ids%][%gene_id%]&nbsp;[%END%]
-              </td>
+              [%FOREACH gene_id = gene_ids%]
+                [%UNLESS first_id%]
+                  [%id_str = id_str _ ','%]
+                [%END%]
+                [%first_id = 0%]
+                [%id_str = id_str _ gene_id%]
+              [%END%]
             [%END%]
+            <td>[%id_str%]</td>
           [%END%]
-          <td>
+
+          [%id_str = ''%]
+          [%first_id = 1%]
           [%FOREACH input_gene = operon_genes.$gid%]
-            [%input_gene.ensembl_id%]&nbsp;
+            [%UNLESS first_id%]
+              [%id_str = id_str _ ','%]
+            [%END%]
+            [%first_id = 0%]
+            [%id_str = id_str _ input_gene.ensembl_id()%]
           [%END%]
-          </td>
-          
+          <td>[%id_str%]</td>
         [%ELSE%]
-          
           [%UNLESS gene_id_type == dflt_gene_id_type%]
+            [%id_str = ''%]
+            [%first_id = 1%]
             [%gene_ids = gid_gene_ids.$gid%]
-            <td>
-            [%FOREACH gene_id = gene_ids%][%gene_id%]&nbsp;[%END%]
-            </td>
+            [%FOREACH gene_id = gene_ids%]
+              [%UNLESS first_id%]
+                [%id_str = id_str _ ','%]
+              [%END%]
+              [%first_id = 0%]
+              [%id_str = id_str _ gene_id%]
+            [%END%]
+            <td>[%id_str%]</td>
           [%END%]
-          <td>[%gene.ensembl_id%]</td>
-        
+          <td>[%ensembl_id%]</td>
         [%END%]
-        
+
         [%IF has_operon%]
-          [%IF gene.operon%]
-            <td>[%gene.operon.symbol%]</td>
+          [%IF operon%]
+            <td>[%operon.symbol()%]</td>
           [%ELSE%]
             <td>N/A</td>
           [%END%]
         [%END%]
         
-        <td align="center">[%gene.chr%]</td>
+        <td align="center">[%chr%]</td>
         <td align="right">[%prom_start%]</td>
         <td align="right">[%prom_end%]</td>
-        <td align="center">[%IF gene.strand == 1%]+[%ELSE%]-[%END%]</td>
+        <td align="center">[%IF strand == 1%]+[%ELSE%]-[%END%]</td>
 
         [%first = 1%]
         [%FOREACH sitepair = gid_sitepairs.$gid%]
