@@ -9,10 +9,10 @@ use constant DFLT_BG_NUM_RAND_GENES     => 5000;
 # oPOSSUM DB Access
 #
 # The species name is dynamically appended to OPOSSUM_DB_NAME for full
-# oPOSSUM DB name, e.g. oPOSSUM_2010_human
+# oPOSSUM DB name, e.g. oPOSSUM3_human
 #
-use constant OPOSSUM_DB_HOST    => 'vm5.cmmt.ubc.ca';
-use constant OPOSSUM_DB_NAME    => 'oPOSSUM_2010';
+use constant OPOSSUM_DB_HOST    => 'opossum.cmmt.ubc.ca';
+use constant OPOSSUM_DB_NAME    => 'oPOSSUM3';
 use constant OPOSSUM_DB_USER    => 'opossum_r';
 use constant OPOSSUM_DB_PASS    => '';
 
