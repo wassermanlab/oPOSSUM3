@@ -121,7 +121,7 @@
     [%tf = tf_set.get_matrix(tf_id)%]
     <tr class="table_text">
       [%IF result.bg_gene_hits == 0 and result.t_gene_hits > 0%]
-        <td><b class="warn_text">*[%tf.name%]</b></td>
+        <td><b class="warn_table_text">*[%tf.name%]</b></td>
       [%ELSE%]
         <td>[%tf.name%]</td>
       [%END%]
@@ -163,7 +163,7 @@
 
       <td align=right>
         [%IF result.bg_gene_hits == 0%]
-          <b class="warn_text">[%result.bg_gene_hits%]</b>
+          <b class="warn_table_text">[%result.bg_gene_hits%]</b>
         [%ELSE%]
           [%result.bg_gene_hits%]
         [%END%]
@@ -183,7 +183,7 @@
 
       <td align=right>
         [%IF result.bg_gene_hits == 0%]
-          <b class="warn_text">[%result.bg_tfbs_hits%]</b>
+          <b class="warn_table_text">[%result.bg_tfbs_hits%]</b>
         [%ELSE%]
           <a href="[%rel_results_dir%]/[%tf_id%].html" target="_blank">[%result.bg_tfbs_hits%]</a>
         [%END%]
@@ -191,7 +191,7 @@
 
       <td align=right>
         [%IF result.bg_gene_hits == 0%]
-          <b class="warn_text">[%formatf(3, result.bg_tfbs_rate)%]</b>
+          <b class="warn_table_text">[%formatf(3, result.bg_tfbs_rate)%]</b>
         [%ELSE%]
           <a href="[%rel_results_dir%]/[%tf_id%].html" target="_blank">[%result.bg_tfbs_rate%]</a>
         [%END%]
@@ -199,7 +199,7 @@
 
       <td align=right>
         [%IF result.bg_gene_hits == 0%]
-          <b class="warn_text">N/A</b>
+          <b class="warn_table_text">N/A</b>
         [%ELSE%]
           [%formatf(3, result.zscore)%]
         [%END%]

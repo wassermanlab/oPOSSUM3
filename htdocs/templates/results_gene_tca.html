@@ -49,7 +49,7 @@
 	<td class="table_title">Target GC content:</td>
   <td class="table_text">
   [%IF t_cr_gc_content > high_seq_gc or t_cr_gc_content < low_seq_gc%]
-	<b class="warn_text">[%t_cr_gc_content%]</b>
+	<b class="warn_table_text">[%t_cr_gc_content%]</b>
   [%ELSE%]
 	[%t_cr_gc_content%]
   [%END%]
@@ -59,7 +59,7 @@
 	<td class="table_title">Background GC content:</td>
 	<td class="table_text">
     [%IF bg_cr_gc_content > high_seq_gc or bg_cr_gc_content < low_seq_gc%]
-      <b class="warn_text">[%bg_cr_gc_content%]</b>
+      <b class="warn_table_text">[%bg_cr_gc_content%]</b>
     [%ELSE%]
       [%bg_cr_gc_content%]
     [%END%]
@@ -154,7 +154,7 @@
 	
 	<tr class="table_text">
       [%IF result.bg_gene_hits == 0 and result.t_gene_hits > 0%]
-        <td><b class="warn_text"><a href="[%rel_htdocs_data_path%]/tfbs_clusters/c[%cl.id%]_info.html" target="_blank">*[%cl.name%]</a></b></td>
+        <td><b class="warn_table_text"><a href="[%rel_htdocs_data_path%]/tfbs_clusters/c[%cl.id%]_info.html" target="_blank">*[%cl.name%]</a></b></td>
       [%ELSE%]
 	    <td><a href="[%rel_htdocs_data_path%]/tfbs_clusters/c[%cl.id%]_info.html" target="_blank">[%cl.name%]</a></td>
       [%END%]
@@ -168,7 +168,7 @@
 	  <td align=right>[%result.t_gene_no_hits%]</td>
       <td align=right>
       [%IF result.bg_gene_hits == 0%]
-        <b class="warn_text">[%result.bg_gene_hits%]</b>
+        <b class="warn_table_text">[%result.bg_gene_hits%]</b>
       [%ELSE%]
         [%result.bg_gene_hits%]
       [%END%]
@@ -184,21 +184,21 @@
 	  <td align=right>[%formatg(3, result.t_cluster_rate)%]</td>
 	  <td align=right>
 		[%IF result.bg_gene_hits == 0%]
-		  <b class="warn_text">[%result.bg_cluster_hits%]</b>
+		  <b class="warn_table_text">[%result.bg_cluster_hits%]</b>
 		[%ELSE%]
 		  [%result.bg_cluster_hits%]
 	    [%END%]
 	  </td> 
 	  <td align=right>
 		[%IF result.bg_gene_hits == 0%]
-		  <b class="warn_text">[%formatg(3, result.bg_cluster_rate)%]</b>
+		  <b class="warn_table_text">[%formatg(3, result.bg_cluster_rate)%]</b>
 	    [%ELSE%]
 	      [%formatg(3, result.bg_cluster_rate)%]
 	    [%END%]
 	  </td>
 	  <td align=right>
 		[%IF result.bg_gene_hits == 0%]
-		  <b class="warn_text">[%formatf(3, result.zscore)%]*</b>
+		  <b class="warn_table_text">[%formatf(3, result.zscore)%]*</b>
 		[%ELSE%]
 		  [%formatf(3, result.zscore)%]
 		[%END%]

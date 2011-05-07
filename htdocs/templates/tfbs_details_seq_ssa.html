@@ -32,7 +32,7 @@
       [%IF tf.isa('TFBS::Matrix::PFM')%]
         [%total_ic = formatf(3, tf.to_ICM.total_ic)%]
         [%IF total_ic > high_matrix_ic or total_ic < low_matrix_ic%]
-          <b class="warn_text">[%total_ic%]</b>
+          <b class="warn_table_text">[%total_ic%]</b>
         [%ELSE%]
           [%total_ic%]
         [%END%]
@@ -46,7 +46,7 @@
       <td align="left" class="table_text">
       [%gc = tf.tag('gc_content')%]
       [%IF gc > high_matrix_gc or gc < low_matrix_gc%]
-        <b class="warn_text">[%gc%]</b>
+        <b class="warn_table_text">[%gc%]</b>
       [%ELSE%]
         [%gc%]
       [%END%]

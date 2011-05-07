@@ -48,7 +48,7 @@
     <td class="table_title">Target sequence GC content:</td>
     <td class="table_text">
     [%IF t_seq_gc_content > high_seq_gc or t_seq_gc_content < low_seq_gc%]
-      <b class="warn_text">[%t_seq_gc_content%]</b>
+      <b class="warn_table_text">[%t_seq_gc_content%]</b>
     [%ELSE%]
       [%t_seq_gc_content%]
     [%END%]
@@ -59,7 +59,7 @@
     <td class="table_title">Background sequence GC content:</td>
     <td class="table_text">
     [%IF bg_seq_gc_content > high_seq_gc or bg_seq_gc_content < low_seq_gc%]
-      <b class="warn_text">[%bg_seq_gc_content%]</b>
+      <b class="warn_table_text">[%bg_seq_gc_content%]</b>
     [%ELSE%]
       [%bg_seq_gc_content%]
     [%END%]
@@ -183,7 +183,7 @@
     [%tf = tf_set.get_matrix(tf_id)%]
     <tr class="table_text">
       [%IF result.bg_gene_hits == 0 and result.t_gene_hits > 0%]
-        <td><b class="warn_text">*[%tf.name%]</b></td>
+        <td><b class="warn_table_text">*[%tf.name%]</b></td>
       [%ELSE%]
         <td>[%tf.name%]</td>
       [%END%]
@@ -215,7 +215,7 @@
       [%IF tf.isa('TFBS::Matrix::PFM')%]
         [%total_ic = formatf(3, tf.to_ICM.total_ic)%]
         [%IF total_ic > high_matrix_ic or total_ic < low_matrix_ic%]
-          <b class="warn_text">[%total_ic%]</b>
+          <b class="warn_table_text">[%total_ic%]</b>
         [%ELSE%]
           [%total_ic%]
         [%END%]
@@ -227,7 +227,7 @@
       [%gc = tf.tag('gc_content')%]
       <td align=right>
       [%IF gc > high_matrix_gc or gc < low_matrix_gc%]
-        <b class="warn_text">[%gc%]</b>
+        <b class="warn_table_text">[%gc%]</b>
       [%ELSE%]
         [%gc%]
       [%END%]
@@ -245,7 +245,7 @@
 
       <td align=right>
         [%IF result.bg_gene_hits == 0%]
-          <b class="warn_text">[%result.bg_gene_hits%]</b>
+          <b class="warn_table_text">[%result.bg_gene_hits%]</b>
         [%ELSE%]
           [%result.bg_gene_hits%]
         [%END%]
@@ -265,7 +265,7 @@
 
       <td align=right>
         [%IF result.bg_gene_hits == 0%]
-          <b class="warn_text">[%result.bg_tfbs_hits%]</b>
+          <b class="warn_table_text">[%result.bg_tfbs_hits%]</b>
         [%ELSE%]
           [%result.bg_tfbs_hits%]
         [%END%]
@@ -273,7 +273,7 @@
 
       <td align=right>
         [%IF result.bg_gene_hits == 0%]
-          <b class="warn_text">[%formatf(3, result.bg_tfbs_rate)%]</b>
+          <b class="warn_table_text">[%formatf(3, result.bg_tfbs_rate)%]</b>
         [%ELSE%]
           [%formatf(3, result.bg_tfbs_rate)%]
         [%END%]
@@ -281,7 +281,7 @@
 
       <td align=right>
         [%IF result.bg_gene_hits == 0%]
-          <b class="warn_text">N/A</b>
+          <b class="warn_table_text">N/A</b>
         [%ELSE%]
           [%formatf(3, result.zscore)%]
         [%END%]

@@ -180,7 +180,7 @@
     [%tf = tf_set.get_tf(result.id)%]
     <tr class="table_text">
       [%IF result.bg_gene_hits == 0 and result.t_gene_hits > 0%]
-        <td><b class="warn_text">*[%tf.name%]</b></td>
+        <td><b class="warn_table_text">*[%tf.name%]</b></td>
       [%ELSE%]
         <td>[%tf.name%]</td>
       [%END%]
@@ -193,7 +193,7 @@
       [%total_ic = formatf(3, tf.to_ICM.total_ic)%]
       <td align=right>
       [%IF total_ic > high_matrix_ic or total_ic < low_matrix_ic%]
-        <b class="warn_text">[%total_ic%]</b>
+        <b class="warn_table_text">[%total_ic%]</b>
       [%ELSE%]
         [%total_ic%]
       [%END%]
@@ -201,7 +201,7 @@
       [%gc = tf.tag('gc_content')%]
       <td align=right>
       [%IF gc > high_matrix_gc or gc < low_matrix_gc%]
-        <b class="warn_text">[%gc%]</b>
+        <b class="warn_table_text">[%gc%]</b>
       [%ELSE%]
         [%gc%]
       [%END%]
@@ -216,7 +216,7 @@
       <td align=right>[%result.t_gene_no_hits%]</td>
       <td align=right>
       [%IF result.bg_gene_hits == 0%]
-        <b class="warn_text">[%result.bg_gene_hits%]</b>
+        <b class="warn_table_text">[%result.bg_gene_hits%]</b>
       [%ELSE%]
         [%result.bg_gene_hits%]
       [%END%]
@@ -232,21 +232,21 @@
       <td align=right>[%formatg(3, result.t_tfbs_rate)%]</td>
       <td align=right>
       [%IF result.bg_gene_hits == 0%]
-        <b class="warn_text">[%result.bg_tfbs_hits%]</b>
+        <b class="warn_table_text">[%result.bg_tfbs_hits%]</b>
       [%ELSE%]
         [%result.bg_tfbs_hits%]
       [%END%]
       </td>
       <td align=right>
       [%IF result.bg_gene_hits == 0%]
-        <b class="warn_text">[%formatf(3, result.bg_tfbs_rate)%]</b>
+        <b class="warn_table_text">[%formatf(3, result.bg_tfbs_rate)%]</b>
       [%ELSE%]
         [%formatf(3, result.bg_tfbs_rate)%]
       [%END%]
       </td>
       <td align=right>
       [%IF result.bg_gene_hits == 0%]
-        <b class="warn_text">N/A</b>
+        <b class="warn_table_text">N/A</b>
       [%ELSE%]
         [%formatf(3, result.zscore)%]
       [%END%]
