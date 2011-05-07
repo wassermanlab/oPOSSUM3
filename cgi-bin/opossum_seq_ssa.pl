@@ -632,7 +632,7 @@ sub write_results_text
     # NOTE: rearranged columns
     #
     if ($tf_db) {
-        printf FH "TF Name\tJASPAR ID\tClass\tFamily\tTax Group\tIC\tTarget seq hits\tTarget seq non-hits\tBackground seq hits\tBackground seq non-hits\tTarget TFBS hits\tBackground TFBS hits\tTarget TFBS nucleotide rate\tBackground TFBS nucleotide rate\tZ-score\tFisher score\n";
+        printf FH "TF Name\tJASPAR ID\tClass\tFamily\tTax Group\tIC\tGC Content\tTarget seq hits\tTarget seq non-hits\tBackground seq hits\tBackground seq non-hits\tTarget TFBS hits\tBackground TFBS hits\tTarget TFBS nucleotide rate\tBackground TFBS nucleotide rate\tZ-score\tFisher score\n";
 
         foreach my $result (@$results) {
             my $tf = $tf_set->get_tf($result->id());
@@ -645,13 +645,14 @@ sub write_results_text
             }
 
             printf FH 
-                "%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%s\t%s\t%s\n",
+                "%s\t%s\t%s\t%s\t%s\t%s\t%.3f\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%s\t%s\t%s\n",
                 $tf->name(),
                 $tf->ID(),
                 $tf->class() || 'N/A',
                 $tf->tag('family') || 'N/A',
                 $tf->tag('tax_group') || 'N/A',
                 $total_ic,
+                $tf->tag('gc_content'),
                 $result->t_gene_hits() || 0,
                 $result->t_gene_no_hits() || 0,
                 $result->bg_gene_hits() || 0,
@@ -668,7 +669,7 @@ sub write_results_text
                     ? sprintf("%.3g", $result->fisher_p_value()) : 'N/A';
         }
     } else {
-        printf FH "TF Name\tClass\tFamily\tTax Group\tIC\tTarget seq hits\tTarget seq non-hits\tBackground seq hits\tBackground seq non-hits\tTarget TFBS hits\tBackground TFBS hits\tTarget TFBS nucleotide rate\tBackground TFBS nucleotide rate\tZ-score\tFisher score\n";
+        printf FH "TF Name\tClass\tFamily\tTax Group\tIC\tGC Content\tTarget seq hits\tTarget seq non-hits\tBackground seq hits\tBackground seq non-hits\tTarget TFBS hits\tBackground TFBS hits\tTarget TFBS nucleotide rate\tBackground TFBS nucleotide rate\tZ-score\tFisher score\n";
 
         foreach my $result (@$results) {
             my $tf = $tf_set->get_tf($result->id());
@@ -681,12 +682,13 @@ sub write_results_text
             }
 
             printf FH 
-                "%s\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%s\t%s\t%s\n",
+                "%s\t%s\t%s\t%s\t%s\t%.3f\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%s\t%s\t%s\n",
                 $tf->name(),
                 $tf->class() || 'N/A',
                 $tf->tag('family') || 'N/A',
                 $tf->tag('tax_group') || 'N/A',
                 $total_ic,
+                $tf->tag('gc_content'),
                 $result->t_gene_hits() || 0,
                 $result->t_gene_no_hits() || 0,
                 $result->bg_gene_hits() || 0,
@@ -1238,18 +1240,28 @@ sub fatal
     my $cmd = "/usr/sbin/sendmail -i -t";
 
     my $msg = "oPOSSUM sequence-based SSA analysis failed\n";
-    $msg .= "\nError: $error\n";
     $msg .= "\nJob ID: $job_id\n";
-    $msg .= "\nUser e-mail: $email\n" if $email;
+    $msg .= "\nError: $error\n";
 
     if (open(SM, "|" . $cmd)) {
         printf SM "To: %s\n", ADMIN_EMAIL;
         print SM "Subject: oPOSSUM sequence-based SSA fatal error\n\n";
-        print SM "$msg" ;
+        print SM "$msg";
+        print SM "\nUser e-mail: $email\n" if $email;
 
         close(SM);
     } else {
         $logger->error("Could not open sendmail - $!") if $logger;
+    }
+
+    if ($email) {
+        if (open(SM, "|" . $cmd)) {
+            printf SM "To: %s\n", $email;
+            print SM "Subject: oPOSSUM sequence-based SSA fatal error\n\n";
+            print SM "$msg" ;
+
+            close(SM);
+        }
     }
 
     $logger->logdie("$error") if $logger;

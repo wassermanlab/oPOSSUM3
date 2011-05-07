@@ -1616,18 +1616,28 @@ sub fatal
     my $cmd = "/usr/sbin/sendmail -i -t";
 
     my $msg = "oPOSSUM $species aCSA analysis failed\n";
-    $msg .= "\nError: $error\n";
     $msg .= "\nJob ID: $job_id\n";
-    $msg .= "\nUser e-mail: $email\n" if $email;
+    $msg .= "\nError: $error\n";
 
     if (open(SM, "|" . $cmd)) {
         printf SM "To: %s\n", ADMIN_EMAIL;
         print SM "Subject: oPOSSUM $species aCSA fatal error\n\n";
         print SM "$msg" ;
+        print SM "\nUser e-mail: $email\n" if $email;
 
         close(SM);
     } else {
         $logger->error("Could not open sendmail - $!") if $logger;
+    }
+
+    if ($email) {
+        if (open(SM, "|" . $cmd)) {
+            printf SM "To: %s\n", $email;
+            print SM "Subject: oPOSSUM $species aCSA fatal error\n\n";
+            print SM "$msg" ;
+
+            close(SM);
+        }
     }
 
     $logger->logdie("$error") if $logger;
