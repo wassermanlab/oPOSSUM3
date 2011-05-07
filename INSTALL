@@ -5,21 +5,22 @@ Installation instructions for oPOSSUM. Please also see the DEPENDENCIES file
 for a list of prerequisite databases, programs and libraries that are required
 by oPOSSUM.
 
-1) Install the oPOSSUM databases. There are currenly four species databases
+1) Install the oPOSSUM databases. There are currently five species databases
    and one database used for the TF cluster analysis:
 
-	oPOSSUM_2010_human
-	oPOSSUM_2010_mouse
-	oPOSSUM_2010_worm
-	oPOSSUM_2010_yeast
-	oPOSSUM_cluster
+	oPOSSUM3_human
+	oPOSSUM3_mouse
+	oPOSSUM3_worm
+	oPOSSUM3_fly
+	oPOSSUM3_yeast
+	TFBS_cluster
 
    To download the databases from our servers see section below.
 
    Now you must create a user "opossum_r" with select privileges on the
    each of the databases, e.g.
 
-    mysql> grant select on oPOSSUM_2010_human.* to opossum_r@'%'; (etc..)
+    mysql> grant select on oPOSSUM3_human.* to opossum_r@'%'; (etc..)
 
 2) For web-based oPOSSUM, set up symbolic links from your webserver htdocs and
    cgi-bin directories. For example if you have installed oPOSSUM under a
@@ -71,6 +72,10 @@ by oPOSSUM.
    It is also possible to edit other values in these files to reflect
    different default values for the oPOSSUM analysis.
 
+6) Install the sorttable.js javascript file from
+   http://www.kryogenix.org/code/browser/sorttable into the oPOSSUM
+   htdocs/templates subdirectory.
+
 
 Accessing/Downloading Wasserman Lab Databases
 ---------------------------------------------
@@ -84,16 +89,17 @@ Some of the databases may be too large to maintain on the ftp site. In these
 cases It's possible to dump them directly from the Wasserman lab DB servers
 using the mysqldump facility, e.g.:
 
-    $ mysqldump -h vm5.cmmt.ubc.ca -u opossum_r --skip-lock-tables oPOSSUM_2010_human > oPOSSUM_2010_human.sql
+    $ mysqldump -h opossum.cmmt.ubc.ca -u opossum_r --skip-lock-tables oPOSSUM3_human > oPOSSUM3_human.sql
 
 Note: you will probably have to use the --skip-lock-tables option to the
 mysqldump command.
 
-The databases are all hosted on vm5.cmmt.ubc.ca and have a "read-only"
-(i.e. select privilege) user associated with them which does not require a
-password:
+All oPOSSUM related databases are hosted on Wasserman lab servers have a
+"read-only" (i.e. select privilege) user associated with them which does not
+require a password. The databases and associated hosts/users are:
 
-DB		User
---------------	---------
-oPOSSUM_2010_*	opossum_r
-JASPAR_2010	jaspar_r
+DB		Host			User
+--------------	-----------		---------
+oPOSSUM3_*	opossum.cmmt.ubc.ca	opossum_r
+TFBS_cluster	opossum.cmmt.ubc.ca	opossum_r
+JASPAR_2010	vm5.cmmt.ubc.ca		jaspar_r

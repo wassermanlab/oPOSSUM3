@@ -21,8 +21,8 @@ The following software and databases are required by oPOSSUM3.
 	CGI
    	CGI::Application
 	Data::Dumper
-	DBD::MySQL
 	DBI
+	DBD::mysql
 	File::Temp
 	Log::Log4perl
 	Log::Dispatch::File
