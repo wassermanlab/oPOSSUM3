@@ -1784,6 +1784,7 @@ sub fatal
     if ($email) {
         if (open(SM, "|" . $cmd)) {
             printf SM "To: %s\n", $email;
+            printf SM "From: %s\n", ADMIN_EMAIL;
             print SM "Subject: oPOSSUM $species aCSA fatal error\n\n";
             print SM "$msg" ;
 
