@@ -157,7 +157,7 @@ function verify(f)
     <input type="button" name="use_sample_seqs" value="Use sample seqs"
       onClick="{input.seq_input_method[0].checked=true; input.seq_list.value="[%sample_sequences%]}">
 -->
-    <textarea name="seq_list" rows=5 cols=50 wrap=SOFT
+    <textarea name="seq_list" rows=5 cols=60 wrap=SOFT
       onFocus="{input.seq_input_method[0].checked=true}" 
       onChange="{
         if (!isblank(input.seq_list.value))
@@ -200,7 +200,7 @@ function verify(f)
     <br>
     <input type="radio" name="bg_seq_input_method" value="paste">
     <b>OR</b> Paste fasta formatted background sequences (retrieve from <a href="http://main.g2.bx.psu.edu/" target="_blank">Galaxy</a>):<br>
-    <textarea name="bg_seq_list" rows=5 cols=50 wrap=SOFT
+    <textarea name="bg_seq_list" rows=5 cols=60 wrap=SOFT
       onFocus="{input.bg_seq_input_method[1].checked=true}" 
       onChange="{
         if (!isblank(input.bg_seq_list.value))
