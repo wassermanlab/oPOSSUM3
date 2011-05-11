@@ -479,6 +479,14 @@ sub read_seqs
 
     my @seqs;
     while (my $seq = $seqIO->next_seq()) {
+        unless ($seq->display_id) {
+            fatal("Error parsing sequence file - please make sure your file is a correctly formatted fasta file");
+        }
+
+        unless ($seq->seq) {
+            fatal("Error parsing sequence file - please make sure your file is a correctly formatted fasta file");
+        }
+
         push @seqs, $seq;
     }
     $seqIO->close();
@@ -1189,7 +1197,7 @@ sub send_email
         $msg .= "TFBS profile source:            User supplied matrices\n";
     }
 
-    $msg .= "TFBS matrix score threshold:      $threshold\n";
+    $msg .= "TFBS matrix score threshold:    $threshold\n";
 
     $msg .= "Results returned:               ";
     if (defined $zscore_cutoff || defined $fisher_cutoff) {

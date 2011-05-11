@@ -1366,7 +1366,7 @@ sub send_email
         $msg .= "TFBS profile source:            User supplied matrices\n";
     }
 
-    $msg .= "TFBS matrix score threshold:      $threshold\n";
+    $msg .= "TFBS matrix score threshold:    $threshold\n";
 
     $msg .= "Results returned:               ";
     if (defined $zscore_cutoff || defined $fisher_cutoff) {

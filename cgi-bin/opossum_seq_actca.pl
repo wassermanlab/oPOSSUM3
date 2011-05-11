@@ -1362,13 +1362,13 @@ sub send_email
 
     my $collection = join(', ', @collections) if @collections;
     $msg .= "TFBS profile source:            JASPAR\n";
-    $msg .= "JASPAR collection(s):              $collections_str\n"
+    $msg .= "JASPAR collection(s):           $collections_str\n"
         if $collections_str;
     $msg .= "Min. IC                         $min_ic\n" if $min_ic;
     $msg .= "Taxonomic supergroups           $tax_groups_str\n"
         if $tax_groups_str;
 
-    $msg .= "TFBS matrix score threshold:      $threshold\n";
+    $msg .= "TFBS matrix score threshold:    $threshold\n";
 
     $msg .= "Results returned:               ";
     if (defined $zscore_cutoff || defined $fisher_cutoff) {
