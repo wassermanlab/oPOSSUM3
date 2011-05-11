@@ -6,20 +6,26 @@
 </head>
 
 <body class="text">
-  <h1>Frequently Asked Questions</h1>
+  <h1>oPOSSUM 3.0</h1>
+  <h3><center>May 2011</center></h3>
+  <h2>Frequently Asked Questions</h2>
 
   <p>
-  <h4>Q. I entered a list of genes into Human SSA and I noticed that several were excluded from the analysis. Why is this?</h4>
+  <h4>Q. I entered a list of genes and I noticed that several were excluded from the analysis. Why is this?</h4>
   <p>
-  A. This can happen for several reasons. The background data set was built by extracting 
-  all human/mouse ortholog pairs from Ensembl, determining the promoter region, aligning 
-  the sequences and scanning the conserved portions within the promoter regions for putative 
-  TFBSs. In many cases, strict one-to-one human/mouse orthologs were not defined. Out of the 
-  orthologs which were defined, some did not align in such a way that the conserved promoter 
-  region could be identified in a satisfactory way. These genes were therefore excluded from 
-  the oPOSSUM background set. Additionally, not all genes in the set could be mapped in all 
-  other gene identification schemas. In the latter case you could try entering your list of 
-  genes using a different gene identification system, preferably Ensembl Gene ID.
+  <b>A.</b> This can happen for several reasons. The background gene data set was built by extracting genes from Ensembl which had a canonical symbol (e.g. HGNC, MGI etc) associated. If the gene did not have such a symbol assigned it was excluded from oPOSSUM. Also, not all gene identifiers are mapped to Ensembl genes. Also in a small number cases no significant phastCons conservation exists around the promoter region of the gene and no conserved TFBSs were detected so the gene is excluded.
+  </p>
+
+  <p>
+  <h4>Q. I noticed that the number of gene hits and non-hits don't add up to the number of genes I entered. Why is this?</h4>
+  <p>
+  <b>A.</b> In addition to the above case were some of the genes entered may not be stored in the oPOSSUM database and therefore excluded from the analysis, there is also the problem that different kinds of gene identifiers may not uniquely map one-to-one to Ensebml IDs. Therefore several of the gene intentifiers you entered may have mapped to a single Ensembl ID or vice versa. Since the oPOSSUM gene dataset was build based on Ensembl IDs, the numbers reported by the analysis reflect the number of genes with unique Ensembl IDs which map to your input gene list.
+  </p>
+
+  <p>
+  <h4>Q. I submitted an analysis to oPOSSUM and never received any results. What happened?</h4>
+  <p>
+  <b>A.</b> Depending on the size of the gene/sequence set entered and parameters selected, some analyses may take several hours to complete. Please be patient. If it has been more than a few hours and you still haven't received your results, it may be that your analysis failed for some reason. The oPOSSUM system makes every attempt to catch errors and notify you of problems, however there are cases where the job simply aborts due to excessive memory or processing demands. If this is the case you can try submitting the job again at another time when there is less likely to be high server demand or try splitting the analysis into smaller subsets. If the problem persists of if this is not a viable option please <a href="contact.html" target="_blank">contact</a> the oPOSSUM administrators and inform us of the problem.
   </p>
 
 </body>
