@@ -573,11 +573,11 @@ YPR156C">
   <h4>TFBS Cluster Selection Based on TF Families</h4>
 
   <p class="text">
-    <div style="float:left;"><input type="radio" name="cluster_type" value="all" checked></div>
-    <div style="float:left;">All TFBS clusters</div>
+    <input type="radio" name="cluster_type" value="all" checked>
+    All TFBS clusters
     <br>	
-    <div style="float:left;"><input type="radio" name="cluster_type" value="specific"></div>
-    <div style="float:left;"><b>OR</b> select specific TFBS cluster families:
+    <input type="radio" name="cluster_type" value="specific">
+    <b>OR</b> select specific TFBS cluster families:
     <br>
 	[%tfc_families = tf_cluster_set.get_tf_families()%]
 	<select multiple size=8 name=tf_cluster_families
@@ -586,7 +586,6 @@ YPR156C">
 	    <option value=[%fam%]>[%fam%]</option>
 	[%END%]
     </select>
-    <div style="clear:left;"></div>
   </p>
 
 <!--
