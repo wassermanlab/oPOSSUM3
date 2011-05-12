@@ -15,6 +15,17 @@ function verify(f)
 {
     var msg;
     var errors = "";
+    
+    var EnsemblID;
+    if (f.species.value == 'worm') {
+        EnsemblID = /(\b[A-Z]\w+\.\d+)+/;
+    } else if (f.species.value == 'fly') {
+        EnsemblID = /(\bFBgn\w+\d+)+/;
+    } else {
+        EnsemblID = /(\bENS\w+\d+)+/;
+    }
+
+    var RefseqID = /(\b\w{2}_\d+\b)+/;
 
     if (f.t_id_input_method[0].checked) {
         if (   f.t_gene_text.value == null
@@ -23,22 +34,24 @@ function verify(f)
         ) {
             errors += "No gene IDs were pasted into the target Paste Gene IDs";
             errors += " box\n";
-        }
-        
-        var EnsemblID;
-        if (f.species.value == 'worm') {
-          EnsemblID = /(\b[A-Z]\w+\.\d+)+/;
         } else {
-          EnsemblID = /(\bENS\w+\d+)+/;
-        }
-        var RefseqID = /(\b\w{2}_\d+\b)+/;
-        
-        if (   f.t_gene_id_type[0].selected
-            && !EnsemblID.test(f.t_gene_text.value)
-        ) {
-            errors += "Target genes entered do not appear to be Ensembl IDs.\n";
-            errors += " Please check to see that you've entered valid"
-            errors += " Ensembl IDs or change the target Gene ID type.\n";
+            if (f.t_gene_id_type[0].selected) {
+                var valid = 1;
+
+                var lines = f.t_gene_text.value.split("\n");
+                for (var i in lines) {
+                    if (!EnsemblID.test(lines[i])) {
+                        valid = 0;
+                        break;
+                    }
+                }
+
+                if (!valid) {
+                    errors += "Target genes entered do not appear to be Ensembl";
+                    errors += "IDs. Please check to see that you've entered valid"
+                    errors += " Ensembl IDs or change the target Gene ID type.\n";
+                }
+            }
         }
     } else if (f.t_id_input_method[1].checked) {
         if (   f.t_gene_file.value == null
@@ -65,22 +78,25 @@ function verify(f)
         ) {
             errors += "No background gene IDs were pasted into the";
             errors += " Paste Gene IDs box\n";
-        }
-
-        var EnsemblID;
-        if (f.species.value == 'worm') {
-          EnsemblID = /(\b[A-Z]\w+\.\d+)+/;
         } else {
-          EnsemblID = /(\bENS\w+\d+)+/;
-        }
-        var RefseqID = /(\b\w{2}_\d+\b)+/;
+            if (f.bg_gene_id_type[0].selected) {
+                var valid = 1;
 
-        if (   f.bg_gene_id_type[0].selected
-            && !EnsemblID.test(f.bg_gene_text.value)
-        ) {
-            errors += "Background genes entered do not appear to be Ensembl";
-            errors += " IDs. Please check to see that you've entered valid";
-            errors += " Ensembl IDs or change the Gene ID type.\n";
+                var lines = f.bg_gene_text.value.split("\n");
+                for (var i in lines) {
+                    if (!EnsemblID.test(lines[i])) {
+                        valid = 0;
+                        break;
+                    }
+                }
+
+                if (!valid) {
+                    errors += "Background genes entered do not appear to be";
+                    errors += " Ensembl IDs. Please check to see that you've";
+                    errors += " entered valid Ensembl IDs or change the Gene ID";
+                    errors += " type.\n";
+                }
+            }
         }
     } else if (f.bg_id_input_method[3].checked) {
         if (   f.bg_gene_file.value == null
@@ -847,15 +863,16 @@ YPR156C">
     <input type="radio" name="result_sort_by" value="fisher_p_value">Fisher score
   </p>
     
-  <br>
-  <hr noshade><br>
+  <br><hr noshade>
 
   <p class="text"> 
-    Press the <b>Submit</b> button to perform the analysis or <b>Reset</b> to reset the analysis parameters to their default values.<br>Depending on parameters selected and server load, the analysis may take anywhere from a few seconds to several minutes to perform. Please be patient.<br>
+    Press the <b>Submit</b> button to perform the analysis or <b>Reset</b> to reset the analysis parameters to their default values.<br>
+    Depending on parameters selected and server load, the analysis may take anywhere from a few seconds to several minutes to perform.<br>
+    <br>
     <input type="submit" name="Submit" value="Submit">
     <input type="reset" name="Reset" value="Reset">
     <input type="hidden" name="rm" value="results">
     <input type="hidden" name="sid" value="[%sid%]">
   </p>
-
+  <br>
 </form>

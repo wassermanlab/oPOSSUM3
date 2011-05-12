@@ -1,5 +1,4 @@
 <script language="JavaScript">
-<!-- BEGIN script hiding
 function isblank(s)
 {
     for (var i = 0; i < s.length; i++) {
@@ -16,6 +15,17 @@ function verify(f)
     var msg;
     var errors = "";
 
+    var EnsemblID;
+    if (f.species.value == 'worm') {
+      EnsemblID = /(\b[A-Z]\w+\.\d+)+/;
+    } else if (f.species.value == 'fly') {
+      EnsemblID = /(\bFBgn\w+\d+)+/;
+    } else {
+      EnsemblID = /(\bENS\w+\d+)+/;
+    }
+
+    var RefseqID = /(\b\w{2}_\d+\b)+/;
+
     if (f.t_id_input_method[0].checked) {
         if (   f.t_gene_text.value == null
             || f.t_gene_text.value == ""
@@ -23,22 +33,24 @@ function verify(f)
         ) {
             errors += "No gene IDs were pasted into the target Paste Gene IDs";
             errors += " box\n";
-        }
-
-        var EnsemblID;
-        if (f.species.value == 'worm') {
-          EnsemblID = /(\b[A-Z]\w+\.\d+)+/;
         } else {
-          EnsemblID = /(\bENS\w+\d+)+/;
-        }
-        var RefseqID = /(\b\w{2}_\d+\b)+/;
-        
-        if (   f.t_gene_id_type[0].selected
-            && !EnsemblID.test(f.t_gene_text.value)
-        ) {
-            errors += "Target genes entered do not appear to be Ensembl IDs.\n";
-            errors += " Please check to see that you've entered valid"
-            errors += " Ensembl IDs or change the target Gene ID type.\n";
+            if (f.t_gene_id_type[0].selected) {
+                var valid = 1;
+
+                var lines = f.t_gene_text.value.split("\n");
+                for (var i in lines) {
+                    if (!EnsemblID.test(lines[i])) {
+                        valid = 0;
+                        break;
+                    }
+                }
+
+                if (!valid) {
+                    errors += "Target genes entered do not appear to be Ensembl";
+                    errors += "IDs. Please check to see that you've entered valid";
+                    errors += " Ensembl IDs or change the target Gene ID type.\n";
+                }
+            }
         }
     } else if (f.t_id_input_method[1].checked) {
         if (   f.t_gene_file.value == null
@@ -65,22 +77,25 @@ function verify(f)
         ) {
             errors += "No background gene IDs were pasted into the";
             errors += " Paste Gene IDs box\n";
-        }
-
-        var EnsemblID;
-        if (f.species.value == 'worm') {
-          EnsemblID = /(\b[A-Z]\w+\.\d+)+/;
         } else {
-          EnsemblID = /(\bENS\w+\d+)+/;
-        }
-        var RefseqID = /(\b\w{2}_\d+\b)+/;
+            if (f.bg_gene_id_type[0].selected) {
+                var valid = 1;
 
-        if (   f.bg_gene_id_type[0].selected
-            && !EnsemblID.test(f.bg_gene_text.value)
-        ) {
-            errors += "Background genes entered do not appear to be Ensembl";
-            errors += " IDs. Please check to see that you've entered valid";
-            errors += " Ensembl IDs or change the Gene ID type.\n";
+                var lines = f.bg_gene_text.value.split("\n");
+                for (var i in lines) {
+                    if (!EnsemblID.test(lines[i])) {
+                        valid = 0;
+                        break;
+                    }
+                }
+
+                if (!valid) {
+                    errors += "Background genes entered do not appear to be";
+                    errors += " Ensembl IDs. Please check to see that you've";
+                    errors += " entered valid Ensembl IDs or change the Gene ID";
+                    errors += " type.\n";
+                }
+            }
         }
     } else if (f.bg_id_input_method[3].checked) {
         if (   f.bg_gene_file.value == null
@@ -91,62 +106,20 @@ function verify(f)
         }
     }
 
-    if (f.tf_select_method[0].checked) {
-        var v = parseFloat(f.core_min_ic.value);
-        if (isNaN(v)) {
-            errors += "Minimum specificity for JASPAR CORE profiles is not a valid number\n";
-        } else {
-            if (v < [%db_info.min_ic%]) {
-                errors += "Minimum specificity for JASPAR CORE profiles is below minimum allowable";
-                errors += " [%db_info.min_ic%] bits\n";
-            }
-        }
-    } else if (f.tf_select_method[1].checked) {
+    if (f.cluster_type[1].checked) {
         var tfs_selected = false;
-        for (var i = 0; i < f.core_tfs.options.length; i++) {
-            if (f.core_tfs.options[i].selected) {
+        for (var i = 0; i < f.tf_cluster_families.options.length; i++) {
+            if (f.tf_cluster_families.options[i].selected) {
                 tfs_selected = true;
                 break;
             }
         }
 
         if (!tfs_selected) {
-            errors += "No specific JASPAR CORE profiles were selected\n";
+            errors += "No specific TFBS cluster families were selected\n";
         }
-    } else if (f.tf_select_method[2].checked) {
-        var w = parseFloat(f.pbm_min_ic.value);
-        if (isNaN(w)) {
-            errors += "Minimum specificity for JASPAR PBM profiles is not a valid number\n";
-        } else {
-            if (w < [%db_info.min_ic%]) {
-                errors += "Minimum specificity for JASPAR PBM profiles is below minimum allowable";
-                errors += " [%db_info.min_ic%] bits\n";
-            }
-        } 
-    } else if (f.tf_select_method[3].checked) {
-        var tfs_selected = false;
-        for (var i = 0; i < f.pbm_tfs.options.length; i++) {
-            if (f.pbm_tfs.options[i].selected) {
-                tfs_selected = true;
-                break;
-            }
-        }
+    }
 
-        if (!tfs_selected) {
-            errors += "No specific JASPAR PBM profiles were selected\n";
-        }
-    } else if (f.tf_select_method[4].checked) {
-        var w = parseFloat(f.fam_min_ic.value);
-        if (isNaN(w)) {
-            errors += "Minimum specificity for JASPAR FAM profiles is not a valid number\n";
-        } else {
-            if (w < [%db_info.min_ic%]) {
-                errors += "Minimum specificity for JASPAR FAM profiles is below minimum allowable";
-                errors += " [%db_info.min_ic%] bits\n";
-            }
-        } 
-    }    
-    
     if (!errors) return true;
 
     msg = "_________________________________________________________\n\n";
@@ -158,7 +131,6 @@ function verify(f)
 
     return false;
 }
-// END script hiding -->
 </script>
 
 <form name="input" enctype="multipart/form-data" method="post" onSubmit="return verify(this)" target="_blank">
@@ -580,7 +552,7 @@ YPR156C">
     <b>Gene ID type:</b>
     <span class="subtext">
     <select size=1 name="bg_gene_id_type">
-      <option value="0" checked>Ensembl ID</option>
+      <option value="0" selected>Ensembl ID</option>
       [%FOREACH xgit = xgid_types%]
         <option value=[%xgit.id_type()%]>[%xgit.name()%]</option>
       [%END%]
@@ -736,15 +708,16 @@ YPR156C">
     <input type="radio" name="result_sort_by" value="fisher_score">Fisher score
   </p>
     
-  <br>
-  <hr noshade><br>
+  <br><hr noshade>
 
   <p class="text"> 
-    Press the <b>Submit</b> button to perform the analysis or <b>Reset</b> to reset the analysis parameters to their default values.<br>Depending on parameters selected and server load, the analysis may take anywhere from a few seconds to several minutes to perform. Please be patient.<br>
+    Press the <b>Submit</b> button to perform the analysis or <b>Reset</b> to reset the analysis parameters to their default values.<br>
+    Depending on parameters selected and server load, the analysis may take anywhere from a few seconds to several minutes to perform.<br>
+    <br>
     <input type="submit" name="Submit" value="Submit">
     <input type="reset" name="Reset" value="Reset">
     <input type="hidden" name="rm" value="results">
     <input type="hidden" name="sid" value="[%sid%]">
   </p>
-
+  <br>
 </form>

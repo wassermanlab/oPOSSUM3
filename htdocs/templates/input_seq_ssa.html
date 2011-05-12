@@ -441,17 +441,23 @@ function verify(f)
     <br>
     <input type="radio" name="result_sort_by" value="zscore" checked>Z-score
     <input type="radio" name="result_sort_by" value="fisher_p_value">Fisher score
-    <br><br>
+  </p>
+
+  <br><hr noshade>
+
+  <p class="text"> 
+    Please enter your email address:
+    <input type="text" name="email" value="">
   </p>
   <p class="text"> 
-    Enter your email address:
-    <input type="text" name="email" value="">
-    <br><br>
-    Press the <b>Submit</b> button to perform the analysis or <b>Reset</b> to reset the analysis parameters to their default values.<br>The results will be sent to the email address you provided.<br>
-    <br><br>
+    Press the <b>Submit</b> button to perform the analysis or <b>Reset</b> to reset the analysis parameters to their default values.<br>
+    The results will be sent to the email address you provided.<br>
+    Depending on parameters selected and server load, the analysis may take anywhere from a few minutes to several hours to complete.<br>
+    <br>
     <input type="submit" name="Submit" value="Submit">
     <input type="reset" name="Reset" value="Reset">
     <input type="hidden" name="rm" value="process">
     <br>
   </p>
+  <br>
 </form>
