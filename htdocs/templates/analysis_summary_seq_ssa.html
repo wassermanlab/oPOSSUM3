@@ -90,7 +90,7 @@
 
     [%IF result_sort_by == 'zscore'%]
       [%display_sort_by = 'Z-score'%]
-    [%ELSIF result_sort_by == 'fisher'%]
+    [%ELSIF result_sort_by == 'fisher_p_value'%]
       [%display_sort_by = 'Fisher score'%]
     [%ELSE%]
       [%display_sort_by = result_sort_by%]
@@ -104,7 +104,7 @@
           <td class="table_text">Top [%num_display_results%] results by [%display_sort_by%]</td>
         [%END%]
       [%ELSIF result_type == 'significant_hits'%]
-        <td class="table_text">All results with a Z-score >= [%zscore_cutoff%] and a Fisher score <= [%fisher_cutoff%] sorted by [%display_sort_by%]</td>
+        <td class="table_text">All results with a Z-score >= [%zscore_cutoff%] and a Fisher score >= [%fisher_cutoff%] sorted by [%display_sort_by%]</td>
       [%END%]
     </tr>
 
