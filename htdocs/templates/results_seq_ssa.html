@@ -139,7 +139,7 @@
         <td class="table_text">Top [%num_display_results%] results sorted by [%display_sort_by%]</td>
       [%END%]
     [%ELSIF result_type == 'significant_hits'%]
-      <td class="table_text">All results with a Z-score >= [%zscore_cutoff%] and a Fisher score <= [%fisher_cutoff%] sorted by [%display_sort_by%]</td>
+      <td class="table_text">All results with a Z-score >= [%zscore_cutoff%] and a Fisher score >= [%fisher_cutoff%] sorted by [%display_sort_by%]</td>
     [%END%]
   </tr>
 
