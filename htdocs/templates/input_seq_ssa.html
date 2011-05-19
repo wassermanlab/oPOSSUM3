@@ -142,7 +142,10 @@ function verify(f)
 </script>
 
 <form name="input" enctype="multipart/form-data" method="post" onSubmit="return verify(this)" target="_blank">
-  
+
+  [%INCLUDE "sample_t_seqs.html"%]
+  [%INCLUDE "sample_bg_seqs.html"%]
+
   <h3>STEP 1: Enter your sequences</h3>
   
   <p class="text">[
@@ -152,11 +155,11 @@ function verify(f)
 
   <p class="text">
     <input type="radio" name="seq_input_method" value="paste" checked>
-    Paste fasta formatted sequences (retrieve from <a href="http://main.g2.bx.psu.edu/" target="_blank">Galaxy</a>):<br>
-<!--
-    <input type="button" name="use_sample_seqs" value="Use sample seqs"
-      onClick="{input.seq_input_method[0].checked=true; input.seq_list.value="[%sample_sequences%]}">
--->
+    Paste fasta formatted sequences (retrieve from <a href="http://main.g2.bx.psu.edu/" target="_blank">Galaxy</a>):
+    <br>
+    <input type="button" name="use_sample_seqs" value="Use sample sequences"
+      onClick="{input.seq_input_method[0].checked=true; input.seq_list.value=document.getElementById('sample_t_seqs').value}">
+      <br>
     <textarea name="seq_list" rows=5 cols=60 wrap=SOFT
       onFocus="{input.seq_input_method[0].checked=true}" 
       onChange="{
@@ -199,7 +202,11 @@ function verify(f)
     </select>
     <br>
     <input type="radio" name="bg_seq_input_method" value="paste">
-    <b>OR</b> Paste fasta formatted background sequences (retrieve from <a href="http://main.g2.bx.psu.edu/" target="_blank">Galaxy</a>):<br>
+    <b>OR</b> Paste fasta formatted background sequences (retrieve from <a href="http://main.g2.bx.psu.edu/" target="_blank">Galaxy</a>):
+    <br>
+    <input type="button" name="use_bg_sample_seqs" value="Use sample sequences"
+      onClick="{input.bg_seq_input_method[1].checked=true; input.bg_seq_list.value=document.getElementById('sample_bg_seqs').value}">
+    <br>
     <textarea name="bg_seq_list" rows=5 cols=60 wrap=SOFT
       onFocus="{input.bg_seq_input_method[1].checked=true}" 
       onChange="{
@@ -428,7 +435,7 @@ function verify(f)
         <option value=[%cutoff%] [%IF cutoff == dflt_zcutoff%]selected[%END%]>[%cutoff%]</option>
       [%END%]
     </select>
-    and <b>Fisher score <= </b>
+    and <b>Fisher score >= </b>
     <select name="fisher_cutoff">
       [%FOREACH cutoff = fcutoffs%]
         <option value=[%cutoff%] [%IF cutoff == dflt_fcutoff%]selected[%END%]>[%cutoff%]</option>
