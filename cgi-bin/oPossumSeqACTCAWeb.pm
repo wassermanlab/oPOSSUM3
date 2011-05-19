@@ -426,7 +426,7 @@ sub process
     }
 
     if ($bg_seq_set_name) {
-        $command .= " -bss $bg_seq_set_name";
+        $command .= " -bss '$bg_seq_set_name'";
     }
 
     printf LOG "Starting ACTCA analysis at %s:\n$command\n\n",

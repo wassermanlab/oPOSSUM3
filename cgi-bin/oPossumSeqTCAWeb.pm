@@ -447,7 +447,7 @@ sub process
     }
 
     if ($bg_seq_set_name) {
-        $command .= " -bss $bg_seq_set_name";
+        $command .= " -bss '$bg_seq_set_name'";
     }
 
     printf LOG "\nStarting sequence-based analysis at %s:\n$command\n\n",
