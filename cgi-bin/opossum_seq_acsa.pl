@@ -188,6 +188,8 @@ GetOptions(
 
 die "No results directory specified\n" if !$results_dir;
 
+$num_results = 'All' unless $num_results;
+
 # Create relative results dir name from abs results dir
 my $rel_results_dir = $results_dir;
 
@@ -433,26 +435,26 @@ if ($anchor_tf_file) {
 }
 
 $logger->info("Searching target sequences for TFBSs");
-my ($t_tf_seq_siteset, $t_tf_seq_sitepairs) = anchored_tf_set_search_seqs(
+my ($t_tf_seq_sites, $t_tf_seq_sitepairs) = anchored_tf_set_search_seqs(
     $tf_set, $anchor_matrix, \%t_seq_id_seqs, $threshold
 );
 
-fatal("No TFBSs found in test sequences") unless $t_tf_seq_siteset;
+fatal("No TFBSs found in test sequences") unless $t_tf_seq_sites;
 
 $logger->info("Searching background sequences for TFBSs");
-my ($bg_tf_seq_siteset) = anchored_tf_set_search_seqs(
+my ($bg_tf_seq_sites) = anchored_tf_set_search_seqs(
     $tf_set, $anchor_matrix, \%bg_seq_id_seqs, $threshold
 );
 
-fatal("No anchored TFBSs found in control sequences") unless $bg_tf_seq_siteset;
+fatal("No anchored TFBSs found in control sequences") unless $bg_tf_seq_sites;
 
 $logger->info("Computing target sequence TFBS counts");
-my $t_counts = compute_site_counts($tf_set, \@t_seq_ids, $t_tf_seq_siteset);
+my $t_counts = compute_site_counts($tf_set, \@t_seq_ids, $t_tf_seq_sites);
 
 $logger->debug("Target TFBS counts:\n" . Data::Dumper::Dumper($t_counts));
 
 $logger->info("Computing background sequence TFBS counts");
-my $bg_counts = compute_site_counts($tf_set, \@bg_seq_ids, $bg_tf_seq_siteset);
+my $bg_counts = compute_site_counts($tf_set, \@bg_seq_ids, $bg_tf_seq_sites);
 
 #$t_counts->conserved_region_length_set($t_cr_len_set);
 #$bg_counts->conserved_region_length_set($bg_cr_len_set);
@@ -585,7 +587,7 @@ sub anchored_tf_set_search_seqs
         $anchor_pwm = $anchor_matrix;
     }
 
-    my %tf_seq_siteset;
+    my %tf_seq_sites;
     my %tf_seq_sitepairs;
     foreach my $seq_id (@seq_ids) {
         $logger->debug("\nSequence: $seq_id\n");
@@ -597,13 +599,13 @@ sub anchored_tf_set_search_seqs
             -threshold  => $threshold
         );
 
-        logprint_siteset("Anchor siteset", $anchor_siteset);
+        #logprint_siteset("Anchor siteset", $anchor_siteset);
 
         next if !$anchor_siteset || $anchor_siteset->size() == 0;
 
         my $filtered_anchor_siteset = filter_overlapping_sites($anchor_siteset);
 
-        logprint_siteset("Filtered anchor siteset", $filtered_anchor_siteset);
+        #logprint_siteset("Filtered anchor siteset", $filtered_anchor_siteset);
 
         next if !$filtered_anchor_siteset
             || $filtered_anchor_siteset->size() == 0;
@@ -623,31 +625,31 @@ sub anchored_tf_set_search_seqs
                 -threshold  => $threshold
             );
 
-            logprint_siteset("TF siteset", $siteset);
+            #logprint_siteset("TF siteset", $siteset);
 
             next if !$siteset || $siteset->size == 0;
 
             my $filtered_siteset = filter_overlapping_sites($siteset);
 
-            logprint_siteset("Filtered TF siteset", $filtered_siteset);
+            #logprint_siteset("Filtered TF siteset", $filtered_siteset);
 
             next if !$filtered_siteset || $filtered_siteset->size == 0;
 
-            my ($prox_siteset, $sitepairs) = proximal_siteset(
+            my ($prox_sites, $sitepairs) = proximal_sites(
                 $filtered_anchor_siteset, $filtered_siteset, $max_site_dist
             );
 
-            logprint_siteset("Proximal siteset", $prox_siteset);
-            logprint_sitepairs($sitepairs);
+            #logprint_siteset("Proximal siteset", $prox_siteset);
+            #logprint_sitepairs($sitepairs);
 
-            if ($prox_siteset && $prox_siteset->size() > 0) {
-                $tf_seq_siteset{$tf_id}->{$seq_id} = $prox_siteset;
+            if ($prox_sites) {
+                $tf_seq_sites{$tf_id}->{$seq_id} = $prox_sites;
                 $tf_seq_sitepairs{$tf_id}->{$seq_id} = $sitepairs;
             }
         }
     }
 
-    my $retval1 = %tf_seq_siteset ? \%tf_seq_siteset : undef;
+    my $retval1 = %tf_seq_sites ? \%tf_seq_sites : undef;
     my $retval2 = %tf_seq_sitepairs ? \%tf_seq_sitepairs : undef;
 
     return ($retval1, $retval2);
@@ -655,7 +657,7 @@ sub anchored_tf_set_search_seqs
 
 sub compute_site_counts
 {
-    my ($tf_set, $seq_ids, $tf_seq_siteset) = @_;
+    my ($tf_set, $seq_ids, $tf_seq_sites) = @_;
 
     my $tf_ids  = $tf_set->ids();
 
@@ -666,11 +668,11 @@ sub compute_site_counts
 
     foreach my $seq_id (@$seq_ids) {
         foreach my $tf_id (@$tf_ids) {
-            my $siteset = $tf_seq_siteset->{$tf_id}->{$seq_id};
+            my $sites = $tf_seq_sites->{$tf_id}->{$seq_id};
 
-            if ($siteset) {
+            if ($sites) {
                 # Note set size could be 0.
-                $counts->gene_tfbs_count($seq_id, $tf_id, $siteset->size());
+                $counts->gene_tfbs_count($seq_id, $tf_id, scalar @$sites);
             } else {
                 $counts->gene_tfbs_count($seq_id, $tf_id, 0);
             }
@@ -1022,7 +1024,7 @@ sub write_tfbs_details_text
     print FH "\n\n$anchor_name - $tf_name Binding Site Combinations\n\n";
 
     #printf FH "\n\n%-31s\t%s\t%s\t%s\t%s\t%s\%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
-    printf FH "\n\n%s\t%s\t%s\t%s\t%s\t%s\%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
+    printf FH "\n\n%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
         'Sequence ID', 'Anchoring TF', 'Start', 'End', 'Strand', 'Score', '%Score', 'TFBS Sequence', 'Anchored TF', 'Start', 'End', 'Strand', 'Score', '%Score', 'TFBS Sequence', 'Distance';
 
     foreach my $seq_id (@$seq_ids) {
@@ -1050,23 +1052,21 @@ sub write_tfbs_details_text
             #printf FH "\t%s\t%7d\t%7d\t%7d\t%7.3f\t%6.1f%%\t%s\t%s\t%7d\t%7d\t%7d\t%7.3f\t%6.1f%%\t%s\t%7d\n",
             printf FH "\t%s\t%d\t%d\t%d\t%.3f\t%.1f%%\t%s\t%s\t%d\t%d\t%d\t%.3f\t%.1f%%\t%s\t%d\n",
                 $anchor_name,
-                $anchor_site->start(),
-                $anchor_site->end(),
-                $anchor_site->strand(),
-                $anchor_site->score(),
-                $anchor_site->rel_score() * 100,
-                $anchor_site->seq->seq(),
+                $anchor_site->{start},
+                $anchor_site->{end},
+                $anchor_site->{strand},
+                $anchor_site->{score},
+                $anchor_site->{rel_score} * 100,
+                $anchor_site->{seq},
                 $tf_name,
-                $tf_site->start(),
-                $tf_site->end(),
-                $tf_site->strand(),
-                $tf_site->score(),
-                $tf_site->rel_score() * 100,
-                $tf_site->seq->seq(),
+                $tf_site->{start},
+                $tf_site->{end},
+                $tf_site->{strand},
+                $tf_site->{score},
+                $tf_site->{rel_score} * 100,
+                $tf_site->{seq},
                 $distance;
         }
-
-        print FH "\n";
     }
 
     close(FH);
@@ -1217,11 +1217,11 @@ sub read_matrices
 
 #
 # This may have to be revisited for more sophisticated filtering.
-# Take a TFBS::SitePairSet where each site pair in the set corresponds to the
-# same transcription factor and filter overlapping site pairs such that only
-# the highest scoring site pair of any mutually overlapping site pairs is kept.
-# In the event that site pairs score equally, the first site pair is kept, i.e.
-# bias is towards the site pair with the lowest starting position.
+# Take a TFBS::SiteSet where each site in the set corresponds to the
+# same transcription factor and filter overlapping sites such that only
+# the highest scoring site of any mutually overlapping sites is kept.
+# In the event that sites score equally, the first site is kept, i.e.
+# bias is towards the site with the lowest starting position.
 #
 sub filter_overlapping_sites
 {
@@ -1262,12 +1262,14 @@ sub filter_overlapping_sites
 # NOTE: A given TFBS could be proximal to more than one anchor. It is counted
 # in combination with each anchor (multiple times).
 #
-sub proximal_siteset
+# For memory efficiency, changed to return a list of hashes storing the
+# minimal amount of information about sites instead of a TFBS::SiteSet.
+#
+sub proximal_sites
 {
     my ($siteset1, $siteset2, $max_dist) = @_;
 
-    my $prox_siteset = TFBS::SiteSet->new();
-
+    my @prox_sites;
     my @sitepairs;
 
     my $iter1 = $siteset1->Iterator(-sort_by => 'start');
@@ -1285,20 +1287,41 @@ sub proximal_siteset
             }
 
             if ($dist <= $max_dist) {
-                $prox_siteset->add_site($tfbs2);
+                my $site1_hash = {
+                    start       => $tfbs1->start,
+                    end         => $tfbs1->end,
+                    strand      => $tfbs1->strand,
+                    score       => $tfbs1->score,
+                    rel_score   => $tfbs1->rel_score,
+                    seq         => $tfbs1->seq->seq
+                };
+
+                my $site2_hash = {
+                    start       => $tfbs2->start,
+                    end         => $tfbs2->end,
+                    strand      => $tfbs2->strand,
+                    score       => $tfbs2->score,
+                    rel_score   => $tfbs2->rel_score,
+                    seq         => $tfbs2->seq->seq
+                };
+
+                push @prox_sites, $site2_hash;
 
                 #my $key = sprintf "%s|%d",
                 #    $tfbs2->pattern->ID(), $tfbs2->start, $tfbs2->end;
                 push @sitepairs, {
-                    anchor_site => $tfbs1,
-                    tf_site     => $tfbs2,
+                    anchor_site => $site1_hash,
+                    tf_site     => $site2_hash,
                     distance    => $dist
                 };
             }
         }
     }
 
-    return ($prox_siteset, \@sitepairs);
+    return (
+        @prox_sites ? \@prox_sites : undef,
+        @sitepairs ? \@sitepairs : undef
+    );
 }
 
 sub process_template

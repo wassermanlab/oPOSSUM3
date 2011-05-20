@@ -171,6 +171,8 @@ GetOptions(
 
 die "No results directory specified\n" if !$results_dir;
 
+$num_results = 'All' unless $num_results;
+
 # Create relative results dir name from abs results dir
 my $rel_results_dir = $results_dir;
 
@@ -366,26 +368,26 @@ $logger->debug("Matrix set:\n" . Data::Dumper::Dumper($matrix_set));
 my $tf_set = OPOSSUM::TFSet->new(-matrix_set => $matrix_set);
 
 $logger->info("Searching target sequences for TFBSs");
-#my ($t_tf_seq_siteset, $t_tf_seqs)
-my $t_tf_seq_siteset
+#my ($t_tf_seq_sites, $t_tf_seqs)
+my $t_tf_seq_sites
     = tf_set_search_seqs($tf_set, \%t_seq_id_seqs, $threshold);
 
-fatal("No TFBSs found in test sequences") if !$t_tf_seq_siteset;
+fatal("No TFBSs found in test sequences") if !$t_tf_seq_sites;
 
 $logger->info("Searching background sequences for TFBSs");
-#my ($bg_tf_seq_siteset, $bg_tf_seqs)
-my $bg_tf_seq_siteset
+#my ($bg_tf_seq_sites, $bg_tf_seqs)
+my $bg_tf_seq_sites
     = tf_set_search_seqs($tf_set, \%bg_seq_id_seqs, $threshold);
 
-fatal("No TFBSs found in control sequences") if !$bg_tf_seq_siteset;
+fatal("No TFBSs found in control sequences") if !$bg_tf_seq_sites;
 
 $logger->info("Computing target sequence TFBS counts");
-my $t_counts = compute_site_counts($tf_set, \@t_seq_ids, $t_tf_seq_siteset);
+my $t_counts = compute_site_counts($tf_set, \@t_seq_ids, $t_tf_seq_sites);
 
 $logger->debug("Target TFBS counts:\n" . Data::Dumper::Dumper($t_counts));
 
 $logger->info("Computing background sequence TFBS counts");
-my $bg_counts = compute_site_counts($tf_set, \@bg_seq_ids, $bg_tf_seq_siteset);
+my $bg_counts = compute_site_counts($tf_set, \@bg_seq_ids, $bg_tf_seq_sites);
 
 #$t_counts->conserved_region_length_set($t_cr_len_set);
 #$bg_counts->conserved_region_length_set($bg_cr_len_set);
@@ -461,7 +463,7 @@ if ($cresult_list && $cresult_list->[0]) {
     write_results_text($tf_set, $cresult_list);
 
     $logger->info("Writing TFBS details");
-    write_tfbs_details($t_tf_seq_siteset, \%t_seq_id_display_ids);
+    write_tfbs_details($t_tf_seq_sites, \%t_seq_id_display_ids);
 }
 
 $logger->info("Sending notification email to $email");
@@ -517,7 +519,7 @@ sub tf_set_search_seqs
 
     my @seq_ids = keys %$seq_id_seqs;
 
-    my %tf_seq_siteset;
+    my %tf_seq_sites;
 
 	foreach my $tf_id (@$tf_ids) {
 	    my $matrix = $tf_set->get_matrix($tf_id);
@@ -537,20 +539,21 @@ sub tf_set_search_seqs
                 -threshold  => $threshold
             );
 
-            my $filtered_siteset;
+            my $filtered_sites;
             if ($siteset && $siteset->size > 0) {
-                $filtered_siteset = filter_overlapping_sites($siteset);
+                $filtered_sites = filter_overlapping_sites($siteset);
 
-                if ($filtered_siteset && $filtered_siteset->size > 0) {
+                if ($filtered_sites) {
                     # Only set if seqs had sites for this TF
                     #push @{$tf_seqs{$tf_id}}, $seq_id;
-                    $tf_seq_siteset{$tf_id}->{$seq_id} = $filtered_siteset;
+
+                    $tf_seq_sites{$tf_id}->{$seq_id} = $filtered_sites;
                 }
             }
         }
     }
 
-    my $retval1 = %tf_seq_siteset ? \%tf_seq_siteset : undef;
+    my $retval1 = %tf_seq_sites ? \%tf_seq_sites : undef;
     #my $retval2 = %tf_seqs ? \%tf_seqs : undef;
 
     #return ($retval1, $retval2);
@@ -559,7 +562,7 @@ sub tf_set_search_seqs
 
 sub compute_site_counts
 {
-    my ($tf_set, $seq_ids, $tf_seq_siteset) = @_;
+    my ($tf_set, $seq_ids, $tf_seq_sites) = @_;
 
     my $tf_ids  = $tf_set->ids();
 
@@ -570,11 +573,11 @@ sub compute_site_counts
 
     foreach my $seq_id (@$seq_ids) {
         foreach my $tf_id (@$tf_ids) {
-            my $siteset = $tf_seq_siteset->{$tf_id}->{$seq_id};
+            my $sites = $tf_seq_sites->{$tf_id}->{$seq_id};
 
-            if ($siteset) {
+            if ($sites) {
                 # Note set size could be 0.
-                $counts->gene_tfbs_count($seq_id, $tf_id, $siteset->size());
+                $counts->gene_tfbs_count($seq_id, $tf_id, scalar @$sites);
             } else {
                 $counts->gene_tfbs_count($seq_id, $tf_id, 0);
             }
@@ -833,15 +836,15 @@ sub write_results_html
 #
 sub write_tfbs_details
 {
-    my ($tf_seq_siteset, $seq_id_display_ids) = @_;
+    my ($tf_seq_sites, $seq_id_display_ids) = @_;
 
     my $tf_ids = $tf_set->ids();
 
     foreach my $tf_id (@$tf_ids) {
-        my $seq_siteset = $tf_seq_siteset->{$tf_id};
+        my $seq_sites = $tf_seq_sites->{$tf_id};
 
-        if ($seq_siteset) {
-            my @seq_ids = keys %$seq_siteset;
+        if ($seq_sites) {
+            my @seq_ids = keys %$seq_sites;
 
             my $tf = $tf_set->get_tf($tf_id);
 
@@ -853,7 +856,7 @@ sub write_tfbs_details
                 $tf,
                 \@seq_ids,
                 $seq_id_display_ids,
-                $seq_siteset
+                $seq_sites
             );
 
             write_tfbs_details_html(
@@ -861,7 +864,7 @@ sub write_tfbs_details
                 $tf,
                 \@seq_ids,
                 $seq_id_display_ids,
-                $seq_siteset
+                $seq_sites
             );
         }
     }
@@ -873,7 +876,7 @@ sub write_tfbs_details
 #
 sub write_tfbs_details_text
 {
-    my ($filename, $tf, $seq_ids, $seq_id_display_ids, $seq_siteset) = @_;
+    my ($filename, $tf, $seq_ids, $seq_id_display_ids, $seq_sites) = @_;
 
     my $tf_id   = $tf->ID();
     my $tf_name = $tf->name();
@@ -908,17 +911,16 @@ sub write_tfbs_details_text
         'Sequence ID', 'Start', 'End', 'Strand', 'Score', '%Score', 'TFBS Sequence';
 
     foreach my $seq_id (@$seq_ids) {
-        my $siteset = $seq_siteset->{$seq_id};
+        my $sites = $seq_sites->{$seq_id};
 
         my $display_id = $seq_id_display_ids->{$seq_id};
 
-        next if !$siteset || $siteset->size == 0;
+        next if !$sites;
 
         my $first = 1;
         printf FH "%s", $display_id;
 
-        my $iter = $siteset->Iterator(-sort_by => 'start');
-        while (my $site = $iter->next()) {
+        foreach my $site (@$sites) {
             # Do not reprint sequence ID for subsequent sites
             unless ($first) {
                 printf FH "%s", '';
@@ -927,15 +929,15 @@ sub write_tfbs_details_text
 
             #printf FH "\t%7d\t%7d\t%7d\t%7.3f\t%6.1f%%\t%s\n",
             printf FH "\t%d\t%d\t%d\t%.3f\t%.1f%%\t%s\n",
-                $site->start(),
-                $site->end(),
-                $site->strand(),
-                $site->score(),
-                $site->rel_score() * 100,
-                $site->seq->seq();
+                $site->{start},
+                $site->{end},
+                $site->{strand},
+                $site->{score},
+                $site->{rel_score} * 100,
+                $site->{seq};
         }
 
-        print FH "\n";
+        #print FH "\n";
     }
 
     close(FH);
@@ -947,25 +949,10 @@ sub write_tfbs_details_text
 #
 sub write_tfbs_details_html
 {
-    my ($filename, $tf, $seq_ids, $seq_id_display_ids, $seq_siteset) = @_;
+    my ($filename, $tf, $seq_ids, $seq_id_display_ids, $seq_sites) = @_;
 
     my $tf_id   = $tf->ID();
     my $tf_name = $tf->name();
-
-    my %seq_sites;
-    foreach my $seq_id (@$seq_ids) {
-        my $siteset = $seq_siteset->{$seq_id};
-
-        next if !$siteset || $siteset->size == 0;
-
-        my @site_list;
-        my $iter = $siteset->Iterator(-sort_by => 'start');
-        while (my $site = $iter->next()) {
-            push @site_list, $site;
-        }
-
-        $seq_sites{$seq_id} = \@site_list;
-    }
 
     open(FH, ">$filename") || fatal(
         "Could not create TFBS details HTML file $filename"
@@ -1004,7 +991,7 @@ sub write_tfbs_details_html
         tf                      => $tf,
         seq_ids                 => $seq_ids,
         seq_id_display_ids      => $seq_id_display_ids,
-        seq_sites               => \%seq_sites,
+        seq_sites               => $seq_sites,
         rel_results_dir         => $rel_results_dir,
         tfbs_details_file       => "$tf_id.txt",
         var_template            => "tfbs_details_seq_ssa.html"
@@ -1095,11 +1082,16 @@ sub read_matrices
 
 #
 # This may have to be revisited for more sophisticated filtering.
-# Take a TFBS::SitePairSet where each site pair in the set corresponds to the
-# same transcription factor and filter overlapping site pairs such that only
-# the highest scoring site pair of any mutually overlapping site pairs is kept.
-# In the event that site pairs score equally, the first site pair is kept, i.e.
-# bias is towards the site pair with the lowest starting position.
+# Take a TFBS::SiteSet where each site in the set corresponds to the
+# same transcription factor and filter overlapping sites such that only
+# the highest scoring site of any mutually overlapping sites is kept.
+# In the event that sites score equally, the first site is kept, i.e.
+# bias is towards the site with the lowest starting position.
+#
+# This routine has been modified so that instead of returning another
+# TFBS::SiteSet, it instead returns a listref of hashes which store the minimal
+# amount of information about a site. This was done for memory efficiency.
+# DJA 2011/05/20
 #
 sub filter_overlapping_sites
 {
@@ -1107,7 +1099,8 @@ sub filter_overlapping_sites
 
     return if !defined $siteset || $siteset->size == 0;
 
-    my $filtered_set = TFBS::SiteSet->new();
+    #my $filtered_set = TFBS::SiteSet->new();
+    my @filtered_sites;
 
     my $iter = $siteset->Iterator(-sort_by => 'start');
     my $prev_site = $iter->next;
@@ -1122,14 +1115,29 @@ sub filter_overlapping_sites
                     $prev_site = $site;
                 }
             } else {
-                $filtered_set->add_site($prev_site);
+                push @filtered_sites, {
+                    start       => $prev_site->start,
+                    end         => $prev_site->end,
+                    strand      => $prev_site->strand,
+                    score       => $prev_site->score,
+                    rel_score   => $prev_site->rel_score,
+                    seq         => $prev_site->seq->seq,
+                };
                 $prev_site = $site;
             }
         }
-        $filtered_set->add_site($prev_site);
+
+        push @filtered_sites, {
+            start       => $prev_site->start,
+            end         => $prev_site->end,
+            strand      => $prev_site->strand,
+            score       => $prev_site->score,
+            rel_score   => $prev_site->rel_score,
+            seq         => $prev_site->seq->seq,
+        };
     }
 
-    return $filtered_set;
+    return @filtered_sites ? \@filtered_sites : undef;
 }
 
 sub process_template
