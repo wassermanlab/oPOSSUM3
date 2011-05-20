@@ -221,14 +221,14 @@ function verify(f)
       
       <b>Collections:</b>
       [%FOREACH col = collections%]
-        &nbsp;&nbsp;<input type="checkbox" name="tf_collections" value="[%col%]" checked>[%col%]
+        &nbsp;&nbsp;<input type="checkbox" name="tf_collections" value="[%col%]" [%IF col == 'CORE'%]checked[%END%]>[%col%]
       [%END%]
       
       <br><br>
       
       <b>Tax groups:</b>
       [%FOREACH tax = tax_groups%]
-        &nbsp;&nbsp;<input type="checkbox" name="tf_tax_groups" value="[%tax%]" checked>[%tax%]
+        &nbsp;&nbsp;<input type="checkbox" name="tf_tax_groups" value="[%tax%]" [%IF tax == 'vertebrates'%]checked[%END%]>[%tax%]
       [%END%]
       
       <br><br>
