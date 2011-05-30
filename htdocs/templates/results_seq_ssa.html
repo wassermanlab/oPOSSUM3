@@ -149,13 +149,15 @@
   </tr>
 </table>
 
-[%IF warn_zero_bg_gene_hits%]
-  <p class="warn_text"><b>Warning</b>: the provided background sequence set resulted in zero binding sites for one or more TFs. In these cases the Z-score is undefined and is marked as N/A. In cases where there were one or more binding sites in the target gene set, the result could still be considered significant. Results for which this was the case are marked with an asterisk (*).
-  </p>
-[%END%]
+<h3>Results</h3>
+[%IF message%]
+  <p class="warn_text">[%message%]</p>
+[%ELSIF results%]
+  [%IF warn_zero_bg_gene_hits%]
+    <p class="warn_text"><b>Warning</b>: the provided background sequence set resulted in zero binding sites for one or more TFs. In these cases the Z-score is undefined and is marked as N/A. In cases where there were one or more binding sites in the target gene set, the result could still be considered significant. Results for which this was the case are marked with an asterisk (*).
+    </p>
+  [%END%]
 
-[%IF results%]
-  <h3>oPOSSUM Analysis</h3>
   <table id="results_table" class="sortable" cellpadding="2" cellspacing="0">
   <tr class="table_title">
     <th title="Click arrows to sort">TF</th>
@@ -301,7 +303,6 @@
   <p class="text">
   Consult the <a href="javascript:newWindow=window.open('[%rel_htdocs_path%]/help.html','help','width=600,height=800,toolbar=1,location=0,directories=0,status=0,menuBar=0,scrollBars=1,resizable=0'); newWindow.focus()">help file</a> for an explanation of the column headings.
   </p>
-
 [%ELSE%]
   <p class="warn_text">No TFBSs were found which matched your search criteria</p>
 [%END%]

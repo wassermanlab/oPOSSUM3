@@ -149,14 +149,13 @@
 [%END%]
 -->
 
-[%IF warn_zero_bg_gene_hits%]
-  <p class="warn_text"><b>Warning</b>: The provided background gene set resulted in zero binding sites for one or more TFs. In these cases the Z-score is undefined and is marked as N/A. In cases where there were one or more binding sites in the target gene set, the result could still be considered significant. Results for which this was the case are marked with an asterisk (*).
-  </p>
-[%END%]
-
+<h3>Results</h3>
 [%IF results%]
-<p>&nbsp;</p>
-<h3>oPOSSUM Analysis</h3>
+  [%IF warn_zero_bg_gene_hits%]
+    <p class="warn_text"><b>Warning</b>: The provided background gene set resulted in zero binding sites for one or more TFs. In these cases the Z-score is undefined and is marked as N/A. In cases where there were one or more binding sites in the target gene set, the result could still be considered significant. Results for which this was the case are marked with an asterisk (*).
+    </p>
+  [%END%]
+
 <table id="results_summary_table" class="sortable" cellpadding="2" cellspacing="0">
   <tr class="table_title">
     <th title="Click arrows to sort">TF</th>
