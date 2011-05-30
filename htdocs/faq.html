@@ -10,21 +10,35 @@
   <h3><center>May 2011</center></h3>
   <h2>Frequently Asked Questions</h2>
 
+  <h4>Q. How often will oPOSSUM be updated?</h4>
   <p>
+  <b>A.</b> There is no fixed schedule for oPOSSUM updates. oPOSSUM will be updated periodically as new gene assemblies, and improved annotations become available.
+  </p>
+
+  <h4>Q. What is the difference between &quot;Target gene/seq hits&quot; and 
+  &quot;Target TFBS hits&quot;?</h4>
+  <p>
+  <b>A.</b>
+  The Fisher statistic reflects the proportion of genes/sequences that contain the TFBS compared to background. We, therefore, report the total number of genes/sequences in the target set containing the TFBS under &quot;Target gene/seq hits&quot;.
+  </p>
+  <p>
+  The Z-score statistic reflects the occurrence of the TFBS in the target set of genes/sequences compared to background. Therefore, we report the total number of TFBSs for the set under &quot;Target TFBS hits&quot;.
+  </p>
+  </p>
+  For example, if you perform human single site analysis (SSA) using the sample gene set provided on the website and submit with default parameters, you'll see that HNF1A is the top-scoring TFBS for the Z-score analysis and ranked sixth for the Fisher analysis. If you click on the number under &quot;Target gene hits&quot; in the table (it should be 19), you'll see that there are 19 genes containing one or more predicted HNF1A binding sites. The total count of HNF1A binding sites is 41, which is what is reported under &quot;Target TFBS hits&quot;.
+  </p>
+
   <h4>Q. I entered a list of genes and I noticed that several were excluded from the analysis. Why is this?</h4>
-  <p>
   <b>A.</b> This can happen for several reasons. The background gene data set was built by extracting genes from Ensembl which had a canonical symbol (e.g. HGNC, MGI etc) associated. If the gene did not have such a symbol assigned it was excluded from oPOSSUM. Also, not all gene identifiers are mapped to Ensembl genes. Also in a small number cases no significant phastCons conservation exists around the promoter region of the gene and no conserved TFBSs were detected so the gene is excluded.
   </p>
 
-  <p>
   <h4>Q. I noticed that the number of gene hits and non-hits don't add up to the number of genes I entered. Why is this?</h4>
-  <p>
+
   <b>A.</b> In addition to the above case were some of the genes entered may not be stored in the oPOSSUM database and therefore excluded from the analysis, there is also the problem that different kinds of gene identifiers may not uniquely map one-to-one to Ensebml IDs. Therefore several of the gene intentifiers you entered may have mapped to a single Ensembl ID or vice versa. Since the oPOSSUM gene dataset was build based on Ensembl IDs, the numbers reported by the analysis reflect the number of genes with unique Ensembl IDs which map to your input gene list.
   </p>
 
-  <p>
   <h4>Q. I submitted an analysis to oPOSSUM and never received any results. What happened?</h4>
-  <p>
+
   <b>A.</b> Depending on the size of the gene/sequence set entered and parameters selected, some analyses may take several hours to complete. Please be patient. If it has been more than a few hours and you still haven't received your results, it may be that your analysis failed for some reason. The oPOSSUM system makes every attempt to catch errors and notify you of problems, however there are cases where the job simply aborts due to excessive memory or processing demands. If this is the case you can try submitting the job again at another time when there is less likely to be high server demand or try splitting the analysis into smaller subsets. If the problem persists of if this is not a viable option please <a href="contact.html" target="_blank">contact</a> the oPOSSUM administrators and inform us of the problem.
   </p>
 
