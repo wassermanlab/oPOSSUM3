@@ -166,22 +166,18 @@
 	<p>
 	  For gene-based systems, conservation was determined by using phastCons scores
 	  from the UCSC Genome Browser scoring above some minimum threshold and merging
-	  these into conserved regions of minimum length 20 bp such that the resulting
-	  average score over each region was still above threshold. The top 10th, 20th
-	  and 30th percentiles of windows, based on their phastCons scores, were selected
-	  if they met the	minimum required thresholds of 70%, 65%, and 60%, respectively. 
+	  these into conserved regions of minimum length 20 bp.
 	</p>
 	<p>
 	  The conserved regions that fell within 10,000 nucleotides upstream and downstream of the predicted
 	  transcription start site (TSS) were then scanned for binding sites using position weight matrice (PWM) models 
-	  of transcription factor (TF) binding specificity from the <a href="javascript:newWindow=window.open('http://mordor.cgb.ki.se/cgi-bin/jaspar2005/jaspar_db.pl','jaspar'); newWindow.focus()">JASPAR</a> 
+	  of transcription factor (TF) binding specificity from the <a href="http://jaspar.genereg.net/" target="_blank">JASPAR</a> 
 	  database. These TF sites were stored in the oPOSSUM database and comprise the background set for the default analysis.
 	  The background set was pre-computed with three levels of conservation filter. 
 	  <ul>
-		<li>Level 1 corresponds to the top 10 percentile of non-coding conserved regions with 
-			  an absolute minimum percent identity of 70%</li>
-		<li>Level 2 corresponds to the top 20 percentile with a minimum percent identity of 65%</li>
-		<li>Level 3 corresponds to the top 30 percentile with a minimum percent identity of 60%</li>
+		<li>Level 1 corresponds to non-coding conserved regions with a minimum percent identity of 70%</li>
+		<li>Level 2 corresponds to non-coding conserved regions with a minimum percent identity of 65%</li>
+		<li>Level 3 corresponds to non-coding conserved regions with a minimum percent identity of 60%</li>
 	  </ul>
 	</p>
 	<p>No conservation filters are used for yeast oPOSSUM and sequence-based systems.</p>

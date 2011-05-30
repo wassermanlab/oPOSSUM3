@@ -25,8 +25,7 @@
 
   <h1><a name="ssa_help"></a>oPOSSUM anchored Combination Site Analysis (aCSA)</h1>
   <p>
-  <b><center>Identification of pairs of over-represented transcription factor binding
-  sites in sets of genes or sequences</center></b>
+  <b><center>Identification of pairs of over-represented transcription factor binding sites in sets of genes or sequences</center></b>
   </p>
   
   <a href="#analysis_input"><h2>Analysis Input</h2></a>
@@ -69,15 +68,14 @@
 	the text box or using the file upload option.
   </p>
   <p>
-	For gene-based analysis, the gene list should be separated by spaces, commas,
-	semi-colons, colons, newlines or some combination thereof.
+	For gene-based analysis, the gene list should preferably be formatted with one ID per line but may also be separated by spaces, commas, semi-colons, colons, newlines or some combination thereof.
 	  
 	For testing purposes, pressing the <b>Use sample genes</b> button will paste
 	a pre-defined set of test genes into the text area.
 	
 	Use the <b>Clear</b> button to clear the text area.
 
-    You need to choose the type of gene ID from the drop down menu. The gene ID
+  You need to choose the type of gene ID from the drop down menu. The gene ID
 	types available are:<br>
 	<ul>
 	  <li>Ensembl Gene ID
@@ -120,28 +118,30 @@
 	as given in the Entering Target Data Sets section.
   </p>
   <p>
-  	For gene-based oPOSSUM systems, the background data sets were compiled by
+  For gene-based oPOSSUM systems, the full background data sets were compiled by
 	selecting genes from Ensembl which were considered to be well known, i.e. the
 	"KNOWN" attribute was true and the genes had a gene symbol assigned (HGNC
-	symbol for human, MGI for mouse etc.). Transcription start sites (TSSs) were
-	assigned for each gene based on the core Ensembl gene TSS annotations.
-	You can paste in the list of gene ID's to be used as the background data set, or
-	upload a file containing the ID's. Alternatively, you can specify the number of
-	random genes to be picked as the background data set, where the maximum number
-	allowed is the number of genes annotated in the oPOSSUM system.
+	symbol for human, MGI for mouse etc.). You can choose the full set of
+  background genes for your analysis or specify a number of genes to be
+  randomly picked from the full background data set. Alternatively, you can
+  paste in a list of gene ID's to or upload a file containing the ID's.
   </p>
   <p>
 	For sequence-based systems, you can either choose a pre-defined background
-	data set or supply your own. When choosing a background data set, it is important
-	to ascertain that its GC composition closely matches that of the target data set.
-	The pre-defined data sets include:
+	data set or supply your own. When choosing a background data set, it is
+  important to ascertain that its GC composition closely matches that of the
+  target data set. Ideally, the average lengths of the sequences used in the
+  background set should also closely match the lengths used in the target set.
+  The pre-defined data sets include:
 	<ul>
 	  <li>Mouse fibroblast cells
 	  <li>Mouse liver cells
 	  <li>Mouse ES cells
 	  <li>Mouse bone marrow cells
-	  <li>Mouse combined cell lines
+	  <li>Mouse mixed cell lines (a combination of the cell lines above)
 	</ul>
+  For each of the above pre-defined sets, two set sizes are provided and the
+  GC composition is indicated in parenthesis.
 	Your own data sets can be pasted in or uploaded as a file.
   </p>
   
@@ -151,11 +151,10 @@
     Select transcription factor binding site profiles
   </h3>
     
-	<p>Thes matrices included in oPOSSUM-3 were obtained from the 2010 release of
-      <a href="javascript:newWindow=window.open('http://jaspar.cgb.ki.se/cgi-bin/jaspar_db.pl','jaspar');
-	    newWindow.focus()">JASPAR</a> database.
+	<p>The matrices included in oPOSSUM-3 were obtained from the 2010 release of
+      <a href="http://jaspar.genereg.net" target="_blank">JASPAR</a> database.
       For gene-based analysis, you are currently restricted to JASPAR CORE profiles
-	  only for both the anchoring TFs and the TFs to be searched in combination.
+	  for both the anchoring TFs and the TFs to be searched in combination.
 	  The actual profiles that can be selected vary according to the species selected.
       For sequence-based analysis, you have the option of pasting in or uploading your
 	  custom profiles.
@@ -167,7 +166,7 @@
 	Species-specific restrictions may apply.</p>  
 
     <h4><a name="combine_tfs"></a>Select TFs to find in combination with the anchoring TF</h4>
-    <p>To select multiple TFs, use CTRL-click (Windows) or Command-click (OS X).</p>
+    <p>To select multiple TFs, use Shift-click and/or CTRL-click (Command-click for Mac).</p>
     
 	<q></q>
 	</p>
@@ -180,22 +179,18 @@
 	<p>
 	  For gene-based systems, conservation was determined by using phastCons scores
 	  from the UCSC Genome Browser scoring above some minimum threshold and merging
-	  these into conserved regions of minimum length 20 bp such that the resulting
-	  average score over each region was still above threshold. The top 10th, 20th
-	  and 30th percentiles of windows, based on their phastCons scores, were selected
-	  if they met the	minimum required thresholds of 70%, 65%, and 60%, respectively. 
+	  these into conserved regions of minimum length 20 bp.
 	</p>
 	<p>
-	  The conserved regions that fell within 10,000 nucleotides upstream and downstream of the predicted
+	  The conserved regions that fell within 10,000 nucleotides (species dependent) upstream and downstream of the predicted
 	  transcription start site (TSS) were then scanned for binding sites using position weight matrice (PWM) models 
-	  of transcription factor (TF) binding specificity from the <a href="javascript:newWindow=window.open('http://mordor.cgb.ki.se/cgi-bin/jaspar2005/jaspar_db.pl','jaspar'); newWindow.focus()">JASPAR</a> 
+	  of transcription factor (TF) binding specificity from the <a href="http://jaspar.genereg.net/" target="_blank">JASPAR</a> 
 	  database. These TF sites were stored in the oPOSSUM database and comprise the background set for the default analysis.
 	  The background set was pre-computed with three levels of conservation filter. 
 	  <ul>
-		<li>Level 1 corresponds to the top 10 percentile of non-coding conserved regions with 
-			  an absolute minimum percent identity of 70%</li>
-		<li>Level 2 corresponds to the top 20 percentile with a minimum percent identity of 65%</li>
-		<li>Level 3 corresponds to the top 30 percentile with a minimum percent identity of 60%</li>
+		<li>Level 1 corresponds to non-coding conserved regions with a minimum percent identity of 60%</li>
+		<li>Level 2 corresponds to non-coding conserved regions with a minimum percent identity of 65%</li>
+		<li>Level 3 corresponds to non-coding conserved regions with a minimum percent identity of 70%</li>
 	  </ul>
 	</p>
 	<p>No conservation filters are used for yeast oPOSSUM and sequence-based systems.</p>
@@ -205,7 +200,7 @@
 	  <p>
 		  TF sites are scanned by sliding the corresponding postion weight matrix (PWM) along the sequence 
 		  and scoring it at each position. The threshold is the minimum relative score used to report the 
-		  position as a putative binding site. The background set was computed using a threshold of 70%.
+		  position as a putative binding site. The background set was computed using a minimum threshold of 75%.
 	  </p>
 	  <p><hr noshade><br><a href="#top"><img src="../images/arrow-up.gif" align="right" /></a></p>
    
@@ -221,21 +216,19 @@
 	  <p class="text">
 		  This refers to the size of the region around the transcription start site (TSS) which was analysed 
 		  for TF sites. The background set was computed using a region extending a maximum of 10000 bp 
-		  upstream and 10000 bp downstream of the TSS. 
+		  upstream and 10000 bp downstream of the TSS (species dependent). 
 	  </p>
 		
+	<h4><a name="sort_by"></a>Number of results to return:</h4>
+	<p class="text">You can opt to display all results (all TFs are included in the results), a certain number of results (only the top X scoring TFs are included) or results based on a chosen Z-score and Fisher score threshold (only TFs which scored above both the Z-score and Fisher score threshold are returned). If you select to return a certain number of results then the results returned are affected by the sort results option (see below), e.g. if you choose the top 10 results sorted by Fisher score then the TFs which had the top Fisher scores are returned regardless of what their Z-scores were. <b>Please NOTE:</b> you need to be aware that if you select anything other than the 'All' results option, those results that do not meet the criteria selected will be lost, i.e. in the previous example, TFs with high Z-scores may be lost if their Fisher score was not in the top 10. Also note that selecting less than 'All' results does not speed up the analysis. All results still need to be computed even if they are not returned for display on the results page. This option is simply provided to allow for a cleaner, more compact results display. It is therefore recommended that at least for your initial analysis with a give target set, you choose the 'All' option.</p>
+  </p>
 	<h4><a name="sort_by"></a>Sort results by:</h4>
-	<p class="text">Results can be sorted by either Z-scores or Fisher scores. You
-	can opt to display all results or only those that scored above a minimum Z- or
-	Fisher score you specify. You need to be aware that if you select the score
-	threshold option, those results that scored below this value will be lost, even
-	those results that scored highly in the other scoring measure (i.e. low Z-score
-	and high Fisher and vice versa).</p>
+	<p class="text">Results can be sorted by either Z-scores or Fisher scores. Note that this may affect which results are displayed depending on what was selected as the number of results to return (see above). You can resort the results by other criteria by clicking on the corresponding header in the results page table, but please see <b>NOTE</b> above about lost results when choosing less than 'All' results.
+  </p>
   
 	<h4><a name="email"></a>Enter your email address:</h4>
 	<p class="text">
-	  As aCSA process takes a considerable amount of time to complete, users are
-	  notified by email of the results when the analysis is finished.
+	  Depending on parameters selected, the aCSA process make take a considerable amount of time (several hours) to complete. Users are notified by email of the results when the analysis is finished. Please be assured that your e-mail address is used solely for this purpose.
 	</p>
   
   <p><hr noshade><br><a href="#top"><img src="../images/arrow-up.gif" align="right" /></a></p>
@@ -246,8 +239,8 @@
   
 	<p>
 	The results are returned in a table format, preceded by a summary of the
-	input parameters and the GC composition of the target and background
-	sequences used in the analysis. The results can be downloaded in a tab delimited
+	input parameters and, for sequence-based analysis, the GC composition of the target and background sequences used in the analysis.
+  The results can be downloaded in a tab delimited
 	file format (link is provided at the bottom of the table). Those results that
 	do not have any hits in the background genes/sequences are flagged with a
 	warning.
@@ -278,7 +271,7 @@
 		<li>Missing from analysis: number of user-supplied IDs that oPOSSUM could not map
 		to its internal database of genes
 		<li>Unique oPOSSUM genes in analysis: number of unique genes identified by oPOSSUM
-		from the user-supplied IDs (some external IDs may map to a single gene)
+		from the user-supplied IDs (some user supplied IDs may map to a single oPOSSUM gene or vice versa)
 	  </ul>
 
       <a name="selected_tfbs"></a><h4>TFBS profile summary</h4>
@@ -329,21 +322,17 @@
 
   <p><hr noshade><br><a href="#top"><img src="../images/arrow-up.gif" align="right" /></a></p>
 
-  <h2><a name="opossum_results"></a>Analysis Results Summary Table</h2>
+  <h2><a name="opossum_results"></a>Analysis Results Table</h2>
     
 	<p>
-      This table contains the results of both the Z-score and Fisher analyses. The results are 
-      ordered by Z-score from most to least significant (higher to lower z-score). Those columns
-	  that the table can be sorted by has double arrow icons in the header. The columns 
-      of the table are as follows:
+  This table contains the combined Z-score and Fisher analysis results. The results are ordered depending on what was chosen for the 'Sort results by' selection on the input page (default is Z-score) from most to least significant (higher to lower score). The table may be re-sorted by any column by clicking on the column header, but see <b>NOTE</b> in the 'Number of results returned' section above. The columns of the table are as follows:
     </p>
     
 	<h4><a name="tf_name"></a>TF</h4>
 	<p>The name of the transcription factor.</p>
     
 	<h4><a name="jaspar_id"></a>JASPAR ID</h4>
-	<p>The JASPAR ID of the transcription factor. Link is provided to the JASPAR summary page
-	for the TF.</p>
+	<p>The JASPAR ID of the transcription factor. Link is provided to the JASPAR summary page for the TF.</p>
 	
 	<h4><a name="tf_class"></a>Class</h4>
     <p>The class of TFs to which this TF belongs.</p>
@@ -352,17 +341,15 @@
 	<p>The family of TFs to which this TF belongs.</p>
 	
 	<h4><a name="tax_group"></a>Tax group</h4>
-	<p>The taxonomic group to which this TF belongs.</p>
+	<p>The taxonomic supergroup to which this TF belongs.</p>
     
 	<h4><a name="tf_ic"></a>IC</h4>
 	<p>
-	The information content or specificity of this TFBS profile's position weight matrix.
-	IC values less than 12 or greater than 18 are flagged red.
+	The specificity or information content (IC) of this TFBS profile's position weight matrix. 'Extreme' IC values are flagged as this may affect the results for these profiles. A very low IC matrix will be found more frequently by random chance, i.e. more false positives. A very high IC matrix will be found infrequently such that it's possible that just a few extra or fewer hits detected in the foreground or background will more greatly affect the Fisher and Z-scores. Currently those IC values less than 9 or greater than 19 are flagged.
 	</p>
 	
 	<h4><a name="tf_gc"></a>GC Content</h4>
-	<p>The GC content of the this TFBS profile. Values less than 0.33 or greater than 0.66
-	are flagged red.
+	<p>The GC content of the this TFBS profile. Values less than 0.33 or greater than 0.66 are flagged red.
 	
     <h4><a name="t_gene_hits"></a>Target gene/sequence hits</h4>
 	<p>

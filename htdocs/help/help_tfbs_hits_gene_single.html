@@ -25,28 +25,22 @@
 
 <h2><a name="tfbs_hits"></a>TFBS Hits Summary Table</h2>
   
-  <p>This table contains the gene and promoter information where the TFBS prediction is found,
-  along with individual TFBS hit locations.</p>
+  <p>This table contains the gene and promoter information where the TFBS prediction is found, along with individual TFBS hit locations.</p>
   
-  <p>The table is preceded by a header section listing the TF name, JASPAR ID, structural
-  class and family, taxonomic group, information content and GC content of the TFBS profile.</p>
+  <p>The table is preceded by a header section listing the TF name, JASPAR ID, structural class and family, taxonomic group, information content and GC content of the TFBS profile.</p>
   
-  <p> Note that a gene may have multiple alternative promoters. In some cases, the 
-  region upstream of one TSS overlaps with the downstream region of an adjacent TSS (depending on the 
-  promoter upstream and downstream parameters selected). If a TFBS prediction resides in the overlapping 
-  region, it is marked with an asterisk (*) and highlighted in yellow.<p>
+  <p> Note that a gene may have multiple alternative promoters. In some cases, the region upstream of one TSS overlaps with the downstream region of an adjacent TSS (depending on the promoter upstream and downstream parameters selected).</p>
   
   <p>For operon genes in the <i>C. elegans</i> genome, the operon ID is displayed.</p>
   
 <h4><a name="gene_id"></a>Gene ID(s)</h4>
-<p>The Gene ID/name for which the TFBS is predicted.</p>
+<p>This column only appears if you specified gene IDs other than Ensembl IDs. Shows the gene ID/symbol of the gene for which the TFBS is predicted. Since there can be a many-to-one mapping between gene IDs and Ensembl IDs, this may be a comma separated list of IDs</p>
 
 <h4><a name="ensembl_id"></a>Ensembl ID(s)</h4>
-<p>The Ensembl gene ID for which the TFBS is predicted.</p>
+<p>The Ensembl ID of the gene for which the TFBS is predicted.</p>
 
 <h4><a name="operon_id"></a>Operon ID (for <i> C. elegans</i>)</h4>
-<p>The ID for the operon containing the gene. When a gene occurs as part of an operon, the TFBSs upstream
-	of the first gene in the operon apply to all genes in the operon.</p>
+<p>The ID for the operon containing the gene. When a gene occurs as part of an operon, the TFBSs upstream of the first gene in the operon apply to all genes in the operon.</p>
 
 <h4><a name="chr"></a>Chr</h4>
 <p>The chromosome on which the gene is located.</p>
@@ -79,12 +73,12 @@
 <p>The chromosome strand on which the predicted TFBS is located.</p>
 
 <h4><a name="abs_score"></a>Abs. Score</h4>
-<p>The absolute score for the sequence given the weight matrix profile.</p>
+<p>The absolute score of the predicted binding site sequence given the weight matrix profile.</p>
 
 <h4><a name="rel_score"></a>Rel. Score</h4>
-<p>The relative score for the sequence given the weight matrix profile.</p>
+<p>The relative (percentage) score of the predicted binding site sequence given the weight matrix profile.</p>
 
 <h4><a name="tfbs_sequence"></a>TFBS sequence</h4>
-<p>The sequence matching the given TFBS profile above the threshold match score.</p>
+<p>The predicted binding site sequence. Note that if the TFBS strand is negative, the binding sequence is displayed based on the antisense strand</p>
 
 <p><hr noshade><br><a href="#top"><img src="../images/arrow-up.gif" align="right" /></a></p>

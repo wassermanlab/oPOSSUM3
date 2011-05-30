@@ -25,29 +25,22 @@
 
 <h2><a name="tfbs_hits"></a>TFBS Hits Summary Table</h2>
   
-  <p>This table contains the gene and promoter information where the TFBS predictions
-  are found, along with individual TFBS hit locations.</p>
+  <p>This table contains the gene and promoter information where the TFBS predictions are found, along with individual TFBS hit locations.</p>
   
-  <p>The table is preceded by a header section listing the TF name, JASPAR ID, structural
-  class and family, taxonomic group, information content and GC content of the TFBS
-  profile for the anchoring TF and the anchored (paired) TF.</p>
+  <p>The table is preceded by a header section listing the TF name, JASPAR ID, structural class and family, taxonomic group, information content and GC content of the TFBS profile for the anchoring TF and the anchored (paired) TF.</p>
   
-  <p> Note that a gene may have multiple alternative promoters. In some cases, the 
-  region upstream of one TSS overlaps with the downstream region of an adjacent TSS (depending on the 
-  promoter upstream and downstream parameters selected). If a TFBS prediction resides in the overlapping 
-  region, it is marked with an asterisk (*) and highlighted in yellow.<p>
+  <p> Note that a gene may have multiple alternative promoters. In some cases, the region upstream of one TSS overlaps with the downstream region of an adjacent TSS (depending on the promoter upstream and downstream parameters selected).</p>
   
   <p>For operon genes in the <i>C. elegans</i> genome, the operon ID is displayed.</p>
   
 <h4><a name="gene_id"></a>Gene ID(s)</h4>
-<p>The Gene ID/name for which the TFBS is predicted.</p>
+<p>This column only appears if you specified gene IDs other than Ensembl IDs. Shows the gene ID/symbol of the gene for which the TFBS is predicted. Since there can be a many-to-one mapping between gene IDs and Ensembl IDs, this may be a comma separated list of IDs</p>
 
 <h4><a name="ensembl_id"></a>Ensembl ID(s)</h4>
 <p>The Ensembl gene ID for which the TFBS is predicted.</p>
 
 <h4><a name="operon_id"></a>Operon ID (for <i> C. elegans</i>)</h4>
-<p>The ID for the operon containing the gene. When a gene occurs as part of an operon, the TFBSs upstream
-	of the first gene in the operon apply to all genes in the operon.</p>
+<p>The ID for the operon containing the gene. When a gene occurs as part of an operon, the TFBSs upstream of the first gene in the operon apply to all genes in the operon.</p>
 
 <h4><a name="chr"></a>Chr</h4>
 <p>The chromosome on which the gene is located.</p>
@@ -65,7 +58,7 @@
 <p>The annotated transcription start site (TSS) position located closest to the given TFBS hit.</p>
 
 <h4><a name="tss"></a>Anchoring TF</h4>
-<p>The Anchoring TF name.</p>
+<p>The anchoring TF name.</p>
 
 <h4><a name="tfbs_start"></a>Start</h4>
 <p>The start position of the predicted anchoring TFBS.</p>
@@ -83,16 +76,16 @@
 <p>The chromosome strand on which the predicted anchoring TFBS is located.</p>
 
 <h4><a name="abs_score"></a>Score</h4>
-<p>The absolute score for the sequence given the anchoring TFBS weight matrix profile.</p>
+<p>The absolute score of the predicted binding site sequence given the anchoring TFBS weight matrix profile.</p>
 
 <h4><a name="rel_score"></a>% Score</h4>
-<p>The relative score for the sequence given the anchoring TFBS weight matrix profile.</p>
+<p>The relative (percent) score of the predicted binding site sequence given the anchoring TFBS weight matrix profile.</p>
 
 <h4><a name="tfbs_sequence"></a>Sequence</h4>
-<p>The sequence matching the given anchoring TFBS profile above the threshold match score.</p>
+<p>The predicted binding site sequence of the anchoring TF. Note that if the anchoring TFBS strand is negative, the sequence reported is based on the antisense strand</p>
 
 <h4><a name="tss"></a>Anchored TF</h4>
-<p>The Anchored TF name (paired with the anchoring TF).</p>
+<p>The anchored TF name (paired with the anchoring TF).</p>
 
 <h4><a name="tfbs_start"></a>Start</h4>
 <p>The start position of the predicted anchored TFBS.</p>
@@ -110,13 +103,13 @@
 <p>The chromosome strand on which the predicted anchored TFBS is located.</p>
 
 <h4><a name="abs_score"></a>Score</h4>
-<p>The absolute score for the sequence given the anchored TFBS weight matrix profile.</p>
+<p>The absolute score of the predicted binding site sequence given the anchored TFBS weight matrix profile.</p>
 
 <h4><a name="rel_score"></a>% Score</h4>
-<p>The relative score for the sequence given the anchored TFBS weight matrix profile.</p>
+<p>The relative (percent) score of the predicted binding site sequence given the anchored TFBS weight matrix profile.</p>
 
 <h4><a name="tfbs_sequence"></a>Sequence</h4>
-<p>The sequence matching the given anchored TFBS profile above the threshold match score.</p>
+<p>The predicted binding site sequence of the anchored TF. Note that if the anchored TFBS strand is indicated to be negative, the sequence reported is based on the antisense strand.</p>
 
 <h4><a name="distance"></a>Distance</h4>
 <p>The distance between the anchoring TFBS and the anchored TFBS.</p>
