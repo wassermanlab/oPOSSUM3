@@ -172,6 +172,9 @@ GetOptions(
 
 die "No results directory specified\n" if !$results_dir;
 
+my $ok = 1;
+my $message = "";
+
 # Create relative results dir name from abs results dir
 my $rel_results_dir = $results_dir;
 
@@ -405,104 +408,119 @@ $logger->debug("TFBSClusterSet:\n" . Data::Dumper::Dumper($tf_cluster_set));
 # search for TFBS cluster sites on the sequences, based on the TFs specified
 #
 
-$logger->info("Searching target sequences for TFBSs");
+$logger->info("Searching target sequences for TFBS clusters");
 #my ($t_tf_seq_siteset, $t_tf_seqs)
 my $t_cluster_seq_sites
     = tf_cluster_set_search_seqs($tf_cluster_set, $tf_set, \%t_seq_id_seqs, $threshold);
 
-fatal("No TFBS clusters found in test sequences") if !$t_cluster_seq_sites;
-
-$logger->info("Searching background sequences for TFBSs");
-#my ($bg_tf_seq_siteset, $bg_tf_seqs)
-my $bg_cluster_seq_sites
-    = tf_cluster_set_search_seqs($tf_cluster_set, $tf_set, \%bg_seq_id_seqs, $threshold);
-
-fatal("No TFBS clusters found in control sequences") if !$bg_cluster_seq_sites;
-
-#
-# this is where I do cluster count
-#
-$logger->info("Computing target sequence TFBS cluster counts");
-my $t_counts = compute_site_cluster_counts(
-                $tf_cluster_set, \@t_seq_ids, $t_cluster_seq_sites);
-
-$logger->debug("Target TFBS cluster counts:\n" . Data::Dumper::Dumper($t_counts));
-
-$logger->info("Computing background sequence TFBS cluster counts");
-my $bg_counts = compute_site_cluster_counts(
-                $tf_cluster_set, \@bg_seq_ids, $bg_cluster_seq_sites);
-
-#$t_counts->conserved_region_length_set($t_cr_len_set);
-#$bg_counts->conserved_region_length_set($bg_cr_len_set);
-
-#my $fresults = fisher_analysis($bg_counts, $t_counts, \%tfs,
-#                               scalar @$t_seqs, scalar @$bg_seqs);
-my $fisher = OPOSSUM::Analysis::Cluster::Fisher->new();
-$logger->info("Computing Fisher scores");
-my $fresults = $fisher->calculate_Fisher_probability($bg_counts, $t_counts);
-
-$logger->debug("Fisher results:\n" . Data::Dumper::Dumper($fresults));
-
-#my $zresults = zscore_analysis($bg_counts, $t_counts, \%tfs,
-#                               $t_seq_len, $bg_seq_len);
-my $zscore = OPOSSUM::Analysis::Cluster::Zscore->new();
-$logger->info("Computing z-scores");
-my $zresults = $zscore->calculate_Zscore(
-    $bg_counts, $t_counts, $bg_seq_len, $t_seq_len
-);
-
-$logger->debug("Z-score results:\n" . Data::Dumper::Dumper($zresults));
-
-# Sort results by z-score
-#$zresults->sort_by('z_score', 1);
-#
-#my $formatted_results = format_results($fresults, $zresults, $tf_set);
-#
-
-#
-# Use new OPOSSUM::Analysis::CombinedResultSet to combine Fisher and
-# Z-score result sets.
-#
-my $cresults = OPOSSUM::Analysis::Cluster::CombinedResultSet->new(
-    -fisher_result_set  => $fresults,
-    -zscore_result_set  => $zresults
-);
-
-#
-# Get results as a list
-#
-my %result_params;
-$result_params{-num_results} = $num_results if defined $num_results;
-$result_params{-zscore_cutoff} = $zscore_cutoff if defined $zscore_cutoff;
-$result_params{-fisher_cutoff} = $fisher_cutoff if defined $fisher_cutoff;
-
-if (defined $sort_by) {
-    if ($sort_by =~ /^fisher/) {
-        $sort_by = 'fisher_p_value';
-    } elsif ($sort_by =~ /^z_score/ || $sort_by =~ /^z-score/) {
-        $sort_by = 'zscore';
-    }
-
-    $result_params{-sort_by} = $sort_by;
-
-    #
-    # Fisher scores are now -ln() values so all results are reverse sorted
-    # (largest value first).
-    # DJA 14/03/2011
-    #
-    #if ($sort_by eq 'zscore') {
-    #    # Sort z-score from highest to lowest
-    #    $result_params{-reverse} = 1;
-    #}
-    $result_params{-reverse} = 1;
+unless ($t_cluster_seq_sites) {
+    $message = "No TFBS clusters found in target sequences";
+    $logger->info($message);
+    $ok = 0;
 }
 
-my $cresult_list = $cresults->get_list(%result_params);
+my $cresult_list;
+if ($ok) {
+    $logger->info("Searching background sequences for TFBS clusters");
+    #my ($bg_tf_seq_siteset, $bg_tf_seqs)
+    my $bg_cluster_seq_sites = tf_cluster_set_search_seqs(
+        $tf_cluster_set, $tf_set, \%bg_seq_id_seqs, $threshold
+    );
+
+    $logger->info("No TFBS clusters found in control sequences")
+        unless $bg_cluster_seq_sites;
+
+    #
+    # this is where I do cluster count
+    #
+    $logger->info("Computing target sequence TFBS cluster counts");
+    my $t_counts = compute_site_cluster_counts(
+                    $tf_cluster_set, \@t_seq_ids, $t_cluster_seq_sites);
+
+    $logger->debug("Target TFBS cluster counts:\n" . Data::Dumper::Dumper($t_counts));
+
+    $logger->info("Computing background sequence TFBS cluster counts");
+    my $bg_counts = compute_site_cluster_counts(
+                    $tf_cluster_set, \@bg_seq_ids, $bg_cluster_seq_sites);
+
+    #$t_counts->conserved_region_length_set($t_cr_len_set);
+    #$bg_counts->conserved_region_length_set($bg_cr_len_set);
+
+    #my $fresults = fisher_analysis($bg_counts, $t_counts, \%tfs,
+    #                               scalar @$t_seqs, scalar @$bg_seqs);
+    my $fisher = OPOSSUM::Analysis::Cluster::Fisher->new();
+    $logger->info("Computing Fisher scores");
+    my $fresults = $fisher->calculate_Fisher_probability($bg_counts, $t_counts);
+
+    $logger->debug("Fisher results:\n" . Data::Dumper::Dumper($fresults));
+
+    #my $zresults = zscore_analysis($bg_counts, $t_counts, \%tfs,
+    #                               $t_seq_len, $bg_seq_len);
+    my $zscore = OPOSSUM::Analysis::Cluster::Zscore->new();
+    $logger->info("Computing z-scores");
+    my $zresults = $zscore->calculate_Zscore(
+        $bg_counts, $t_counts, $bg_seq_len, $t_seq_len
+    );
+
+    $logger->debug("Z-score results:\n" . Data::Dumper::Dumper($zresults));
+
+    # Sort results by z-score
+    #$zresults->sort_by('z_score', 1);
+    #
+    #my $formatted_results = format_results($fresults, $zresults, $tf_set);
+    #
+
+    #
+    # Use new OPOSSUM::Analysis::CombinedResultSet to combine Fisher and
+    # Z-score result sets.
+    #
+    my $cresults = OPOSSUM::Analysis::Cluster::CombinedResultSet->new(
+        -fisher_result_set  => $fresults,
+        -zscore_result_set  => $zresults
+    );
+
+    #
+    # Get results as a list
+    #
+    my %result_params;
+    $result_params{-num_results} = $num_results if defined $num_results;
+    $result_params{-zscore_cutoff} = $zscore_cutoff if defined $zscore_cutoff;
+    $result_params{-fisher_cutoff} = $fisher_cutoff if defined $fisher_cutoff;
+
+    if (defined $sort_by) {
+        if ($sort_by =~ /^fisher/) {
+            $sort_by = 'fisher_p_value';
+        } elsif ($sort_by =~ /^z_score/ || $sort_by =~ /^z-score/) {
+            $sort_by = 'zscore';
+        }
+
+        $result_params{-sort_by} = $sort_by;
+
+        #
+        # Fisher scores are now -ln() values so all results are reverse sorted
+        # (largest value first).
+        # DJA 14/03/2011
+        #
+        #if ($sort_by eq 'zscore') {
+        #    # Sort z-score from highest to lowest
+        #    $result_params{-reverse} = 1;
+        #}
+        $result_params{-reverse} = 1;
+    }
+
+    $cresult_list = $cresults->get_list(%result_params);
+    unless ($cresult_list) {
+        $message = "No TFBS clusters scored above the selected Z-score/Fisher"
+            . " cutoffs";
+        $logger->info($message);
+        $ok = 0;
+    }
+}
 
 $logger->info("Writing html results");
 write_results_html($tf_cluster_set, $cresult_list);
 
-if ($cresult_list && $cresult_list->[0]) {
+if ($ok) {
     $logger->info("Writing text results");
     write_results_text($tf_cluster_set, $cresult_list);
 
@@ -560,7 +578,7 @@ sub tf_cluster_set_search_seqs
     my $count = 1;
     foreach my $seq_id (@seq_ids)
     {
-        $logger->info("$count: $seq_id");
+        $logger->debug("$count: $seq_id");
         my $seq = $seq_id_seqs->{$seq_id};
         
         foreach my $cl_id (@$cluster_ids)
@@ -647,7 +665,7 @@ sub fetch_tf_cluster_set
     #print STDERR "# clusters = " . scalar(@$clusters) . "\n";
     $cluster_set->add_tf_cluster_list($clusters);
 
-    die "Could not fetch TFBS clusters\n"
+    fatal("Could not fetch TFBS clusters")
         if !$cluster_set || $cluster_set->size == 0;
 
     return $cluster_set;
@@ -702,15 +720,25 @@ sub merge_cluster_siteset
     #my $it = $filtered_siteset->Iterator(-sort_by => 'start');
     my $it = $tf_siteset->Iterator(-sort_by => 'start');
     my $tfsite = $it->next;
+
+    #
+    # Let's not mess around setting and resetting strand info. Strand is
+    # meaningless for clusters. Just keep everything on the +ve strand.
+    # DJA 2011/05/24
+    #
+    my $seq = $tfsite->seq->seq;
+    if ($tfsite->strand == -1) {
+        $seq = revcom($seq);
+    }
     my $prev_ctfbs = OPOSSUM::ConservedTFBS->new(
-        -tf_id => $cluster_id,
-        -gene_id => $seq_id,
-        -start => $tfsite->start,
-        -end => $tfsite->end,
-        -strand => $tfsite->strand,
-        -score => $tfsite->score,
-        -rel_score => $tfsite->rel_score,
-        -seq => $tfsite->seq->seq
+        -tf_id      => $cluster_id,
+        -gene_id    => $seq_id,
+        -start      => $tfsite->start,
+        -end        => $tfsite->end,
+        -strand     => 1,
+        -score      => $tfsite->score,
+        -rel_score  => $tfsite->rel_score,
+        -seq        => $seq
     );
     
     my @merged_sites;
@@ -718,15 +746,20 @@ sub merge_cluster_siteset
     
     while ($tfsite = $it->next)
     {
+        my $seq = $tfsite->seq->seq;
+        if ($tfsite->strand == -1) {
+            $seq = revcom($seq);
+        }
+
         my $ctfbs = OPOSSUM::ConservedTFBS->new(
-            -tf_id => $cluster_id,
-            -gene_id => $seq_id,
-            -start => $tfsite->start,
-            -end => $tfsite->end,
-            -strand => $tfsite->strand,
-            -score => $tfsite->score,
-            -rel_score => $tfsite->rel_score,
-            -seq => $tfsite->seq->seq
+            -tf_id      => $cluster_id,
+            -gene_id    => $seq_id,
+            -start      => $tfsite->start,
+            -end        => $tfsite->end,
+            -strand     => 1,
+            -score      => $tfsite->score,
+            -rel_score  => $tfsite->rel_score,
+            -seq        => $seq
         );
         
         $prev_ctfbs = $merged_sites[$#merged_sites];
@@ -736,33 +769,51 @@ sub merge_cluster_siteset
         if (overlap($prev_ctfbs, $ctfbs))
         {
             if ($prev_ctfbs->end < $ctfbs->end) {
-                $prev_ctfbs->end($ctfbs->end);
-                
+                #$prev_ctfbs->end($ctfbs->end);
+                #
                 # merge the sequences
                 # first, check the strands of the sites
                 # if negative, reverse complement
                 # I should only do this if they are overlapping
-                if ($prev_ctfbs->strand != $ctfbs->strand) {
-                    if ($prev_ctfbs->strand == -1) {
-                        my $seq = Bio::Seq->new(-seq => $prev_ctfbs->seq);
-                        $prev_ctfbs->seq($seq->revcom->seq);
-                    } else {
-                        my $seq = Bio::Seq->new(-seq => $ctfbs->seq);
-                        $ctfbs->seq($seq->revcom->seq);
-                    }
-                }
+                #
+                # XXX If we are going to reverse complement the original
+                # (prev_ctfbs) seq, we also need to reset the strand
+                # DJA 2011/05/24
+                #if ($prev_ctfbs->strand != $ctfbs->strand) {
+                #    if ($prev_ctfbs->strand == -1) {
+                #        my $seq = Bio::Seq->new(-seq => $prev_ctfbs->seq);
+                #        $prev_ctfbs->seq($seq->revcom->seq);
+                #    } else {
+                #        my $seq = Bio::Seq->new(-seq => $ctfbs->seq);
+                #        $ctfbs->seq($seq->revcom->seq);
+                #    }
+                #}
                 
-                my $ext_seq = substr($ctfbs->seq, $prev_ctfbs->end - $ctfbs->start);
-                $prev_ctfbs->seq($prev_ctfbs->seq . $ext_seq);
+                #my $ext_seq = substr($ctfbs->seq, $prev_ctfbs->end - $ctfbs->start);
+                # DJA 2011/05/24
+                my $ext_seq = substr(
+                    $seq, $prev_ctfbs->end - $ctfbs->start + 1
+                );
+
+                #
+                # Have to check this. If ends of ctfbs and prev_ctfbs are the
+                # same, then ext_seq is undef.
+                # DJA 2011/05/24
+                #
+                if ($ext_seq) {
+                    $prev_ctfbs->seq($prev_ctfbs->seq . $ext_seq);
+                }
+
+                $prev_ctfbs->end($ctfbs->end);
             }
 
             if ($ctfbs->rel_score > $prev_ctfbs->rel_score) {
                     $prev_ctfbs->rel_score($ctfbs->rel_score);
             }
+
             if ($ctfbs->score > $prev_ctfbs->score) {
                     $prev_ctfbs->score($tfsite->score);
             }
-
         } else {
             push @merged_sites, $ctfbs;
         }
@@ -775,8 +826,10 @@ sub overlap
 {
     my ($tf1, $tf2) = @_;
     
-    if (($tf1->start <= $tf2->start and $tf1->end > $tf2->start)
-        or ($tf2->start <= $tf1->start and $tf2->end > $tf1->start))
+    #if (($tf1->start <= $tf2->start and $tf1->end > $tf2->start)
+    #    or ($tf2->start <= $tf1->start and $tf2->end > $tf1->start))
+    # DJA 2011/05/24
+    if ($tf1->start <= $tf2->end and $tf1->end >= $tf2->start)
     {
         return 1;
     }
@@ -947,6 +1000,7 @@ sub write_results_html
         user_bg_seq_file        => $user_bg_seq_file,
         #user_tf_file            => $user_tf_file,
         bg_seq_set_name         => $bg_seq_set_name,
+        message                 => $message,
 
         formatf                 => sub {
                                         my $dec = shift;
@@ -1047,7 +1101,8 @@ sub write_tfbs_cluster_details_text
 
     print FH "\n\nConserved Binding Sites for $cl_name\n\n";
 
-    printf FH "\n\n%-31s\t%7s\t%7s\t%7s\t%7s\t%7s\t%s\n",
+    #printf FH "\n\n%-31s\t%7s\t%7s\t%7s\t%7s\t%7s\t%s\n",
+    printf FH "\n\n%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
         'Sequence ID', 'Start', 'End', 'Strand', 'Score', '%Score', 'TFBS Cluster Sequence';
 
     foreach my $seq_id (@$seq_ids) {
@@ -1057,20 +1112,14 @@ sub write_tfbs_cluster_details_text
 
         next if !$sites || scalar(@$sites) == 0;
 
-        my $first = 1;
-        printf FH "%-31s", $display_id;
+        #printf FH "%-31s", $display_id;
+        printf FH "%s", $display_id;
 
 #        my $iter = $siteset->Iterator(-sort_by => 'start');
 #        while (my $site = $iter->next()) {
         foreach my $site (@$sites) {
-            # Do not reprint sequence ID for subsequent sites
-            unless ($first) {
-                printf FH "%-31s", '';
-            }
-            $first = 0;
-
-            #printf FH "%s\t%d\t%d\t%d\t%.3f\t%.1f%%\t%s\n",
-            printf FH "\t%7d\t%7d\t%7d\t%7.3f\t%6.1f%%\t%s\n",
+            #printf FH "\t%7d\t%7d\t%7d\t%7.3f\t%6.1f%%\t%s\n",
+            printf FH "\t%d\t%d\t%d\t%.3f\t%.1f%%\t%s\n",
                 $site->start(),
                 $site->end(),
                 $site->strand(),
@@ -1078,16 +1127,14 @@ sub write_tfbs_cluster_details_text
                 $site->rel_score() * 100,
                 $site->seq;
         }
-
-        print FH "\n";
     }
 
     close(FH);
 }
 
 #
-# Write the details of the putative TFBS clusters for each cluster/seq. Create an
-# HTML file for each TFBS cluster.
+# Write the details of the putative TFBS clusters for each cluster/seq.
+# Create an HTML file for each TFBS cluster.
 #
 sub write_tfbs_cluster_details_html
 {
@@ -1259,6 +1306,17 @@ sub filter_overlapping_sites
     }
 
     return $filtered_set;
+}
+
+sub revcom
+{
+    my ($seq) = @_;
+
+    my $rc_seq = reverse $seq;
+
+    $rc_seq =~ tr/[acgtACGT]/[tgcaTGCA]/;
+
+    return $rc_seq;
 }
 
 sub process_template

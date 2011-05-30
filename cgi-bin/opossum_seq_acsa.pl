@@ -188,6 +188,9 @@ GetOptions(
 
 die "No results directory specified\n" if !$results_dir;
 
+my $ok = 1;
+my $message = "";
+
 $num_results = 'All' unless $num_results;
 
 # Create relative results dir name from abs results dir
@@ -439,93 +442,108 @@ my ($t_tf_seq_sites, $t_tf_seq_sitepairs) = anchored_tf_set_search_seqs(
     $tf_set, $anchor_matrix, \%t_seq_id_seqs, $threshold
 );
 
-fatal("No TFBSs found in test sequences") unless $t_tf_seq_sites;
-
-$logger->info("Searching background sequences for TFBSs");
-my ($bg_tf_seq_sites) = anchored_tf_set_search_seqs(
-    $tf_set, $anchor_matrix, \%bg_seq_id_seqs, $threshold
-);
-
-fatal("No anchored TFBSs found in control sequences") unless $bg_tf_seq_sites;
-
-$logger->info("Computing target sequence TFBS counts");
-my $t_counts = compute_site_counts($tf_set, \@t_seq_ids, $t_tf_seq_sites);
-
-$logger->debug("Target TFBS counts:\n" . Data::Dumper::Dumper($t_counts));
-
-$logger->info("Computing background sequence TFBS counts");
-my $bg_counts = compute_site_counts($tf_set, \@bg_seq_ids, $bg_tf_seq_sites);
-
-#$t_counts->conserved_region_length_set($t_cr_len_set);
-#$bg_counts->conserved_region_length_set($bg_cr_len_set);
-
-#my $fresults = fisher_analysis($bg_counts, $t_counts, \%tfs,
-#                               scalar @$t_seqs, scalar @$bg_seqs);
-my $fisher = OPOSSUM::Analysis::Fisher->new();
-$logger->info("Computing Fisher scores");
-my $fresults = $fisher->calculate_Fisher_probability($bg_counts, $t_counts);
-
-$logger->debug("Fisher results:\n" . Data::Dumper::Dumper($fresults));
-
-#my $zresults = zscore_analysis($bg_counts, $t_counts, \%tfs,
-#                               $t_seq_len, $bg_seq_len);
-my $zscore = OPOSSUM::Analysis::Zscore->new();
-$logger->info("Computing z-scores");
-my $zresults = $zscore->calculate_Zscore(
-    $bg_counts, $t_counts, $bg_seq_len, $t_seq_len, $tf_set
-);
-
-$logger->debug("Z-score results:\n" . Data::Dumper::Dumper($zresults));
-
-# Sort results by z-score
-#$zresults->sort_by('z_score', 1);
-#
-#my $formatted_results = format_results($fresults, $zresults, $tf_set);
-#
-
-#
-# Use new OPOSSUM::Analysis::CombinedResultSet to combine Fisher and
-# Z-score result sets.
-#
-my $cresults = OPOSSUM::Analysis::CombinedResultSet->new(
-    -fisher_result_set  => $fresults,
-    -zscore_result_set  => $zresults
-);
-
-#
-# Get results as a list
-#
-my %result_params;
-$result_params{-num_results} = $num_results if defined $num_results;
-$result_params{-zscore_cutoff} = $zscore_cutoff if defined $zscore_cutoff;
-$result_params{-fisher_cutoff} = $fisher_cutoff if defined $fisher_cutoff;
-if (defined $sort_by) {
-    if ($sort_by =~ /^fisher/) {
-        $sort_by = 'fisher_p_value';
-    } elsif ($sort_by =~ /^z_score/ || $sort_by =~ /^z-score/) {
-        $sort_by = 'zscore';
-    }
-
-    $result_params{-sort_by} = $sort_by;
-
-    #
-    # Fisher scores are now -ln() values so all results are reverse sorted
-    # (largest value first).
-    # DJA 14/03/2011
-    #
-    #if ($sort_by eq 'zscore') {
-    #    # Sort z-score from highest to lowest
-    #    $result_params{-reverse} = 1;
-    #}
-    $result_params{-reverse} = 1;
+unless ($t_tf_seq_sites) {
+    $message = "No anchored TFBSs found in target sequences";
+    $logger->info($message);
+    $ok = 0;
 }
 
-my $cresult_list = $cresults->get_list(%result_params);
+my $cresult_list;
+if ($ok) {
+    $logger->info("Searching background sequences for TFBSs");
+    my ($bg_tf_seq_sites) = anchored_tf_set_search_seqs(
+        $tf_set, $anchor_matrix, \%bg_seq_id_seqs, $threshold
+    );
+
+    $logger->info("No anchored TFBSs found in control sequences")
+        unless $bg_tf_seq_sites;
+
+    $logger->info("Computing target sequence TFBS counts");
+    my $t_counts = compute_site_counts($tf_set, \@t_seq_ids, $t_tf_seq_sites);
+
+    $logger->debug("Target TFBS counts:\n" . Data::Dumper::Dumper($t_counts));
+
+    $logger->info("Computing background sequence TFBS counts");
+    my $bg_counts = compute_site_counts($tf_set, \@bg_seq_ids, $bg_tf_seq_sites);
+
+    #$t_counts->conserved_region_length_set($t_cr_len_set);
+    #$bg_counts->conserved_region_length_set($bg_cr_len_set);
+
+    #my $fresults = fisher_analysis($bg_counts, $t_counts, \%tfs,
+    #                               scalar @$t_seqs, scalar @$bg_seqs);
+    my $fisher = OPOSSUM::Analysis::Fisher->new();
+    $logger->info("Computing Fisher scores");
+    my $fresults = $fisher->calculate_Fisher_probability($bg_counts, $t_counts);
+
+    $logger->debug("Fisher results:\n" . Data::Dumper::Dumper($fresults));
+
+    #my $zresults = zscore_analysis($bg_counts, $t_counts, \%tfs,
+    #                               $t_seq_len, $bg_seq_len);
+    my $zscore = OPOSSUM::Analysis::Zscore->new();
+    $logger->info("Computing z-scores");
+    my $zresults = $zscore->calculate_Zscore(
+        $bg_counts, $t_counts, $bg_seq_len, $t_seq_len, $tf_set
+    );
+
+    $logger->debug("Z-score results:\n" . Data::Dumper::Dumper($zresults));
+
+    # Sort results by z-score
+    #$zresults->sort_by('z_score', 1);
+    #
+    #my $formatted_results = format_results($fresults, $zresults, $tf_set);
+    #
+
+    #
+    # Use new OPOSSUM::Analysis::CombinedResultSet to combine Fisher and
+    # Z-score result sets.
+    #
+    my $cresults = OPOSSUM::Analysis::CombinedResultSet->new(
+        -fisher_result_set  => $fresults,
+        -zscore_result_set  => $zresults
+    );
+
+    #
+    # Get results as a list
+    #
+    my %result_params;
+    $result_params{-num_results} = $num_results if defined $num_results;
+    $result_params{-zscore_cutoff} = $zscore_cutoff if defined $zscore_cutoff;
+    $result_params{-fisher_cutoff} = $fisher_cutoff if defined $fisher_cutoff;
+    if (defined $sort_by) {
+        if ($sort_by =~ /^fisher/) {
+            $sort_by = 'fisher_p_value';
+        } elsif ($sort_by =~ /^z_score/ || $sort_by =~ /^z-score/) {
+            $sort_by = 'zscore';
+        }
+
+        $result_params{-sort_by} = $sort_by;
+
+        #
+        # Fisher scores are now -ln() values so all results are reverse sorted
+        # (largest value first).
+        # DJA 14/03/2011
+        #
+        #if ($sort_by eq 'zscore') {
+        #    # Sort z-score from highest to lowest
+        #    $result_params{-reverse} = 1;
+        #}
+        $result_params{-reverse} = 1;
+    }
+
+    $cresult_list = $cresults->get_list(%result_params);
+
+    unless ($cresult_list) {
+        $message = "No anchored TFBSs scored above the selected"
+            . " Z-score/Fisher cutoffs";
+        $logger->info($message);
+        $ok = 0;
+    }
+}
 
 $logger->info("Writing html results");
 write_results_html($tf_set, $cresult_list);
+if ($ok) {
 
-if ($cresult_list && $cresult_list->[0]) {
     $logger->info("Writing text results");
     write_results_text($tf_set, $cresult_list);
 
@@ -890,6 +908,7 @@ sub write_results_html
         user_bg_seq_file        => $user_bg_seq_file,
         user_tf_file            => $user_tf_file,
         bg_seq_set_name         => $bg_seq_set_name,
+        message                 => $message,
 
         formatf                 => sub {
                                         my $dec = shift;

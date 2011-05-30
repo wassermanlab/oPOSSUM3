@@ -200,6 +200,9 @@ GetOptions(
 
 die "No results directory specified\n" if !$results_dir;
 
+my $message = "";
+my $ok = 1;
+
 # Create relative results dir name from abs results dir
 my $rel_results_dir = $results_dir;
 
@@ -597,10 +600,17 @@ if (defined $sort_by) {
 $logger->info("Getting filtered/sorted result list");
 my $results = $cresult_set->get_list(%result_params);
 
+unless ($results) {
+    $message = "No anchored TFBS clusters scored above the selected"
+        . " Z-score/Fisher thresholds";
+    $logger->info($message);
+    $ok = 0;
+}
+
 $logger->info("Writing HTML results");
 write_results_html();
 
-if ($results && $results->[0]) {
+if ($ok) {
     $logger->info("Writing text results");
     write_results_text();
 
@@ -980,6 +990,7 @@ sub write_results_html
         result_sort_by      => $sort_by,
         warn_zero_bg_gene_hits  => $warn_zero_bg_gene_hits,
         results_file        => RESULTS_TEXT_FILENAME,
+        message             => $message,
 
         formatf             => sub {
                                     my $dec = shift;
