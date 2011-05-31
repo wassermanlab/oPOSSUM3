@@ -702,8 +702,8 @@ sub process
         }
     }
 
-    printf LOG "Starting aCSA analysis at %s:\n$command\n\n",
-        scalar localtime(time);
+    my $submitted_time = scalar localtime(time);
+    printf LOG "Starting aCSA analysis at $submitted_time:\n$command\n\n";
 
     system("$command >/dev/null 2>&1 &");
 
@@ -724,6 +724,7 @@ sub process
         result_retain_days  => REMOVE_TEMPFILES_OLDER_THAN,
         sid                 => $state->sid(),
         job_id              => $job_id,
+        submitted_time      => $submitted_time,
         user_t_gene_file    => $user_t_gene_file,
         user_bg_gene_file   => $user_bg_gene_file,
         species             => $species,

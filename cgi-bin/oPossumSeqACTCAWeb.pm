@@ -429,8 +429,8 @@ sub process
         $command .= " -bss '$bg_seq_set_name'";
     }
 
-    printf LOG "Starting ACTCA analysis at %s:\n$command\n\n",
-        scalar localtime(time);
+    my $submitted_time = scalar localtime(time);
+    printf LOG "Starting ACTCA analysis at $submitted_time:\n$command\n\n";
 
     system("$command >/dev/null 2>&1 &");
 
@@ -450,6 +450,7 @@ sub process
         section             => 'Analysis Submitted',
         result_retain_days  => REMOVE_TEMPFILES_OLDER_THAN,
         job_id              => $job_id,
+        submitted_time      => $submitted_time,
         tf_db               => $tf_db,
         cl_db               => $cl_db,
         tf_cluster_set      => $tf_cluster_set,

@@ -529,8 +529,9 @@ sub process
         $command .= " -bss '$bg_seq_set_name'";
     }
 
-    printf LOG "\nStarting sequence-based analysis at %s:\n$command\n\n",
-        scalar localtime(time);
+    my $submitted_time = scalar localtime(time);
+    print LOG
+        "\nStarting sequence-based analysis at $submitted_time:\n$command\n\n";
 
     my $rv = system("$command >/dev/null 2>&1 &");
     if ($rv) {
@@ -551,6 +552,7 @@ sub process
         title               => $state->title(),
         section             => 'Analysis Submitted',
         job_id              => $job_id,
+        submitted_time      => $submitted_time,
         user_seq_file       => $user_seq_file,
         user_bg_seq_file    => $user_bg_seq_file,
         user_tf_file        => $user_tf_file,
