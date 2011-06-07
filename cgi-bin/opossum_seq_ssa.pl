@@ -947,10 +947,10 @@ sub write_tfbs_details_text
             $first = 0;
 
             #printf FH "\t%7d\t%7d\t%7d\t%7.3f\t%6.1f%%\t%s\n",
-            printf FH "\t%d\t%d\t%d\t%.3f\t%.1f%%\t%s\n",
+            printf FH "\t%d\t%d\t%s\t%.3f\t%.1f%%\t%s\n",
                 $site->{start},
                 $site->{end},
-                $site->{strand},
+                $site->{strand} == 1 ? '+' : '-',
                 $site->{score},
                 $site->{rel_score} * 100,
                 $site->{seq};

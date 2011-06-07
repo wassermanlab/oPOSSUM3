@@ -1102,8 +1102,8 @@ sub write_tfbs_cluster_details_text
     print FH "\n\nConserved Binding Sites for $cl_name\n\n";
 
     #printf FH "\n\n%-31s\t%7s\t%7s\t%7s\t%7s\t%7s\t%s\n",
-    printf FH "\n\n%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
-        'Sequence ID', 'Start', 'End', 'Strand', 'Score', '%Score', 'TFBS Cluster Sequence';
+    printf FH "\n\n%s\t%s\t%s\t%s\t%s\t%s\n",
+        'Sequence ID', 'Start', 'End', 'Strand', '%Score', 'TFBS Cluster Sequence';
 
     foreach my $seq_id (@$seq_ids) {
         my $sites = $seq_sites->{$seq_id};
@@ -1119,11 +1119,11 @@ sub write_tfbs_cluster_details_text
 #        while (my $site = $iter->next()) {
         foreach my $site (@$sites) {
             #printf FH "\t%7d\t%7d\t%7d\t%7.3f\t%6.1f%%\t%s\n",
-            printf FH "\t%d\t%d\t%d\t%.3f\t%.1f%%\t%s\n",
+            printf FH "\t%d\t%d\t%s\t%.1f%%\t%s\n",
                 $site->start(),
                 $site->end(),
-                $site->strand(),
-                $site->score(),
+                $site->strand() == 1 ? '+' : '-',
+                #$site->score(),
                 $site->rel_score() * 100,
                 $site->seq;
         }
