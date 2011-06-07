@@ -629,6 +629,8 @@ sub anchored_tf_set_search_seqs
             || $filtered_anchor_siteset->size() == 0;
 
         foreach my $tf_id (@$tf_ids) {
+            #next if $tf_id eq $anchor_matrix->ID;
+
             my $matrix = $tf_set->get_matrix($tf_id);
 
             my $pwm;
@@ -1069,18 +1071,18 @@ sub write_tfbs_details_text
             $first = 0;
 
             #printf FH "\t%s\t%7d\t%7d\t%7d\t%7.3f\t%6.1f%%\t%s\t%s\t%7d\t%7d\t%7d\t%7.3f\t%6.1f%%\t%s\t%7d\n",
-            printf FH "\t%s\t%d\t%d\t%d\t%.3f\t%.1f%%\t%s\t%s\t%d\t%d\t%d\t%.3f\t%.1f%%\t%s\t%d\n",
+            printf FH "\t%s\t%d\t%d\t%s\t%.3f\t%.1f%%\t%s\t%s\t%d\t%d\t%s\t%.3f\t%.1f%%\t%s\t%d\n",
                 $anchor_name,
                 $anchor_site->{start},
                 $anchor_site->{end},
-                $anchor_site->{strand},
+                $anchor_site->{strand} == 1 ? '+' : '-',
                 $anchor_site->{score},
                 $anchor_site->{rel_score} * 100,
                 $anchor_site->{seq},
                 $tf_name,
                 $tf_site->{start},
                 $tf_site->{end},
-                $tf_site->{strand},
+                $tf_site->{strand} == 1 ? '+' : '-',
                 $tf_site->{score},
                 $tf_site->{rel_score} * 100,
                 $tf_site->{seq},
@@ -1295,6 +1297,12 @@ sub proximal_sites
     while (my $tfbs1 = $iter1->next()) {
         my $iter2 = $siteset2->Iterator(-sort_by => 'start');
         while (my $tfbs2 = $iter2->next()) {
+            if ($tfbs2->pattern->ID eq $tfbs1->pattern->ID) {
+                # If TF in question is same as anchor TF only count sites where
+                # the TF is to the right of the anchor to avoid double counting
+                next if $tfbs2->start <= $tfbs1->end;
+            }
+
             my $dist;
             if ($tfbs2->start() > $tfbs1->end()) {
                 $dist = $tfbs2->start() - $tfbs1->end() - 1;

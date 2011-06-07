@@ -1081,54 +1081,33 @@ sub write_tfbs_cluster_details
 
             $gid_inc{$gid} = 1;
             
-            # for the given cluster, retrieve the associated tf_ids
-            # run each through ctfbsa->fetch_anchored_by_tf_id
-            my @anchor_cluster_tfbss;
-            my @cluster_tfbss;
-            foreach my $anchor_cluster_tf_id (@$anchor_cluster_tf_ids)
-            {
-                my $anchor_tfbss = $ctfbsa->fetch_by_gene(
-                    -gene_id                => $gid,
-                    -tf_id                  => $anchor_tf_id,
-                    -conservation_level     => $conservation_level,
-                    -threshold              => $threshold,
-                    -upstream_bp            => $upstream_bp,
-                    -downstream_bp          => $downstream_bp
-                );
-            
-                next if !$anchor_tfbss;
+            my $anchor_cluster_tfbss = $ctfbsa->fetch_by_gene(
+                -gene_id                => $gid,
+                -tf_ids                 => $anchor_cluster_tf_ids,
+                -conservation_level     => $conservation_level,
+                -threshold              => $threshold,
+                -upstream_bp            => $upstream_bp,
+                -downstream_bp          => $downstream_bp
+            );
+        
+            next if !$anchor_cluster_tfbss;
                 
-                foreach my $cl_tf_id (@$cl_tf_ids)
-                {
-                
-                    my $tfbss = $ctfbsa->fetch_by_gene(
-                        -gene_id                => $gid,
-                        -tf_id                  => $cl_tf_id,
-                        -conservation_level     => $conservation_level,
-                        -threshold              => $threshold,
-                        -upstream_bp            => $upstream_bp,
-                        -downstream_bp          => $downstream_bp
-                    );
-                    
-                    next if !$tfbss;
-                    
-                    push @cluster_tfbss, @$tfbss;
-                }
-                
-                # both anchor_tfbss and tfbss need to be present
-                # if either was absent, would have gone to the next loop by now
-                push @anchor_cluster_tfbss, @$anchor_tfbss;
-            }
-            
-            my $sitepairs = _merged_proximal_tfbss(
-                \@anchor_cluster_tfbss, \@cluster_tfbss, $cl_id, $max_site_dist
+            my $cluster_tfbss = $ctfbsa->fetch_by_gene(
+                -gene_id                => $gid,
+                -tf_ids                 => $cl_tf_ids,
+                -conservation_level     => $conservation_level,
+                -threshold              => $threshold,
+                -upstream_bp            => $upstream_bp,
+                -downstream_bp          => $downstream_bp
             );
             
-            if ($sitepairs)
-            {
-                # This should always be true, since we previously checked
-                # the count was not zero.
-                #
+            next if !$cluster_tfbss;
+
+            my $sitepairs = merged_proximal_tfbss(
+                $anchor_cluster_tfbss, $cluster_tfbss, $cl_id, $max_site_dist
+            );
+            
+            if ($sitepairs) {
                 my $gene = $ga->fetch_by_id($gid);
                 $gene->fetch_promoters();
 
@@ -1148,16 +1127,22 @@ sub write_tfbs_cluster_details
     }
 }
 
-sub _merged_proximal_tfbss
+sub merged_proximal_tfbss
 {
     my ($anchor_tfbss, $tfbss, $cluster_id, $max_dist) = @_;
     
-    my $merged_anchor_tfbss = _merge_tfbss($anchor_tfbss, $cluster_id);
-    my $merged_tfbss = _merge_tfbss($tfbss, $cluster_id);
+    my $merged_anchor_tfbss = merge_tfbss($anchor_tfbss, $cluster_id);
+    my $merged_tfbss = merge_tfbss($tfbss, $cluster_id);
     
     my @sitepairs;
     foreach my $anchor (@$merged_anchor_tfbss) {
         foreach my $tfbs (@$merged_tfbss) {
+            if ($tfbs->id eq $anchor->id) {
+                # If TF in question is same as anchor TF only count sites where
+                # the TF is to the right of the anchor to avoid double counting
+                next if $tfbs->start <= $anchor->end;
+            }
+
             my $dist;
             #if (!defined $anchor or !defined $tfbs) {
             #    $logger->error("Cluster ID: $cluster_id");
@@ -1186,7 +1171,7 @@ sub _merged_proximal_tfbss
     return @sitepairs ? \@sitepairs : undef;
 }
 
-sub _merge_tfbss
+sub merge_tfbss
 {
     my ($tfsites, $cluster_id) = @_;
     
@@ -1196,11 +1181,29 @@ sub _merge_tfbss
     # I should do some filtering first
     
     my @sorted_sites = sort {$a->start <=> $b->start} @$tfsites;
+
+    #
+    # Let's not mess around setting and resetting strand info. Strand is
+    # meaningless for clusters. Just keep everything on the +ve strand.
+    # DJA 2011/06/01
+    #
+    my $site1 = $sorted_sites[0];
+    if ($site1->strand == -1) {
+        $site1->strand(1);
+        $site1->seq(revcom($site1->seq));
+    }
+
     my @merged_sites;
-    push @merged_sites, $sorted_sites[0];
+    push @merged_sites, $site1;
+
     for (my $i = 1; $i < scalar(@sorted_sites); $i++)
     {        
         my $tfsite = $sorted_sites[$i];
+        if ($tfsite->strand == -1) {
+            $tfsite->strand(1);
+            $tfsite->seq(revcom($tfsite->seq));
+        }
+
         my $prevsite = $merged_sites[$#merged_sites];
         $prevsite->id($cluster_id);
         
@@ -1214,28 +1217,35 @@ sub _merge_tfbss
                 # first, check the strands of the sites
                 # if negative, reverse complement
                 # I should only do this if they are overlapping
-				$prevsite->end($tfsite->end); 
-                if ($prevsite->strand != $tfsite->strand) {
-                    if ($prevsite->strand == -1) {
-                        my $seq = Bio::Seq->new(-seq => $prevsite->seq);
-                        $prevsite->seq($seq->revcom->seq);
-                    } else {
-                        my $seq = Bio::Seq->new(-seq => $tfsite->seq);
-                        $tfsite->seq($seq->revcom->seq);
-                    }
-				}
+				#$prevsite->end($tfsite->end); 
+                #if ($prevsite->strand != $tfsite->strand) {
+                #    if ($prevsite->strand == -1) {
+                #        my $seq = Bio::Seq->new(-seq => $prevsite->seq);
+                #        $prevsite->seq($seq->revcom->seq);
+                #    } else {
+                #        my $seq = Bio::Seq->new(-seq => $tfsite->seq);
+                #        $tfsite->seq($seq->revcom->seq);
+                #    }
+				#}
 				
-				my $ext_seq = substr($tfsite->seq, $prevsite->end - $tfsite->start + 1);
-                $prevsite->seq($prevsite->seq . $ext_seq);
+				my $ext_seq = substr(
+                    $tfsite->seq, $prevsite->end - $tfsite->start + 1
+                );
+
+                if ($ext_seq) {
+                    $prevsite->seq($prevsite->seq . $ext_seq);
+                }
+
+				$prevsite->end($tfsite->end); 
             }
 
             if ($tfsite->rel_score > $prevsite->rel_score) {
                     $prevsite->rel_score($tfsite->rel_score);
             }
+
             if ($tfsite->score > $prevsite->score) {
                     $prevsite->score($tfsite->score);
             }
-
         } else {
             $tfsite->id($cluster_id);
             push @merged_sites, $tfsite;
@@ -1249,8 +1259,9 @@ sub overlap
 {
     my ($tf1, $tf2) = @_;
     
-    if (($tf1->start <= $tf2->start and $tf1->end > $tf2->start)
-        or ($tf2->start <= $tf1->start and $tf2->end > $tf1->start))
+    #if (($tf1->start <= $tf2->start and $tf1->end > $tf2->start)
+    #    or ($tf2->start <= $tf1->start and $tf2->end > $tf1->start))
+    if ($tf1->start <= $tf2->end && $tf1->end >= $tf2->start)
     {
         return 1;
     }
@@ -1324,7 +1335,7 @@ sub write_tfbs_cluster_details_text
         $text .= "\tOperon ID";
     }
 
-    $text .= qq{\tChr\tStart\tEnd\tStrand\tNearest TSS\tAnchoring TFBS Cluster\tStart\tEnd\tRel. Start\tRel. End\tStrand\tScore\t%%Score\tSequence\tAnchored TF\tStart\tEnd\tRel. Start\tRel. End\tStrand\tScore\t%%Score\tSequence\tDistance\n};
+    $text .= qq{\tChr\tStart\tEnd\tStrand\tNearest TSS\tAnchoring TFBS Cluster\tStart\tEnd\tRel. Start\tRel. End\tStrand\t%Score\tSequence\tAnchored TF\tStart\tEnd\tRel. Start\tRel. End\tStrand\t%Score\tSequence\tDistance\n};
 
     foreach my $gene (@$genes) {
         my $gid = $gene->id();
@@ -1541,7 +1552,7 @@ sub write_tfbs_cluster_details_text
                     $text .= "\t";
                 }
             }
-            $text .= sprintf("\t%d\t%s\t%d\t%d\t%d\t%d\t%s\t%.3f\t%.1f%%\t%s\t%s\t%d\t%d\t%d\t%d\t%s\t%.3f\t%.1f%%\t%s\t%d\n",
+            $text .= sprintf("\t%d\t%s\t%d\t%d\t%d\t%d\t%s\t%.1f%%\t%s\t%s\t%d\t%d\t%d\t%d\t%s\t%.1f%%\t%s\t%d\n",
                 $anchor_closest_tss,
                 'C' . $anchor_cluster->id(),
                 $anchor_start,
@@ -1549,7 +1560,6 @@ sub write_tfbs_cluster_details_text
                 $anchor_rel_start,
                 $anchor_rel_end,
                 $anchor_strand == 1 ? '+' : '-',
-                $anchor_score,
                 $anchor_rel_score * 100,
                 $anchor_seq,
                 'C' . $cl->id(),
@@ -1558,7 +1568,6 @@ sub write_tfbs_cluster_details_text
                 $site_rel_start,
                 $site_rel_end,
                 $site_strand == 1 ? '+' : '-',
-                $site_score,
                 $site_rel_score * 100,
                 $site_seq,
                 $distance
@@ -1640,6 +1649,7 @@ sub write_tfbs_cluster_details_html
         tf_cluster          => $cl,
         gene_id_type        => $t_gene_id_type,
         dflt_gene_id_type   => DFLT_GENE_ID_TYPE,
+        gid_gene_ids        => $t_gid_gene_ids,
         genes               => $genes,
         gid_sitepairs       => $gid_sitepairs,
         has_operon          => $has_operon,
@@ -1862,4 +1872,15 @@ sub _parse_biotype
     }
 
     return $biotype;
+}
+
+sub revcom
+{
+    my ($seq) = @_;
+
+    my $rc_seq = reverse $seq;
+
+    $rc_seq =~ tr/[acgtACGT]/[tgcaTGCA]/;
+
+    return $rc_seq;
 }

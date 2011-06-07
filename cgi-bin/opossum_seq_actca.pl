@@ -644,16 +644,14 @@ sub anchored_tf_cluster_set_search_seqs
     # then go through each cluster and search for those TFs
     # merge the site hits based on cluster
     # using the merged sites, find proximal site pairs
-    foreach my $seq_id (@seq_ids)
-    {
+    foreach my $seq_id (@seq_ids) {
         $logger->debug("\nSequence: $seq_id\n");
 
         my $seq = $seq_id_seqs->{$seq_id};
         
         # retrieve the TFs in the anchor cluster
         my $anchor_siteset = TFBS::SiteSet->new();
-        foreach my $anchor_tf_id (@$anchor_cluster_tf_ids)
-        {
+        foreach my $anchor_tf_id (@$anchor_cluster_tf_ids) {
             my $anchor_matrix = $tf_set->get_matrix($anchor_tf_id);
             next if !$anchor_matrix;
             my $anchor_pwm;
@@ -676,8 +674,9 @@ sub anchored_tf_cluster_set_search_seqs
         my $merged_anchor_sites = merge_cluster_siteset(
             $anchor_siteset, $seq_id, $anchor_cluster->id);
         
-        foreach my $cl_id (@$cluster_ids)
-        {
+        foreach my $cl_id (@$cluster_ids) {
+            #next if $cl_id eq $anchor_cluster->id;
+
             my $cluster = $tf_cluster_set->get_tf_cluster($cl_id);
             my $cl_tf_ids = $cluster->tf_ids;
             my $cluster_siteset = TFBS::SiteSet->new();
@@ -917,13 +916,18 @@ sub proximal_sites
     my @sitepairs;
 
     # $sites1 and $sites2 should have already been sorted
-    for (my $i = 0; $i < scalar @$sites1; $i++)
-    {
+    for (my $i = 0; $i < scalar @$sites1; $i++) {
         my $tfbs1 = $$sites1[$i];
-        for (my $j = 0; $j < scalar @$sites2; $j++)
-        {
+
+        for (my $j = 0; $j < scalar @$sites2; $j++) {
             my $tfbs2 = $$sites2[$j];
-            
+
+            if ($tfbs2->id eq $tfbs1->id) {
+                # If TF in question is same as anchor TF only count sites where
+                # the TF is to the right of the anchor to avoid double counting
+                next if $tfbs2->start <= $tfbs1->end;
+            }
+
             my $dist;
             if ($tfbs2->start() > $tfbs1->end()) {
                 $dist = $tfbs2->start() - $tfbs1->end() - 1;
@@ -998,6 +1002,8 @@ sub write_results_text
     printf FH "TFBS Cluster Name\tClass\tFamily\tTarget seq hits\tTarget seq non-hits\tBackground seq hits\tBackground seq non-hits\tTarget Cluster hits\tBackground Cluster hits\tTarget Cluster nucleotide rate\tBackground Cluster nucleotide rate\tZ-score\tFisher score\n";
 
     foreach my $result (@$results) {
+        #next if $result->id eq $anchor_cluster->id;
+
         my $cl = $tf_cluster_set->get_tf_cluster($result->id());
 
         printf FH 
@@ -1155,6 +1161,8 @@ sub write_tfbs_cluster_details
     my $cluster_ids = $tf_cluster_set->ids();
 
     foreach my $cl_id (@$cluster_ids) {
+        #next if $cl_id eq $anchor_cluster->id;
+
         my $seq_sitepairs = $cluster_seq_sitepairs->{$cl_id};
         
         if ($seq_sitepairs) {
@@ -1210,7 +1218,7 @@ sub write_tfbs_cluster_details_text
 
     print FH "\n\nConserved Binding Sites for $cl_name\n\n";
 
-    printf FH "\n\n%-31s\t%s\t%s\t%s\t%s\t%s\%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
+    printf FH "\n\n%s\t%s\t%s\t%s\t%s\%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
         'Sequence ID',
         'Anchoring TFBS Cluster', 'Start', 'End', 'Strand', '%Score', 'TFBS Cluster Sequence',
         'Anchored TFBS Cluster', 'Start', 'End', 'Strand', '%Score', 'TFBS Cluster Sequence';
@@ -1236,18 +1244,18 @@ sub write_tfbs_cluster_details_text
             #$first = 0;
 
             #printf FH "\t%s\t%7d\t%7d\t%7d\t%6.1f%%\t%s\t%s\t%7d\t%7d\t%7d\t%6.1f%%\t%s\t%7d\n",
-            printf FH "\t%s\t%d\t%d\t%d\t%.1f%%\t%s\t%s\t%d\t%d\t%d\t%.1f%%\t%s\t%d\n",
+            printf FH "\t%s\t%d\t%d\t%s\t%.1f%%\t%s\t%s\t%d\t%d\t%s\t%.1f%%\t%s\t%d\n",
                 $anchor_name,
                 $anchor_site->start(),
                 $anchor_site->end(),
-                $anchor_site->strand(),
+                $anchor_site->strand() == 1 ? '+' : '-',
                 #$anchor_site->score(),
                 $anchor_site->rel_score() * 100,
                 $anchor_site->seq,
                 $cl_name,
                 $cl_site->start(),
                 $cl_site->end(),
-                $cl_site->strand(),
+                $cl_site->strand() == 1 ? '+' : '-',
                 #$cl_site->score(),
                 $cl_site->rel_score() * 100,
                 $cl_site->seq,
