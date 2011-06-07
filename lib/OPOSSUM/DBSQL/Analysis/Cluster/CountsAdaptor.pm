@@ -586,7 +586,7 @@ sub fetch_anchored_counts
 		
         unless ($anchor_tfbss) {
             foreach my $cid (@$cids) {
-                next if $cid eq $anchor_cluster->id;
+                #next if $cid eq $anchor_cluster->id;
                 $t_counts->gene_cluster_count($gid, $cid, 0);
 				$t_counts->gene_cluster_length($gid, $cid, 0);
             }
@@ -596,11 +596,11 @@ sub fetch_anchored_counts
 		# merge the anchor_tfbss into cluster sites
 		my @sorted_anchor_sites = sort {$a->start <=> $b->start} @$anchor_tfbss;
 		my $merged_anchor_sites = merge_cluster_sites(
-									\@sorted_anchor_sites, $anchor_cluster->id);
+            \@sorted_anchor_sites, $anchor_cluster->id
+        );
         
 		foreach my $cid (@$cids) {
-
-			next if $cid eq $anchor_cluster->id;
+			#next if $cid eq $anchor_cluster->id;
 
 			my $cluster = $cluster_set->get_tf_cluster($cid);
 
@@ -660,8 +660,7 @@ sub fetch_anchored_counts
             }
 
 			foreach my $cid (@$cids) {
-				
-                next if $cid eq $anchor_cluster->id;
+                #next if $cid eq $anchor_cluster->id;
 				#my $cluster = $cluster_set->get_tf_cluster(id);
 
                 my $count = $t_counts->gene_cluster_count($first_gid, $cid);
@@ -697,6 +696,12 @@ sub _proximal_cluster_sites
     my @prox_csites;
     foreach my $anchor (@$anchor_csites) {
         foreach my $site (@$csites) {
+            if ($site->id eq $anchor->id) {
+                # If TF in question is same as anchor TF only count sites where
+                # the TF is to the right of the anchor to avoid double counting
+                next if $site->start <= $anchor->end;
+            }
+
             my $dist;
             if ($site->start() > $anchor->end()) {
                 $dist = $site->start() - $anchor->end() - 1;
@@ -725,45 +730,74 @@ sub merge_cluster_sites
     }
     
     my @merged_sites;
-    push @merged_sites, $$tfsites[0];
-    for (my $i = 1; $i < scalar(@$tfsites); $i++)
-    {        
-        my $tfsite = $$tfsites[$i];
+
+    #
+    # Let's not mess around setting and resetting strand info. Strand is
+    # meaningless for clusters. Just keep everything on the +ve strand.
+    # DJA 2011/05/31
+    #
+    my $tfsite1 = $tfsites->[0];
+    if ($tfsite1->strand == -1) {
+        $tfsite1->strand(1);
+        $tfsite1->seq(revcom($tfsite1->seq));
+    }
+
+    push @merged_sites, $tfsite1;
+
+    for (my $i = 1; $i < scalar(@$tfsites); $i++) {        
+        my $tfsite = $tfsites->[$i];
+        if ($tfsite->strand == -1) {
+            $tfsite->strand(1);
+            $tfsite->seq(revcom($tfsite->seq));
+        }
+
         my $prevsite = $merged_sites[$#merged_sites];
         $prevsite->id($cluster_id);
         
         # if overlap, keep the max score
         # merge the two sites
-        if (overlap($prevsite, $tfsite))
-        {
+        if (overlap($prevsite, $tfsite)) {
             if ($prevsite->end < $tfsite->end) {
-                $prevsite->end($tfsite->end);
-                
+                #$prevsite->end($tfsite->end);
+                #
                 # merge the sequences
                 # first, check the strands of the sites
                 # if negative, reverse complement
                 # I should only do this if they are overlapping
-                if ($prevsite->strand != $tfsite->strand) {
-                    if ($prevsite->strand == -1) {
-                        my $seq = Bio::Seq->new(-seq => $prevsite->seq);
-                        $prevsite->seq($seq->revcom->seq);
-                    } else {
-                        my $seq = Bio::Seq->new(-seq => $tfsite->seq);
-                        $tfsite->seq($seq->revcom->seq);
-                    }
-                }
+                #if ($prevsite->strand != $tfsite->strand) {
+                #    if ($prevsite->strand == -1) {
+                #        my $seq = Bio::Seq->new(-seq => $prevsite->seq);
+                #        $prevsite->seq($seq->revcom->seq);
+                #    } else {
+                #        my $seq = Bio::Seq->new(-seq => $tfsite->seq);
+                #        $tfsite->seq($seq->revcom->seq);
+                #    }
+                #}
                 
-                my $ext_seq = substr($tfsite->seq, $prevsite->end - $tfsite->start);
-                $prevsite->seq($prevsite->seq . $ext_seq);
+                # DJA 2011/05/31
+                my $ext_seq = substr(
+                    $tfsite->seq, $prevsite->end - $tfsite->start + 1
+                );
+
+                #
+                # If ends of current tfbs and prev tfbs are the same, then
+                # ext_seq is undef.
+                # DJA 2011/05/31
+                #
+                if ($ext_seq) {
+                    $prevsite->seq($prevsite->seq . $ext_seq);
+                }
+
+                $prevsite->end($tfsite->end);
             }
 
             if ($tfsite->rel_score > $prevsite->rel_score) {
                     $prevsite->rel_score($tfsite->rel_score);
             }
+
             if ($tfsite->score > $prevsite->score) {
                     $prevsite->score($tfsite->score);
             }
-
         } else {
             $tfsite->id($cluster_id);
             push @merged_sites, $tfsite;
@@ -777,12 +811,24 @@ sub overlap
 {
     my ($tf1, $tf2) = @_;
     
-    if (($tf1->start <= $tf2->start and $tf1->end > $tf2->start)
-        or ($tf2->start <= $tf1->start and $tf2->end > $tf1->start))
-    {
+    # DJA 2011/05/31
+    #if (($tf1->start <= $tf2->start and $tf1->end > $tf2->start)
+    #    or ($tf2->start <= $tf1->start and $tf2->end > $tf1->start))
+    if ($tf1->start <= $tf2->end && $tf1->end >= $tf2->start) {
         return 1;
     }
     return 0;
+}
+
+sub revcom
+{
+    my ($seq) = @_;
+
+    my $rc_seq = reverse $seq;
+
+    $rc_seq =~ tr/[acgtACGT]/[tgcaTGCA]/;
+
+    return $rc_seq;
 }
 
 1;
