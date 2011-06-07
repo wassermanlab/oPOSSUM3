@@ -1061,10 +1061,10 @@ sub fetch_anchored_by_tf_id
         return;
     }
 
-    if ($tfid eq $anchor_tfid) {
-        carp "anchoring TF and search TF are the same";
-        return;
-    }
+    #if ($tfid eq $anchor_tfid) {
+    #    carp "anchoring TF and search TF are the same";
+    #    return;
+    #}
 
     my $anchor_tfbss = $self->fetch_by_gene(
         -gene_id                => $gene_id,
@@ -1227,6 +1227,12 @@ sub _proximal_tfbss
     my @sitepairs;
     foreach my $anchor (@$anchor_tfbss) {
         foreach my $tfbs (@$tfbss) {
+            if ($tfbs->id eq $anchor->id) {
+                # If TF in question is same as anchor TF only count sites where
+                # the TF is to the right of the anchor to avoid double counting
+                next if $tfbs->start <= $anchor->end;
+            }
+
             my $dist;
             if ($tfbs->start() > $anchor->end()) {
                 $dist = $tfbs->start() - $anchor->end() - 1;
