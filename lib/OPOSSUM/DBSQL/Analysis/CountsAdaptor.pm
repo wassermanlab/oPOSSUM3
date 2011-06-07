@@ -671,14 +671,14 @@ sub fetch_anchored_counts
 
         unless ($anchor_tfbss) {
             foreach my $tf_id (@$tf_ids) {
-                next if $tf_id eq $anchor_tf_id;
+                #next if $tf_id eq $anchor_tf_id;
                 $t_counts->gene_tfbs_count($gid, $tf_id, 0);
             }
             next;
         }
 
         foreach my $tf_id (@$tf_ids) {
-            next if $tf_id eq $anchor_tf_id;
+            #next if $tf_id eq $anchor_tf_id;
 
             my $tfbss = $ctfbsa->fetch_by_gene(
                 -gene_id                => $gid,
@@ -757,6 +757,12 @@ sub _proximal_tfbss
     my @prox_tfbss;
     foreach my $anchor (@$anchor_tfbss) {
         foreach my $tfbs (@$tfbss) {
+            if ($tfbs->id eq $anchor->id) {
+                # If TF in question is same as anchor TF only count sites where
+                # the TF is to the right of the anchor to avoid double counting
+                next if $tfbs->start <= $anchor->end;
+            }
+
             my $dist;
             if ($tfbs->start() > $anchor->end()) {
                 $dist = $tfbs->start() - $anchor->end() - 1;
