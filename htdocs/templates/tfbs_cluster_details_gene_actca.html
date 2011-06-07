@@ -287,7 +287,7 @@
           <td align="right">[%anchor_rel_start%]</td>
           <td align="right">[%anchor_rel_end%]</td>
           <td align="center">[%IF anchor.strand() == 1%]+[%ELSE%]-[%END%]</td>
-          <td align="right">[%anchor.rel_score() * 100%]%</td>
+          <td align="right">[%formatf(1, anchor.rel_score() * 100)%]%</td>
           <td align="left" class="seqtext">[%anchor.seq()%]</td>
 
           <td align="right">C[%tf_cluster.id()%]</td>
@@ -296,7 +296,7 @@
           <td align="right">[%site_rel_start%]</td>
           <td align="right">[%site_rel_end%]</td>
           <td align="center">[%IF site.strand() == 1%]+[%ELSE%]-[%END%]</td>
-          <td align="right">[%site.rel_score() * 100%]%</td>
+          <td align="right">[%formatf(1, site.rel_score() * 100)%]%</td>
           <td align="left" class="seqtext">[%site.seq()%]</td>
 
           <td align="right">[%distance%]</td>

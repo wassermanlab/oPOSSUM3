@@ -44,7 +44,7 @@
       <th align="right">TFBS Cluster Rel. Start</th>
       <th align="right">TFBS Cluster Rel. End</th>
       <th align="center">TFBS Cluster Strand</th>
-      <th align="right">Score</th>
+      <th align="right">%Score</th>
       <th align="left">TFBS Cluster Sequence</th>
     </tr>
 
@@ -185,7 +185,7 @@
           <td align="right">[%rel_start%]</td>
           <td align="right">[%rel_end%]</td>
           <td align="center">[%IF site.strand() == 1%]+[%ELSE%]-[%END%]</td>
-          <td align="right">[%site.score()%] ([%site.rel_score() * 100%]%)</td>
+          <td align="right">[%formatf(1, site.rel_score() * 100)%]%</td>
           <td align="left">[%site.seq()%]</td>
           </tr>
 

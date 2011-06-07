@@ -76,13 +76,13 @@
           <td align="right">C[%anchor_cluster.id%]</td>
           <td align="right">[%anchor_site.start%]</td>
           <td align="right">[%anchor_site.end%]</td>
-          <td align="right">[%anchor_site.strand%]</td>
+          <td align="right">[%IF anchor_site.strand == 1%]+[%ELSE%]-[%END%]</td>
           <td align="right">[%formatf(1, anchor_rel_score)%]%</td>
           <td align="left" class="seqtext">[%anchor_site.seq%]</td>
           <td align="right">C[%tf_cluster.id%]</td>
           <td align="right">[%cl_site.start%]</td>
           <td align="right">[%cl_site.end%]</td>
-          <td align="right">[%cl_site.strand%]</td>
+          <td align="right">[%IF cl_site.strand == 1%]+[%ELSE%]-[%END%]</td>
           <td align="right">[%formatf(1, cl_rel_score)%]%</td>
           <td align="left" class="seqtext">[%cl_site.seq%]</td>
           <td align="right">[%sitepair.distance%]</td>

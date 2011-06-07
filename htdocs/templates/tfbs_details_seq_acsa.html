@@ -115,15 +115,15 @@
         <th align="right">Start</th>
         <th align="right">End</th>
         <th align="right">Strand</th>
-        <th align="right">Abs. Score</th>
-        <th align="right">Rel. Score</th>
+        <th align="right">Score</th>
+        <th align="right">%Score</th>
         <th align="left">TFBS Sequence</th>
         <th align="left">Anchored TF</th>
         <th align="right">Start</th>
         <th align="right">End</th>
         <th align="right">Strand</th>
-        <th align="right">Abs. Score</th>
-        <th align="right">Rel. Score</th>
+        <th align="right">Score</th>
+        <th align="right">%Score</th>
         <th align="left">TFBS Sequence</th>
         <th align="right">Distance</th>
       </tr>
@@ -147,14 +147,14 @@
           <td align="left">[%anchor_matrix.name%]</td>
           <td align="right">[%anchor_site.start%]</td>
           <td align="right">[%anchor_site.end%]</td>
-          <td align="right">[%anchor_site.strand%]</td>
+          <td align="right">[%IF anchor_site.strand == 1%]+[%ELSE%]-[%END%]</td>
           <td align="right">[%formatf(3, anchor_site.score)%]</td>
           <td align="right">[%formatf(1, anchor_rel_score)%]%</td>
           <td align="left" class="seqtext">[%anchor_site.seq%]</td>
           <td align="left">[%tf.name%]</td>
           <td align="right">[%tf_site.start%]</td>
           <td align="right">[%tf_site.end%]</td>
-          <td align="right">[%tf_site.strand%]</td>
+          <td align="right">[%IF tf_site.strand == 1%]+[%ELSE%]-[%END%]</td>
           <td align="right">[%formatf(3, tf_site.score)%]</td>
           <td align="right">[%formatf(1, tf_rel_score)%]%</td>
           <td align="left" class="seqtext">[%tf_site.seq%]</td>
