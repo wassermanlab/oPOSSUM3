@@ -1170,7 +1170,7 @@ sub write_cluster_details
         $text .= "\tOperon ID";
     }
 
-    $text .= qq{\tChr\tGene Start\tGene End\tStrand\tCluster Start\tCluster End\tNearest TSS\tCluster Rel. Start\tCluster Rel. End\tCluster Strand\tTop Rel. Score\tRep. TFBS Sequence\n};
+    $text .= qq{\tChr\tGene Start\tGene End\tStrand\tCluster Start\tCluster End\tNearest TSS\tCluster Rel. Start\tCluster Rel. End\tCluster Strand\t%Score\tRep. TFBS Sequence\n};
     
 	#
     # Notes for operon genes
@@ -1332,14 +1332,14 @@ sub write_cluster_details
                 }
             }
             
-            $text .= sprintf("\t%d\t%d\t%d\t%d\t%d\t%s\t%.3f (%.1f%%)\t%s\n",
+            $text .= sprintf("\t%d\t%d\t%d\t%d\t%d\t%s\t%.1f%%\t%s\n",
                 $site_start,
                 $site_end,
                 $closest_tss,
                 $rel_start,
                 $rel_end,
                 $site_strand == 1 ? '+' : '-',
-                $site_score,
+                #$site_score,
                 $site_rel_score * 100,
                 $site_seq
             );
