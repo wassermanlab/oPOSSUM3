@@ -127,9 +127,15 @@ sub get_back_seq_file
 
 sub write_matrix_file
 {
-    my ($self, $matrix_spec, $tempdir) = @_;
+    my ($self, $matrix_spec, $tempdir, $fname) = @_;
 
-    my $filename = "$tempdir/matrices.txt";
+    my $filename;
+    
+    if ($fname) {
+        $filename = "$tempdir/$fname";
+    } else {
+        $filename = "$tempdir/matrices.txt";
+    }
 
     unless (open(FH, ">$filename")) {
         $self->_error("Unable to create matrix file $filename\n");
@@ -139,11 +145,11 @@ sub write_matrix_file
     if ($matrix_spec->isa('TFBS::MatrixSet')) {
         my $iter = $matrix_spec->Iterator();
         while (my $matrix = $iter->next()) {
-            printf FH ">%s\n", $matrix->name();
+            printf FH ">%s %s\n", $matrix->ID(), $matrix->name();
             printf FH "%s\n", $matrix->prettyprint();
         }
     } elsif ($matrix_spec->isa('TFBS::Matrix')) {
-        printf FH ">%s\n", $matrix_spec->name();
+        printf FH ">%s %s\n", $matrix_spec->ID(), $matrix_spec->name();
         printf FH "%s\n", $matrix_spec->prettyprint();
     } else {
         $self->_error(
@@ -178,6 +184,7 @@ sub parse_matrix_text
     return if !$text;
 
     my $matrix_set    = TFBS::MatrixSet->new();
+    my $id;
     my $name          = '';
     my $matrix_string = '';
     my $line_count    = 0;
@@ -187,8 +194,20 @@ sub parse_matrix_text
         chomp $line;
         next if !$line;
 
-        if ($line =~ /^>\s*(\S+)/) {
-            $name = $1;
+        if ($line =~ /^>\s*(.*)/) {
+            my $desc = $1;
+
+            if ($desc) {
+                ($id, $name) = split /\s+/, $desc;
+            }
+
+            unless ($id) {
+                $id = sprintf "matrix%d", $matrix_count + 1;
+            }
+
+            unless ($name) {
+                $name = $id;
+            }
         } else {
             if ($line =~ /^\s*[ACGT]\s*\[\s*(.*)\s*\]/) {
                 # line of the form: A [ # # # ... # ]
@@ -202,12 +221,6 @@ sub parse_matrix_text
             $line_count++;
 
             if ($line_count == 4) {
-                my $id = sprintf "matrix%d", $matrix_count + 1;
-
-                unless ($name) {
-                    $name = $id;
-                }
-
                 #
                 # Simplistic determination of whether matrix looks more like
                 # a PWM than a PFM.
