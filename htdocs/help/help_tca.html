@@ -118,7 +118,7 @@
 	as given in the Entering Target Data Sets section.
   </p>
   <p>
-  	For gene-based oPOSSUM systems, the background data sets were compiled by
+  	For gene-based oPOSSUM systems, the full background data sets were compiled by
 	selecting genes from Ensembl which were considered to be well known, i.e. the
 	"KNOWN" attribute was true and the genes had a gene symbol assigned (HGNC
 	symbol for human, MGI for mouse etc.). Transcription start sites (TSSs) were
@@ -127,6 +127,17 @@
 	upload a file containing the ID's. Alternatively, you can specify the number of
 	random genes to be picked as the background data set, where the maximum number
 	allowed is the number of genes annotated in the oPOSSUM system.
+  </p>
+  <p>
+	The default setting for gene-based analyses is to use all genes in the oPOSSUM
+	database as your background.  Alternatively, you can specify the number of genes
+	to be picked randomly to be used as the background (default=5000) or provide
+	your own custom background gene list. Choosing randomly selected background
+	genes can reduce the required computation time compared to choosing the entire
+	gene set if the number chosen is sufficiently larger than your foreground gene
+	set. If you are performing multiple analyses, and you wish to compare the results
+	between analyses, we recommend you use "all" or supply your own background so
+	that the background is stable across analyses.
   </p>
   <p>
 	For sequence-based systems, you can either choose a pre-defined background
@@ -142,7 +153,21 @@
 	</ul>
 	Your own data sets can be pasted in or uploaded as a file.
   </p>
-  
+  <p>
+	For sequence-based analyses, the default setting for the background selection
+	is to provide your own set of control sequences.  Alternatively, one can choose
+	to use one of the provided backgrounds; however, these are currently limited
+	to mouse sequences, and as each background set has a specific nucleotide
+	composition (indicated in the background name), the available background sets
+	may not necessarily be good matches for your foreground sequences.  It is
+	preferable to supply your own control sequences as you can control for the
+	nucleotide composition of your sequence sets. There is an automatic background
+	sequence generator that is currently undergoing beta testing (provided below
+	the custom background box), which you can use to extract a background with a
+	nucleotide composition comparable to your foreground sequences. When choosing
+	the background, you should ensure that you have the same number (or greater)
+	of sequences in your background set as in the foreground set.  
+  </p>
   <p><hr noshade><br><a href="#top"><img src="../images/arrow-up.gif" align="right" /></a></p>
 
   <h3><a name="select_tfbs"></a>
@@ -179,38 +204,145 @@
 		<li>Level 2 corresponds to non-coding conserved regions with a minimum percent identity of 65%</li>
 		<li>Level 3 corresponds to non-coding conserved regions with a minimum percent identity of 60%</li>
 	  </ul>
+	  The default conservation level is 0.7 (level 3). If this is too restrictive
+	  for your analysis, you can lower the conservation level to 0.6 (level 1). 
 	</p>
 	<p>No conservation filters are used for yeast oPOSSUM and sequence-based systems.</p>
 	<p><hr noshade><br><a href="#top"><img src="../images/arrow-up.gif" align="right" /></a></p>
 	
 	<h4><a name="threshold"></a>Matrix score threshold</h4>
 	  <p>
-		  TF sites are scanned by sliding the corresponding postion weight matrix (PWM) along the sequence 
-		  and scoring it at each position. The threshold is the minimum relative score used to report the 
-		  position as a putative binding site. The background set was computed using a threshold of 70%.
+		TF sites are scanned by sliding the corresponding postion weight matrix (PWM) along the sequence 
+		and scoring it at each position. The threshold is the minimum relative (percent) score used to report the 
+		position as a putative binding site. For gene-based oPOSSUM the background sets were scanned using a minimum threshold of 75%.
+	    The background TFBS counts were pre-computed using three threshold levels. 
+	  <ul>
+		<li>Level 1 corresponds to a minimum relative score of 75%</li>
+		<li>Level 2 corresponds to a minimum relative score of 80%</li>
+		<li>Level 3 corresponds to a minimum relative score of 85%</li>
+	  </ul>
 	  </p>
-	  <p><hr noshade><br><a href="#top"><img src="../images/arrow-up.gif" align="right" /></a></p>
+    <p>
+      The relative score is computed from the raw matrix score as:<br>
+      rel_score = (site_score - min_matrix_score) / (max_matrix_score - min_matrix_score)
+	</p>
+	<p>
+	  The default threshold is 80%, which is a commonly used threshold for TFBS
+	  analyses using PWMs. If you have prior knowledge of which TFs are of interest
+	  for your analyses and what their properties are, you may change this threshold
+	  based on that knowledge (between 75% to 100%). For instance, if the matrix
+	  for a TF of interest has a low IC, then you will want to use a higher threshold,
+	  whereas for a TF with a high IC, you might try using a lower threshold. A
+	  threshold of 80% or 85% will generally provide you with satisfactory results,
+	  but if you are uncertain, we recommend multiple analyses with various thresholds.
+	</p>
+	
 	
 	<h4><a name="up_down_seq"></a>Upstream / Downstream sequence</h4>
 	  <p class="text">
-		  This refers to the size of the region around the transcription start site (TSS) which was analysed 
-		  for TF sites. The background set was computed using a region extending a maximum of 10000 bp 
-		  upstream and 10000 bp downstream of the TSS. 
+		  For gene-based oPOSSUM analyses, this refers to the size of the region
+		  around the transcription start sites (TSS) which was analysed for TF
+		  binding sites. The maximum amount of upstream / downstream region used
+		  to pre-compute the background is species dependent, as follows.
 	  </p>
+
+ <table class="sortable" cellpadding="2" cellspacing="0" width="400">
+    <tr class="table_title">
+    <th>Species</th><th>Max. Upstream (bp)</th><th>Max. Downstream (bp)</th>
+    </tr>
+    <tr class="table_text" align="right"><td>Human, Mouse</td><td>10,000</td><td>10,000</td></tr>
+    <tr class="table_text" align="right"><td>Fly</td><td>3,000</td><td>3,000</td></tr>
+    <tr class="table_text" align="right"><td>Worm</td><td>1,500</td><td>1,500</td></tr>
+    <tr class="table_text" align="right"><td>Yeast</td><td>1,000</td><td>Annotated 3' end of the gene</td></tr>
+  </table>
+
+  <p>
+   The TFBS counts within the search regions were precomputed for various levels
+   of upstream / downstream sequence. The levels for the metazoans are:
+  </p>
+  <table class="sortable" cellpadding="2" cellspacing="0" width="400">
+    <tr class="table_title">
+	  <th></th><th colspan=2>Vertebrates</th><th colspan=2>Insects</th><th colspan=2>Nematodes</th>
+	</tr>
+	<tr>
+    <th>Search Region Level</th>
+	  <th>Upstream (bp)</th><th>Downstream (bp)</th>
+	  <th>Upstream (bp)</th><th>Downstream (bp)</th>
+	  <th>Upstream (bp)</th><th>Downstream (bp)</th>
+    </tr>
+    <tr class="table_text" align="center"><td>1</td>
+	  <td>10,000</td><td>10,000</td><td>3,000</td><td>3,000</td><td>1,500</td><td>1,500</td>
+	</tr>
+    <tr class="table_text" align="center"><td>2</td>
+	  <td>10,000</td><td>5,000</td><td>3,000</td><td>2,000</td><td>1,000</td><td>1,000</td>
+	</tr>
+    <tr class="table_text" align="center"><td>3</td>
+	  <td>5,000</td><td>5,000</td><td>2,000</td><td>2,000</td><td>1,000</td><td>500</td>
+	</tr>
+    <tr class="table_text" align="center"><td>4</td>
+	  <td>5,000</td><td>2,000</td><td>2,000</td><td>1,000</td><td>500</td><td>500</td>
+	</tr>
+    <tr class="table_text" align="center"><td>5</td>
+	  <td>5,000</td><td>2,000</td><td>2,000</td><td>1,000</td><td>500</td><td>500</td>
+	</tr>
+    <tr class="table_text" align="center"><td>6</td>
+	  <td>5,000</td><td>2,000</td><td>2,000</td><td>1,000</td><td>500</td><td>500</td>
+	</tr>
+  </table>
+  <p>
+	Using one of the pre-defined search region levels will result in much faster
+	computation than using custom search region lengths, as the oPOSSUM system can
+	take advantage of pre-computed values stored in the database. The default levels
+	were reasonable in terms of regulatory region lengths for the individual organisms.
+	Alternatively, you can choose other pre-computed regions from the drop down
+	list or specify your own custom region.  As the regions in the drop-down list
+	are pre-computed, the analysis will complete relatively quickly. Custom regions
+	are not pre-computed and thus take longer to analyse; if you don't remember
+	to adhere to the max upstream and max downstream constraints, the system will
+	limit the region for you.  
+  </p>
+  <p>
+	We recommend that you perform several analyses, varying the selected search region
+	level for each analyses.  Using mouse as an example, you might start with the default
+	of 5,000/5,000 bp, and then examine how	the over-representaiton analyses change
+	between shorter and longer search regions by comparing the results from
+	2,000/2,000 bp and 10,000/10,000 bp for another.
+  </p>
+  
+  <p>
+    <b>Notes:</b><br>
+    <ul>
+    <li>In cases where the specified amount of downstream sequence extends beyond the annotated 3' end of a gene, the amount of downstream sequence searched is truncated at the annotated 3' end.
+    <li>In cases of multiple TSSs for a given gene, search regions are applied to each TSS and, if overlapping, combined.
+    </ul>
+  </p>
 	  
+	<h4><a name="sort_by"></a>Number of results to display:</h4>
+
+	<p class="text">You can specify the number of results to be returned. The default
+	is to return all results, but you can specify to return only the top 5, 10 or
+	20 results. You can also specify to return all results which score above a given
+	Z-score and Fisher score threshold. In cases where anything other than the "All"
+	option is specified, the top scoring results are based on which scoring method
+	was chosen in the "Sort results by" section. Also, in those cases, those results
+	that are not returned, are lost, even those results that scored highly in the
+	other scoring measure.
+	</p>
+	<p>
+	  We recommend using the default of "all results", as selecting less than "all"
+	  does not increase the speed of the analysis. Once you have the results file,
+	  you can manually filter the scores yourself.
+	</p>
+
 	<h4><a name="sort_by"></a>Sort results by:</h4>
-	<p class="text">Results can be sorted by either Z-scores or Fisher scores. You
-	can opt to display all results or only those that scored above a minimum Z- or
-	Fisher score you specify. You need to be aware that if you select the score
-	threshold option, those results that scored below this value will be lost, even
-	those results that scored highly in the other scoring measure (i.e. low Z-score
-	and high Fisher and vice versa).</p>
+	<p class="text">Results can be sorted by either Z-score or Fisher score. The
+	sort order lists the top scoring over-represented TFBS at the top of the list.
+	The sort order is not permanent, and can be changed once the analysis is complete
+	and the results page is displayed.</p>
 	
   <p><hr noshade><br><a href="#top"><img src="../images/arrow-up.gif" align="right" /></a></p>
   
   <h2><a name="analysis_results"></a>Analysis Results</a></h2>
-  
-  <p><br></p>
   
 	<p>
 	The results are returned in a table format, preceded by a summary of the
@@ -294,7 +426,9 @@
   <p><hr noshade><br><a href="#top"><img src="../images/arrow-up.gif" align="right" /></a></p>
 
   <h2><a name="opossum_results"></a>Analysis Results Summary Table</h2>
-    
+	<p>For a general explanation of what the oPOSSUM analysis results mean, please
+	refer to the main <a href="../help.html#results" name="results">help page</a>.</p>
+	
 	<p>
       This table contains the results of both the Z-score and Fisher analyses. The results are 
       ordered by Z-score from most to least significant (higher to lower z-score). Those columns
@@ -356,7 +490,7 @@
 	<p>
 	The rate of occurrence of this TFBS cluster within the searched regions of the background 
 	set of genes/sequences. The rate is equal to the number of times the site was
-	predicted (background hits) multiplied by the with of the TFBS cluster, divided
+	predicted (background hits) multiplied by the width of the TFBS cluster, divided
 	by the total number of nucleotides in the searched regions of the background set.
 	</p>
     
@@ -364,7 +498,7 @@
 	<p>
 	The rate of occurrence of this TFBS cluster within the searched regions of the included 
 	target set of genes/sequences. The rate is equal to the number of times the site
-	was predicted (target hits) multiplied by the with of the TFBS cluster, divided
+	was predicted (target hits) multiplied by the width of the TFBS cluster, divided
 	by the total number of nucleotides in the searched regions of the included target set.
 	</p>
     
