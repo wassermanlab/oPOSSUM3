@@ -152,17 +152,17 @@
 
   <table id="results_table" class="sortable" cellpadding="2" cellspacing="0">
   <tr class="table_title">
-    <th title="Click arrows to sort">TFBS cluster name</th>
-    <th class="unsortable">Target seq. hits</th>
-    <th class="unsortable">Target seq. non-hits</th>
-    <th class="unsortable">Background seq. hits</th>
-    <th class="unsortable">Background seq. non-hits</th>
-    <th class="unsortable">Target cluster hits</th>
-    <th class="unsortable">Target cluster nucleotide rate</th>
-    <th class="unsortable">Background cluster hits</th>
-    <th class="unsortable">Background cluster nucleotide rate</th>
-    <th title="Click arrows to sort">Z-score</th>
-    <th title="Click arrows to sort">Fisher score</th>
+    <th title="TFBS cluster name (click to sort)">TFBS cluster name</th>
+    <th title="Target sequence hits (click to sort)">Target seq. hits</th>
+    <th title="Target sequence non-hits (click to sort)">Target seq. non-hits</th>
+    <th title="Background sequence hits (click to sort)">Background seq. hits</th>
+    <th title="Background sequence non-hits (click to sort)">Background seq. non-hits</th>
+    <th title="Target TFBS cluster hits (click to sort)">Target cluster hits</th>
+    <th title="Target TFBS cluster nucleotide rate (click to sort)">Target cluster nucleotide rate</th>
+    <th title="Background TFBS cluster hits (click to sort)">Background cluster hits</th>
+    <th title="Background TFBS cluster nucleotide rate (click to sort)">Background cluster nucleotide rate</th>
+    <th title="Assesses TFBS clusters per basepair (click to sort)">Z-score</th>
+    <th title="Assesses TFBS clusters per sequence (click to sort)">Fisher score</th>
   </tr>
   [%FOREACH result = results%]
     [%cl = tf_cluster_set.get_tf_cluster(result.id)%]
@@ -227,7 +227,11 @@
         [%END%]
       </td>
 
-      <td align=right nowrap>[%formatg(3, result.fisher_p_value)%]</td>
+      [%IF result.fisher_p_value == 'inf' or result.fisher_p_value == 'Inf'%]
+        <td sorttable_customkey="999999999" align=right nowrap>Inf</td>
+      [%ELSE%]
+        <td align=right nowrap>[%formatf(3, result.fisher_p_value)%]</td>
+      [%END%]
     </tr>
   [%END%]
   </table>

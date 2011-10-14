@@ -158,23 +158,23 @@
 
 <table id="results_summary_table" class="sortable" cellpadding="2" cellspacing="0">
   <tr class="table_title">
-    <th title="Click arrows to sort">TF</th>
-    <th title="Click arrows to sort">JASPAR ID</th>
-    <th title="Click arrows to sort">Class</th>
-    <th title="Click arrows to sort">Family</th>
-    <th title="Click arrows to sort">Tax group</th>
-    <th title="Click arrows to sort">IC</th>
-    <th title="Click arrows to sort">GC Content</th>
-    <th class="unsortable">Target gene hits</th>
-    <th class="unsortable">Target gene non-hits</th>
-    <th class="unsortable">Background gene hits</th>
-    <th class="unsortable">Background gene non-hits</th>
-    <th class="unsortable">Target TFBS hits</th>
-    <th class="unsortable">Target TFBS nucleotide rate</th>
-    <th class="unsortable">Background TFBS hits</th>
-    <th class="unsortable">Background TFBS nucleotide rate</th>
-    <th title="Click arrows to sort">Z-score</th>
-    <th title="Click arrows to sort">Fisher score</th>
+    <th title="TF name (click to sort)">TF</th>
+    <th title="JASPAR ID (click to sort)">JASPAR ID</th>
+    <th title="TF class (click to sort)">Class</th>
+    <th title="TF family (click to sort)">Family</th>
+    <th title="TF taxonomic supergroup (click to sort)">Tax group</th>
+    <th title="TF information content (click to sort)">IC</th>
+    <th title="TF GC content (click to sort)">GC Content</th>
+    <th title="Target gene hits (click to sort)">Target gene hits</th>
+    <th title="Target gene non-hits (click to sort)">Target gene non-hits</th>
+    <th title="Background gene hits (click to sort)">Background gene hits</th>
+    <th title="Background gene non-hits (click to sort)">Background gene non-hits</th>
+    <th title="Target TFBS hits (click to sort)">Target TFBS hits</th>
+    <th title="Target TFBS nucleotide rate (click to sort)">Target TFBS nucleotide rate</th>
+    <th title="Background TFBS hits (click to sort)">Background TFBS hits</th>
+    <th title="Background TFBS nucleotide rate (click to sort)">Background TFBS nucleotide rate</th>
+    <th title="Assesses TFBS per basepair (click to sort)">Z-score</th>
+    <th title="Assesses TFBS per gene (click to sort)">Fisher score</th>
   </tr>
 
   [%FOREACH result = results%]
@@ -253,7 +253,11 @@
         [%formatf(3, result.zscore)%]
       [%END%]
       </td>
-      <td align=right nowrap>[%formatg(3, result.fisher_p_value)%]</td>
+      [%IF result.fisher_p_value == 'inf' or result.fisher_p_value == 'Inf'%]
+        <td sorttable_customkey="999999999" align=right nowrap>Inf</td>
+      [%ELSE%]
+        <td align=right nowrap>[%formatf(3, result.fisher_p_value)%]</td>
+      [%END%]
     </tr>
   [%END%]
 </table>
