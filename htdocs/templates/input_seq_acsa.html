@@ -164,7 +164,7 @@ function verify(f)
   ]</p>
 
   <p class="text">
-    <input type="radio" name="bg_seq_input_method" value="default" checked>
+    <input type="radio" name="bg_seq_input_method" value="default">
     Choose a background (sequences randomly selected from experimental control peaks)
     <select name="bg_seq_set_key" onChange="{input.bg_seq_input_method[0].checked=true}">
       [%FOREACH key = bg_seq_set_keys%]
@@ -192,7 +192,7 @@ function verify(f)
     <input type="button" name="clear_bg_seqs" value="Clear"
       onClick="{input.bg_seq_list.value=''}">
     <br><br>
-    <input type="radio" name="bg_seq_input_method" value="upload">
+    <input type="radio" name="bg_seq_input_method" value="upload" checked>
     <b>OR</b> upload a file containing a list of fasta formatted background sequences:<br>
     <input type="file" name="bg_seq_file" size="40"
       onClick="{input.bg_seq_input_method[2].checked=true}"
