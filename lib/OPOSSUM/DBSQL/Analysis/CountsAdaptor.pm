@@ -261,7 +261,7 @@ sub fetch_counts
 	
     #printf STDERR "%s: fetching TFBS counts\n", scalar localtime;
 
-    my $counts = $sth->fetchall_arrayref();
+    my $raw_counts = $sth->fetchall_arrayref();
     if ($sth->err()) {
         carp "Error fetching gene TFBS counts: " . $sth->errstr . "\n";
         return;
@@ -272,7 +272,7 @@ sub fetch_counts
     my $t_counts = OPOSSUM::Analysis::Counts->new(
         -gene_ids   => \@t_gids,
         -tf_ids     => $tfids,
-        -counts     => $counts
+        -counts     => $raw_counts
     );
 
 	#
