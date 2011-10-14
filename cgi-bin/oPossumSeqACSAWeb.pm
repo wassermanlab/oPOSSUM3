@@ -414,6 +414,9 @@ sub process
 
         $matrix_set = $self->parse_matrix_text($matrix_text);
 
+        #print STDERR "matrix_set:\n"
+        #   . Data::Dumper::Dumper($matrix_set) . "\n";
+
         if (!$matrix_set || $matrix_set->size == 0) {
             return $self->error(
                 "Error parsing TFBS profile matrices from uploaded file"
@@ -602,7 +605,8 @@ sub process
     ) {
         $anchor_tf_filename = $self->write_matrix_file(
             $anchor_matrix,
-            $tempdir
+            $tempdir,
+            'anchor_matrices.txt'
         );
 
         return $self->error('Could not write anchor TFBS profile matrix file')
