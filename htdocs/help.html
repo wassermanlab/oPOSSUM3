@@ -148,6 +148,37 @@
 
   <br>
   
+  <h2><a name="results"></a>Understanding the Results</h2>
+  <p>
+  In general, the scores are used to *rank* the over-representation of a TFs putative
+  binding sites from the most strongly over-represented to the least, to aid you
+  in selecting potential TFs or structural classes of interest. The scores are
+  dependent upon a number of factors, one of which is the number of sequences
+  analyzed, thus comparing scores between different analyses should not be done
+  unless the number of sequences used in the analyses are similar. Another factor
+  is your selection of background. If your background does not have a similar
+  nucleotide composition as the target sequences, you risk biasing your analysis
+  to a subset of TF motifs. To detect whether a bias has occurred a simple visualization
+  is to plot the Z-score (y-axis) against the TF profiles GC content (x-axis), both
+  of which are columns in the final results table. If you see a tendency for TF
+  matrices with a high (or low) GC content to all have the highest ranking scores,
+  then you may need to go back and check the nucleotide composition of your background
+  relative to your target sequences. 
+  </p>
+  <p>
+  There is no specific threshold that can be recommended for any one data set;
+  however within the results of an analysis you may be able to select a group of
+  interesting TFs by the relative value of the scores. If your experiments were
+  designed to provide well-defined data sets highlighting genes regulated by a TF,
+  then it is common to see one or several TFs with scores clearly higher than the
+  majority of the scores. In general a good overview of your results can be obtained
+  by graphical plot. For instance you might plot the TFs by rank on the x-axis and
+  a corresponding score on the y-axis, or you might plot both scores against each
+  other, or you can use the plot mentionned in the prior paragraph to display one
+  of the scores vs. the GC content of the TF profiles.  In our experience, a clear
+  segregation of scores is the most reliable indication of functional relevance.
+  <p>
+	
   <h2><a name="tfbs_clusters"></a>TFBS Clusters</h2>
 
   <b>Clustering of TFBS profiles based on TF family and matrix similarity</b>
