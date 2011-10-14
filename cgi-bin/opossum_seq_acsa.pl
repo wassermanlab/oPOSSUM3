@@ -565,10 +565,29 @@ sub read_seqs
     my $seqIO = Bio::SeqIO->new(-file => $file, -format => 'fasta');
 
     my @seqs;
-    while (my $seq = $seqIO->next_seq()) {
-        push @seqs, $seq;
-    }
+    my $err = 0;
+    eval {
+        while (my $seq = $seqIO->next_seq()) {
+            unless ($seq->display_id) {
+                $err = 1;
+                last;
+            }
+
+            unless ($seq->seq) {
+                $err = 1;
+                last;
+            }
+
+            push @seqs, $seq;
+        }
+    };
+    $err = 1 if $@;
+
     $seqIO->close();
+
+    if ($err) {
+        fatal("Error parsing sequence file - please make sure your file is a correctly formatted fastA file");
+    }
 
     return @seqs ? \@seqs : undef;
 }
