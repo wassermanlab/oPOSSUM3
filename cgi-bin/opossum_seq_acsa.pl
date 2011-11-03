@@ -98,6 +98,8 @@ TFBS hits file.
 
 use strict;
 
+use opossum_seq_include;
+
 use oPossumWebOpt;
 use oPossumSeqWebOpt;
 use oPossumACSAWebOpt;
@@ -343,6 +345,8 @@ if ($tf_file) {
     unless ($matrix_set && $matrix_set->size > 0) {
         fatal("Error reading TFBS profiles from $tf_file");
     }
+    
+    matrix_set_compute_gc_content($matrix_set);
 } else {
     #$tf_file = undef;
     $logger->info("Fetching matrices from JASPAR");
