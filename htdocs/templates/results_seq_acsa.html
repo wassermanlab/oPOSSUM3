@@ -236,9 +236,9 @@
       [%gc = tf.tag('gc_content')%]
       <td align=right>
       [%IF gc > high_matrix_gc or gc < low_matrix_gc%]
-        <b class="warn_table_text">[%gc%]</b>
+        <b class="warn_table_text">[%formatf(3, gc)%]</b>
       [%ELSE%]
-        [%gc%]
+        [%formatf(3, gc)%]
       [%END%]
       </td>
 
