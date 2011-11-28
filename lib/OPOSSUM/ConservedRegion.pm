@@ -194,7 +194,7 @@ sub conservation
 
     if (@_) {
         my $score = shift;
-        return $self->score($score);
+        $self->score($score);
     }
 
     return $self->score;
@@ -218,11 +218,11 @@ sub gc_content
     my $self = shift;
 
     if (@_) {
-        my $score = shift;
-        return $self->score($score);
+        my $val = shift;
+        $self->{-gc_content} = $val;
     }
 
-    return $self->score;
+    return $self->{-gc_content};
 }
 
 #=head2 length
