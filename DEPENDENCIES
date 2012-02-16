@@ -10,10 +10,19 @@ The following software and databases are required by oPOSSUM3.
 
    oPOSSUM had been tested with 1.4.
 
-2) The TFBS perl library
+2) The TFBS perl library is required.
 
-   This is available at:
+   This is available at as a tarball at:
    	http://tfbs.genereg.net
+
+   NOTE: The tar file DOES NOT contain the TFBS:DB:JASPAR5.pm module
+
+   You can also browse the subversion repository at:
+	http://www.ii.uib.no/svn/lenhard/TFBS/
+
+   The easiest way then is to get the tarball, unzip it and then retrieve 
+   the JASPR5.pm module from the SVN.
+
 
 3) Perl modules
 
@@ -34,6 +43,11 @@ The following software and databases are required by oPOSSUM3.
 
 4) The JASPAR DB of transcription factor binding site profiles is required by
    oPOSSUM3. This may be downloaded from the Wasserman lab (see section below).
+   The DB is called JASPAR_2010.
+   
+   Create a mysql user, jaspar_r with select privileges on the tables in the
+   JASPAR_2010 DB, e.g.:
+   	mysql> grant select on JASPAR_2010.* to jaspar_r@'%';
 
 Accessing/Downloading Wasserman Lab Databases
 ---------------------------------------------
@@ -47,3 +61,5 @@ Wasserman lab DB server using the mysqldump facility. The database is hosted
 on vm5.cmmt.ubc.ca. and has a "read-only" (i.e. select privilege) user
 "jaspar_r" which does not require a password. Note: you will probably have to
 use the --skip-lock-tables option to the mysqldump command.
+
+5) The R statistic package (http://www.r-project.org/)

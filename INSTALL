@@ -42,12 +42,19 @@ by oPOSSUM.
    Alternatively, of course you could copy the oPOSSUM htdocs and cgi-bin
    directories directly into the apache tree.
 
-4) For web-based oPOSSUM, create the following directories:
+3) For web-based oPOSSUM, create the following directories:
     htdocs/tmp
     htdocs/results
-   Make these directories read/write/executable to everyone (chmod 777).
+    logs
 
-5) For web-based oPOSSUM, edit the configuration constants in the main web
+   Change the ownership of these directories to that of the user that the
+   web server runs under and/or make these directories at least
+   read/write/executable to to that user, e.g:
+
+       chown apache:apache htdocs/tmp
+       chmod 700 htdocs/tmp
+
+4) For web-based oPOSSUM, edit the configuration constants in the main web
    options file cgi-bin/oPossumWebOpt.pm to reflect your specific
    installation.
 
@@ -72,7 +79,13 @@ by oPOSSUM.
    It is also possible to edit other values in these files to reflect
    different default values for the oPOSSUM analysis.
 
-6) Install the sorttable.js javascript file from
+5) Edit the htdocs/index.html file and change specific URL to refer to the
+   webserver oPOSSUM is residing on.
+
+6) Edit the htdocs/templates/master.html file and change specific URLs to
+   refer to the webserver oPOSSUM is residing on.
+
+7) Install the sorttable.js javascript file from
    http://www.kryogenix.org/code/browser/sorttable into the oPOSSUM
    htdocs/templates subdirectory.
 
