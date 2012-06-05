@@ -32,6 +32,12 @@ function verify(f)
         ) {
             errors += "No gene IDs were pasted into the Paste Gene IDs box\n";
         } else {
+            /*
+             * Removed this check as it has trouble with trailing newlines,
+             * is not robust anyway, is not implemented for other gene ID types
+             * and the perl code does much better parsing/checking of IDs
+             * anyway. DJA 2012/04/20
+             *
             if (f.t_gene_id_type[0].selected) {
                 var valid = 1;
 
@@ -49,6 +55,7 @@ function verify(f)
                     errors += " Ensembl IDs or change the target Gene ID type.\n";
                 }
             }
+            */
         }
     } else if (f.t_id_input_method[1].checked) {
         if (   f.t_gene_file.value == null || f.t_gene_file.value == ""
@@ -75,6 +82,12 @@ function verify(f)
             errors += "No background gene IDs were pasted into the";
             errors += " Paste Gene IDs box\n";
         } else {
+            /*
+             * Removed this check as it has trouble with trailing newlines,
+             * is not robust anyway, is not implemented for other gene ID types
+             * and the perl code does much better parsing/checking of IDs
+             * anyway. DJA 2012/04/20
+             *
             if (f.bg_gene_id_type[0].selected) {
                 var valid = 1;
 
@@ -93,6 +106,7 @@ function verify(f)
                     errors += " type.\n";
                 }
             }
+            */
         }
     } else if (f.bg_id_input_method[3].checked) {
         if (   f.bg_gene_file.value == null
@@ -172,7 +186,7 @@ function verify(f)
 
   <p class="text">
     <input type="radio" name="t_id_input_method" value="paste" checked>
-    Paste gene IDs:
+    Paste gene IDs (max. [%max_target_genes%] gene IDs):
     <br>
     <input type="button" name="use_sample_genes" value="Use sample genes"
       onClick="{input.t_id_input_method[0].checked=true; input.t_gene_id_type[1].selected=true; input.t_gene_text.value=document.getElementById('sample_genes_[%species%]').value}">
@@ -190,7 +204,7 @@ function verify(f)
       onClick="{input.t_gene_text.value=''}">
     <br><br>
     <input type="radio" name="t_id_input_method" value="upload">
-    <b>OR</b> upload a file containing a list of gene identifiers:
+    <b>OR</b> upload a file containing a list of gene identifiers (max. [%max_target_genes%] gene IDs):
     <br>
     <span class="subtext">
     <input type="file" name="t_gene_file" size="40"
@@ -476,7 +490,7 @@ function verify(f)
     <select name="conservation_level">
       [%FOREACH level = cl_levels%]
         [%cl = cl_hash.$level%]
-        <option value="[%level%]" [%IF level == cl_dflt_level%]selected[%END%]>[%cl.min_conservation()*100%]%</option>
+        <option value="[%level%]" [%IF level == cl_dflt_level%]selected[%END%]>[%cl.min_conservation()%]</option>
       [%END%]
     </select>
     <br><br>

@@ -1,6 +1,10 @@
 <h3>Selected Parameters</h3>
 <table border="0" cellpadding="2" cellspacing="0">
   <tr>
+    <td class="table_title">Job ID:</td>
+    <td class="table_text">[%job_id%]</td>
+  </tr>
+  <tr>
     <td class="table_title">Number of genes submitted for analysis:</td>
     <td class="table_text">[%num_t_gene_ids%]</td>
   </tr>
@@ -17,23 +21,42 @@
     <td class="table_text">[%num_t_gids%]</td>
   </tr>
   <tr>
-    <td class="table_title">TFBS profile matrix source:</td>
-    <td class="table_text">JASPAR CORE profiles</td>
+    <td class="table_title">JASPAR collection(s):</td>
+    [%using_core_collection = 0%]
+    <td class="table_text">
+      [%FOREACH collection = collections%]
+        [%IF collection == 'CORE'%]
+          [%using_core_collection = 1%]
+        [%END%]
+        [%collection%]&nbsp;
+      [%END%]
+    </td>
   </tr>
+  [%IF using_core_collection == 1%]
+    [%IF tax_groups%]
+      <tr>
+        <td class="table_title">Taxonomic supergroup(s):</td>
+        <td class="table_text">
+          [%FOREACH tax_group = tax_groups%]
+            [%tax_group%]&nbsp;
+          [%END%]
+        </td>
+      </tr>
+    [%END%]
+  [%END%]
   <tr>
     <td class="table_title">Anchoring TF:</td>
     <td class="table_text">[%anchor_matrix.name()%]</td>
   </tr>
+  <tr>
+    <td class="table_title">Maximum Inter-Binding Distance:</td>
+    <td class="table_text">[%max_site_distance%]</td>
+  </tr>
 
   [%IF tf_select_criteria == 'min_ic'%]
     <tr>
-      <td class="table_title">Taxonomic supergroup(s):</td>
-      <td class="table_text">[%tax_group_str%]</td>
-    </tr>
-
-    <tr>
-      <td class="table_title">Minimum specificity:</td>
-      <td class="table_text">[%min_ic%]</td>
+      <td class="table_title">Minimum profile specificity:</td>
+      <td class="table_text">[%min_ic%] bits</td>
     </tr>
   [%ELSIF tf_select_criteria == 'specific'%]
     [%IF tf_set%]
@@ -49,8 +72,8 @@
     [%END%]
   [%END%]
   <tr>
-    <td class="table_title">Conservation level:</td>
-    <td class="table_text">[%min_conservation*100%]%</td>
+    <td class="table_title">Conservation cutoff:</td>
+    <td class="table_text">[%min_conservation%]</td>
   </tr>
   <tr>
     <td class="table_title">Matrix score threshold:</td>
@@ -147,7 +170,7 @@
 [%END%]
 -->
 
-<h3>Results</h3>
+<h3>Results - click column headers to sort by that column</h3>
 [%IF message%]
   <p class="warn_text">[%message%]</p>
 [%ELSIF results%]
@@ -185,8 +208,13 @@
       [%ELSE%]
         <td>[%tf.name%]</td>
       [%END%]
+      [%collection = tf.tag('collection')%]
       <td>
+      [%IF collection != 'PENDING'%]
         <a href="javascript:newWindow=window.open('[%jaspar_url%]?rm=present&collection=[%collection%]&ID=[%tf.ID%]', '[%tf.ID%]', 'width=850,height=700,toolbar=0,location=0,directories=0,status=0,menuBar=0,scrollBars=1'); newWindow.focus()">[%tf.ID%]</a>
+      [%ELSE%]
+        [%tf.ID%]
+      [%END%]
       </td>
       <td>[%tf.class%]</td>
       <td>[%tf.tag('family')%]</td>
@@ -262,6 +290,12 @@
   </table>
   <p class="text" align="center">
   <a href="[%rel_results_dir%]/[%results_file%]" target="_blank">Download as a tab delimited text file</a> (results will be kept on the server for [%result_retain_days%] days after analysis)
+  </p>
+
+  <p class="text" align="center">
+  View plot of <a href="[%rel_results_dir%]/[%zscore_plot_file%]" target="_blank">Z-score vs. %GC content</a>
+  <br>
+  View plot of <a href="[%rel_results_dir%]/[%fisher_plot_file%]" target="_blank">Fisher score vs. %GC content</a>
   </p>
 
   <p align="center"><a href="#top"><img src="[%rel_htdocs_path%]/images/arrow-up.gif" border="0" alt="Back to top"></a></p>

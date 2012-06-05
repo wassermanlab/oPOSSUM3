@@ -35,6 +35,20 @@
       </tr>
     [%END%]
 
+    [%IF user_peak_pos_file%]
+      <tr>
+        <td class="table_title">Target sequence MCP position file:</td>
+        <td class="table_text">[%user_peak_pos_file%]</td>
+      </tr>
+    [%END%]
+
+    [%IF user_bg_peak_pos_file%]
+      <tr>
+        <td class="table_title">Background sequence MCP position file:</td>
+        <td class="table_text">[%user_bg_peak_pos_file%]</td>
+      </tr>
+    [%END%]
+
     [%IF tf_db%]
       <tr>
         <td class="table_title">TFBS profile matrix source:</td>
@@ -80,10 +94,10 @@
         <td class="table_text">User supplied</td>
       </tr>
 
-      [%IF user_tf_file%]
+      [%IF user_matrix_file%]
         <tr>
           <td class="table_title">TFBS profile matrix file:</td>
-          <td class="table_text">[%user_tf_file%]</td>
+          <td class="table_text">[%user_matrix_file%]</td>
         </tr>
       [%END%]
     [%END%] <!-- if tf_db> -->
@@ -97,6 +111,8 @@
       [%display_sort_by = 'Z-score'%]
     [%ELSIF result_sort_by == 'fisher_p_value'%]
       [%display_sort_by = 'Fisher score'%]
+    [%ELSIF result_sort_by == 'ks_p_value'%]
+      [%display_sort_by = 'KS score'%]
     [%ELSE%]
       [%display_sort_by = result_sort_by%]
     [%END%]
@@ -109,7 +125,7 @@
           <td class="table_text">Top [%num_display_results%] results by [%display_sort_by%]</td>
         [%END%]
       [%ELSIF result_type == 'significant_hits'%]
-        <td class="table_text">All results with a Z-score >= [%zscore_cutoff%] and a Fisher score >= [%fisher_cutoff%] sorted by [%display_sort_by%]</td>
+        <td class="table_text">All results with a Z-score >= [%zscore_cutoff%] and a Fisher score >= [%fisher_cutoff%] and a K-S p-value <= [%ks_cutoff%] sorted by [%display_sort_by%]</td>
       [%END%]
     </tr>
 

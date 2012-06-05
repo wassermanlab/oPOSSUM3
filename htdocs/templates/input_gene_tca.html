@@ -34,6 +34,12 @@ function verify(f)
             errors += "No gene IDs were pasted into the target Paste Gene IDs";
             errors += " box\n";
         } else {
+            /*
+             * Removed this check as it has trouble with trailing newlines,
+             * is not robust anyway, is not implemented for other gene ID types
+             * and the perl code does much better parsing/checking of IDs
+             * anyway. DJA 2012/04/20
+             *
             if (f.t_gene_id_type[0].selected) {
                 var valid = 1;
 
@@ -51,6 +57,7 @@ function verify(f)
                     errors += " Ensembl IDs or change the target Gene ID type.\n";
                 }
             }
+            */
         }
     } else if (f.t_id_input_method[1].checked) {
         if (   f.t_gene_file.value == null
@@ -78,6 +85,12 @@ function verify(f)
             errors += "No background gene IDs were pasted into the";
             errors += " Paste Gene IDs box\n";
         } else {
+            /*
+             * Removed this check as it has trouble with trailing newlines,
+             * is not robust anyway, is not implemented for other gene ID types
+             * and the perl code does much better parsing/checking of IDs
+             * anyway. DJA 2012/04/20
+             *
             if (f.bg_gene_id_type[0].selected) {
                 var valid = 1;
 
@@ -96,6 +109,7 @@ function verify(f)
                     errors += " type.\n";
                 }
             }
+            */
         }
     } else if (f.bg_id_input_method[3].checked) {
         if (   f.bg_gene_file.value == null
@@ -108,8 +122,8 @@ function verify(f)
 
     if (f.cluster_type[1].checked) {
         var tfs_selected = false;
-        for (var i = 0; i < f.tf_cluster_families.options.length; i++) {
-            if (f.tf_cluster_families.options[i].selected) {
+        for (var i = 0; i < f.tf_families.options.length; i++) {
+            if (f.tf_families.options[i].selected) {
                 tfs_selected = true;
                 break;
             }
@@ -149,7 +163,7 @@ function verify(f)
 
   <p class="text">
     <input type="radio" name="t_id_input_method" value="paste" checked>
-    Paste gene IDs:
+    Paste gene IDs (max. [%max_target_genes%] gene IDs):
     <br>
     <input type="button" name="use_sample_genes" value="Use sample genes"
       onClick="{input.t_id_input_method[0].checked=true; input.t_gene_id_type[1].selected=true; input.t_gene_text.value=document.getElementById('sample_genes_[%species%]').value}">
@@ -167,7 +181,7 @@ function verify(f)
       onClick="{input.t_gene_text.value=''}">
     <br><br>
     <input type="radio" name="t_id_input_method" value="upload">
-    <b>OR</b> upload a file containing a list of gene identifiers:
+    <b>OR</b> upload a file containing a list of gene identifiers (max. [%max_target_genes%] gene IDs):
     <br>
     <span class="subtext">
     <input type="file" name="t_gene_file" size="40"
@@ -265,50 +279,36 @@ function verify(f)
   <h4>TFBS Cluster Selection Based on TF Families</h4>
 
   <p class="text">
-    <input type="radio" name="cluster_type" value="all" checked>
+    <input type="radio" name="tf_family_select_method" value="all" checked>
     All TFBS clusters
     <br>	
-    <input type="radio" name="cluster_type" value="specific">
+    <input type="radio" name="tf_family_select_method" value="specific">
     <b>OR</b> select specific TFBS cluster families:
     <br>
 	[%tfc_families = tf_cluster_set.get_tf_families()%]
-	<select multiple size=8 name=tf_cluster_families
-	    onFocus="{input.cluster_type[1].checked=true}">
+	<select multiple size=8 name=tf_families
+	    onFocus="{input.tf_family_select_method[1].checked=true}">
 	[%FOREACH fam = tfc_families%]
 	    <option value=[%fam%]>[%fam%]</option>
 	[%END%]
     </select>
   </p>
-
-<!--
-  <h4>JASPAR Profile Selection Parameters</h4>
-  <p class="text">
-    <div style="float:left;">
-      <input type="radio" name="tf_selection_criteria" value="default" checked>
-      Default settings (Use all available profiles above [%min_ic%])
-      <br>
-      <input type="radio" name="tf_selection_criteria" value="custom">
-      Choose your custom parameters
-      <br>
-        Collections:
-        [%FOREACH col = collections%]
-          &nbsp;&nbsp;<input type="checkbox" name="tf_collections" value="[%col%]" checked>[%col%]
-        [%END%]
-          
-        <br><br>
-          
-        Tax groups:
-        [%FOREACH tax = tax_groups%]
-          &nbsp;&nbsp;<input type="checkbox" name="tf_tax_groups" value="[%tax%]" checked>[%tax%]
-        [%END%]
-          
-        <br><br>
-          
-        Minimum specificity: &nbsp;
-        <input type="text" name="tf_min_ic" value=[%min_ic%] size="2"> bits (min. [%min_ic%] bits)
-    </div>
-  </p>
--->
+  <div class="">
+    <input type="radio" name="tf_family_select_method" value="upload">
+    <b>OR</b> upload a file containing one or more TFBS families
+    <br>
+    <input type="file" name="tf_family_upload_file" size="40"
+      onClick="{input.tf_family_select_method[2].checked=true}"
+      onFocus="{input.tf_family_select_method[2].checked=true}"
+      onChange="{
+        if (!isblank(input.tf_family_upload_file.value))
+          {input.tf_family_select_method[2].checked=true}
+        else if (!isblank(input.tf_family_upload_file.value))
+          {input.tf_family_select_method[2].checked=true}
+      }">
+  </div>
+  
+  <div style="clear:left;"></div>
 
   <br><hr noshade><br>
 
@@ -325,7 +325,7 @@ function verify(f)
     <select name="conservation_level">
       [%FOREACH level = cl_levels%]
         [%cl = cl_hash.$level%]
-        <option value="[%level%]" [%IF level == cl_dflt_level%]selected[%END%]>[%cl.min_conservation()*100%]%</option>
+        <option value="[%level%]" [%IF level == cl_dflt_level%]selected[%END%]>[%cl.min_conservation()%]</option>
       [%END%]
     </select>
     <br><br>
@@ -371,14 +371,14 @@ function verify(f)
     <br><br>
     Number of results to return:
     <br>
-    <input type="radio" name="result_type" value="top" checked> Top
+    <input type="radio" name="result_type" value="top_x_results" checked> Top
     <select name="num_display_results">
       [%FOREACH num = nresults%]
         <option value=[%num%] [%IF num == dflt_nresults%]selected[%END%]>[%num%]</option>
       [%END%]
     </select> results
     <br>
-    <input type="radio" name="result_type" value="significant"> <b>OR</b> all results with <b>Z-score >= </b>
+    <input type="radio" name="result_type" value="significant_hits"> <b>OR</b> all results with <b>Z-score >= </b>
     <select name="zscore_cutoff">
       [%FOREACH cutoff = zcutoffs%]
         <option value=[%cutoff%] [%IF cutoff == dflt_zcutoff%]selected[%END%]>[%cutoff%]</option>
@@ -400,15 +400,18 @@ function verify(f)
   </p>
     
   <br><hr noshade>
-
+  
+  <p class="text"> 
+    Please enter your email address:
+    <input type="text" name="email" value="">
+  </p>
   <p class="text"> 
     Press the <b>Submit</b> button to perform the analysis or <b>Reset</b> to reset the analysis parameters to their default values.<br>
-    Depending on parameters selected and server load, the analysis may take anywhere from a few seconds to several minutes to perform.<br>
+    Depending on parameters selected and server load, the analysis may take anywhere from a minute to a few hours to complete.<br>
     <br>
     <input type="submit" name="Submit" value="Submit">
     <input type="reset" name="Reset" value="Reset">
-    <input type="hidden" name="rm" value="results">
-    <input type="hidden" name="sid" value="[%sid%]">
+    <input type="hidden" name="rm" value="process">
   </p>
   <br>
 </form>

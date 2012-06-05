@@ -30,6 +30,12 @@
       </tr>
     [%END%]
 
+    [%IF user_tf_family_file%]
+        <td class="table_title">TF family file:</td>
+        <td class="table_text">[%user_tf_family_file%]</td>
+      </tr>
+    [%END%]
+
     [%IF cl_db%]
       <tr>
         <td class="table_title">TFBS cluster source:</td>
@@ -43,16 +49,23 @@
         <td class="table_text">[%tf_db%]</td>
       </tr>
     [%END%] <!-- if tf_db -->
-
-    [%IF tf_cluster_select_criteria == 'specific'%]
-      [%IF tf_families%]
-        <tr>
-          <td class="table_title">TFBS cluster families:</td>
-          <td class="table_text">
-            [%FOREACH fam = tf_families%][%fam%] [%END%]
-          </td>
-        </tr>
-      [%END%]
+    
+    [%IF collections%]
+      <tr>
+        <td class="table_title">JASPAR collections:</td>
+        <td class="table_text">
+          [%FOREACH col = collections%][%col%]&nbsp;[%END%]
+        </td>
+      </tr>
+    [%END%]
+    
+    [%IF tax_groups%]
+      <tr>
+        <td class="table_title">Taxonomic supergroup(s):</td>
+        <td class="table_text">
+          [%FOREACH tax_group = tax_groups%][%tax_group%]&nbsp;[%END%]
+        </td>
+      </tr>
     [%END%]
 
     <tr>
@@ -67,12 +80,12 @@
 
     <tr>
       <td class="table_title">Upstream sequence length:</td>
-      <td class="table_text">[%upstream_bp%]</td>
+      <td class="table_text">[%upstream_bp%] bp</td>
     </tr>
 
     <tr>
       <td class="table_title">Downstream sequence length:</td>
-      <td class="table_text">[%downstream_bp%]</td>
+      <td class="table_text">[%downstream_bp%] bp</td>
     </tr>
 
     [%IF result_sort_by == 'zscore'%]

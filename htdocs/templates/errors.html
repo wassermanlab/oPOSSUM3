@@ -1,8 +1,10 @@
 <form name="possum_error" enctype="multipart/form-data" method="post" action="none">
-  <p class="subtitle">The following error occured</p>
+  <p class="subtitle">The following error(s) occured</p>
   <p class="text">
   <b>
-    [%error%]<br>
+  [%FOREACH err = errors%]
+    [%err%]<br>
+  [%END%]
   </b>
   </p>
   <p class="text">

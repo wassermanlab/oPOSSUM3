@@ -1,4 +1,5 @@
 <h3>Selected Parameters</h3>
+
 <table border="0" cellpadding="2" cellspacing="0">
   <tr>
     <td class="table_title">Job ID:</td>
@@ -11,6 +12,13 @@
       <td class="table_text">[%user_seq_file%]</td>
     </tr>
   [%END%]
+  
+  [%IF user_peak_pos_file%]
+    <tr>
+      <td class="table_title">Target sequence MCP position file:</td>
+      <td class="table_text">[%user_peak_pos_file%]</td>
+    </tr>
+  [%END%]
 
   [%IF user_bg_seq_file%]
     <tr>
@@ -21,6 +29,13 @@
     <tr>
       <td class="table_title">Background sequence set:</td>
       <td class="table_text">[%bg_seq_set_name%]</td>
+    </tr>
+  [%END%]
+  
+  [%IF user_bg_peak_pos_file%]
+    <tr>
+      <td class="table_title">Background sequence MCP position file:</td>
+      <td class="table_text">[%user_bg_peak_pos_file%]</td>
     </tr>
   [%END%]
 
@@ -72,14 +87,30 @@
       <td class="table_text">[%tf_db%]</td>
     </tr>
   [%END%]
+  
+  [%IF cl_db%] 
+    <tr>
+      <td class="table_title">TFBS cluster source:</td>
+      <td class="table_text">[%cl_db%]</td>
+    </tr>
+  [%END%]
+  
   [%IF collections%]
     <tr>
-      <td class="table_title">JASPAR collection:</td>
+      <td class="table_title">JASPAR collection(s):</td>
       <td class="table_text">
         [%FOREACH collection = collections%][%collection%]&nbsp;[%END%]
       </td>
     </tr>
   [%END%]
+    
+  [%IF user_tf_family_file%]
+    <tr>
+      <td class="table_title">TF family file:</td>
+      <td class="table_text">[%user_tf_family_file%]</td>
+    </tr>
+  [%END%]
+  
   [%IF tf_families%]
     <tr>
       <td class="table_title">TFBS families:</td>
@@ -88,6 +119,7 @@
       </td>
     </tr>
   [%END%]
+  
   [%IF tax_groups%]
     <tr>
       <td class="table_title">Taxonomic supergroup(s):</td>
@@ -96,6 +128,7 @@
       </td>
     </tr>
   [%END%]
+  
   [%IF min_ic%]
     <tr>
       <td class="table_title">Min. IC:</td>
@@ -112,9 +145,12 @@
     [%display_sort_by = 'Z-score'%]
   [%ELSIF result_sort_by == 'fisher_p_value'%]
     [%display_sort_by = 'Fisher score'%]
+  [%ELSIF result_sort_by == 'ks_p_value'%]
+    [%display_sort_by = 'KS score'%]
   [%ELSE%]
     [%display_sort_by = result_sort_by%]
   [%END%]
+  
   <tr>
     <td class="table_title">Results returned:</td>
     [%IF result_type == 'top_x_results'%]
@@ -124,7 +160,7 @@
         <td class="table_text">Top [%num_display_results%] results sorted by [%display_sort_by%]</td>
       [%END%]
     [%ELSIF result_type == 'significant_hits'%]
-      <td class="table_text">All results with a Z-score >= [%zscore_cutoff%] and a Fisher score >= [%fisher_cutoff%] sorted by [%display_sort_by%]</td>
+      <td class="table_text">All results with a Z-score >= [%zscore_cutoff%] / Fisher score >= [%fisher_cutoff%] / KS p-value <= [%ks_cutoff%] sorted by [%display_sort_by%]</td>
     [%END%]
   </tr>
 
@@ -132,9 +168,12 @@
     <td class="table_title">The results will be sent to the following email:</td>
     <td class="table_text">[%email%]</td>
   </tr>
+  
 </table>
 
-<h3>Results</h3>
+
+<h3>Results - click column headers to sort by that column</h3>
+
 [%IF message%]
   <p class="warn_text">[%message%]</p>
 [%ELSIF results%]
@@ -156,14 +195,15 @@
     <th title="Background TFBS cluster nucleotide rate (click to sort)">Background cluster nucleotide rate</th>
     <th title="Assesses TFBS clusters per basepair (click to sort)">Z-score</th>
     <th title="Assesses TFBS clusters per sequence (click to sort)">Fisher score</th>
+    <th title="Assesses TFBS distances from sequence peaks (click to sort)">KS score</th>
   </tr>
   [%FOREACH result = results%]
     [%cl = tf_cluster_set.get_tf_cluster(result.id)%]
     <tr class="table_text">
       [%IF result.bg_gene_hits == 0 and result.t_gene_hits > 0%]
-        <td><b class="warn_table_text"><a href="[%rel_htdocs_data_path%]/tfbs_clusters/c[%cl.id%]_info.html" target="_blank">*[%cl.name%]</b></td>
+        <td><b class="warn_table_text"><a href="[%rel_htdocs_data_path%]/tfbs_clusters/c[%cl.id%]_info.html" target="_blank">*[%cl.name%]</a></b></td>
       [%ELSE%]
-	    <td><a href="[%rel_htdocs_data_path%]/tfbs_clusters/c[%cl.id%]_info.html" target="_blank">[%cl.name%]</td>
+	    <td><a href="[%rel_htdocs_data_path%]/tfbs_clusters/c[%cl.id%]_info.html" target="_blank">[%cl.name%]</a></td>
       [%END%]
 
       <td align=right>
@@ -225,6 +265,23 @@
       [%ELSE%]
         <td align=right nowrap>[%formatf(3, result.fisher_p_value)%]</td>
       [%END%]
+
+      [%IF result.ks_p_value == 'inf' or result.ks_p_value == 'Inf'%]
+        <td sorttable_customkey="999999999" align=right nowrap>Inf</td>
+      [%ELSE%]
+        <td align=right nowrap>[%formatf(3, result.ks_p_value)%]</td>
+      [%END%]
+
+<!--      
+      <td align=right>
+        [%IF result.ks_p_value == 'N/A'%]
+          <b class="warn_table_text">N/A</b>
+        [%ELSE%]
+          [%formatf(3, result.ks_p_value)%]
+        [%END%]
+      </td>
+-->
+
     </tr>
   [%END%]
   </table>

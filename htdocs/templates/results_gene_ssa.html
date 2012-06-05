@@ -1,6 +1,10 @@
 <h3>Selected Parameters</h3>
 <table border="0" cellpadding="2" cellspacing="0">
   <tr>
+    <td class="table_title">Job ID:</td>
+    <td class="table_text">[%job_id%]</td>
+  </tr>
+  <tr>
     <td class="table_title">Number of genes submitted for analysis:</td>
     <td class="table_text">[%num_t_gene_ids%]</td>
   </tr>
@@ -17,25 +21,33 @@
     <td class="table_text">[%num_t_gids%]</td>
   </tr>
   <tr>
-    <td class="table_title">JASPAR collection:</td>
-    <td class="table_text">[%collection%]</td>
+    <td class="table_title">JASPAR collection(s):</td>
+    [%using_core_collection = 0%]
+    <td class="table_text">
+      [%FOREACH collection = collections%]
+        [%IF collection == 'CORE'%]
+          [%using_core_collection = 1%]
+        [%END%]
+        [%collection%]&nbsp;
+      [%END%]
+    </td>
   </tr>
-  [%IF collection == 'CORE'%]
-    <tr>
-      <td class="table_title">Taxonomic supergroup(s):</td>
-      <td class="table_text">[%core_tax_group_str%]</td>
-    </tr>
+  [%IF using_core_collection == 1%]
+    [%IF tax_groups%]
+      <tr>
+        <td class="table_title">Taxonomic supergroup(s):</td>
+        <td class="table_text">
+          [%FOREACH tax_group = tax_groups%]
+            [%tax_group%]&nbsp;
+          [%END%]
+        </td>
+      </tr>
+    [%END%]
   [%END%]
   [%IF tf_select_criteria == 'min_ic'%]
     <tr>
-      <td class="table_title">Minimum specificity:</td>
-      [%IF collection == 'CORE'%]
-        <td class="table_text">[%core_min_ic%]</td>
-      [%ELSIF collection == 'PBM'%]
-        <td class="table_text">[%pbm_min_ic%]</td>
-      [%ELSIF collection == 'PENDING'%]
-        <td class="table_text">[%pending_min_ic%]</td>
-      [%END%]
+      <td class="table_title">Minimum profile specificity:</td>
+      <td class="table_text">[%min_ic%] bits</td>
     </tr>
   [%ELSIF tf_select_criteria == 'specific'%]
     [%IF tf_set%]
@@ -51,8 +63,8 @@
     [%END%]
   [%END%]
   <tr>
-    <td class="table_title">Conservation level:</td>
-    <td class="table_text">[%min_conservation*100%]%</td>
+    <td class="table_title">Conservation cutoff:</td>
+    <td class="table_text">[%min_conservation%]</td>
   </tr>
   <tr>
     <td class="table_title">Matrix score threshold:</td>
@@ -149,7 +161,7 @@
 [%END%]
 -->
 
-<h3>Results</h3>
+<h3>Results - click column headers to sort by that column</h3>
 [%IF results%]
   [%IF warn_zero_bg_gene_hits%]
     <p class="warn_text"><b>Warning</b>: The provided background gene set resulted in zero binding sites for one or more TFs. In these cases the Z-score is undefined and is marked as N/A. In cases where there were one or more binding sites in the target gene set, the result could still be considered significant. Results for which this was the case are marked with an asterisk (*).
@@ -178,7 +190,8 @@
   </tr>
 
   [%FOREACH result = results%]
-    [%tf = tf_set.get_tf(result.id)%]
+    [%tf_id = result.id%]
+    [%tf = tf_set.get_matrix(tf_id)%]
 
     <tr class="table_text">
       [%IF result.bg_gene_hits == 0 and result.t_gene_hits > 0%]
@@ -186,8 +199,13 @@
       [%ELSE%]
         <td>[%tf.name%]</td>
       [%END%]
+      [%collection = tf.tag('collection')%]
       <td>
+      [%IF collection != 'PENDING'%]
         <a href="javascript:newWindow=window.open('[%jaspar_url%]?rm=present&collection=[%collection%]&ID=[%tf.ID%]', '[%tf.ID%]', 'width=850,height=700,toolbar=0,location=0,directories=0,status=0,menuBar=0,scrollBars=1'); newWindow.focus()">[%tf.ID%]</a>
+      [%ELSE%]
+        [%tf.ID%]
+      [%END%]
       </td>
       <td>[%tf.class%]</td>
       <td>[%tf.tag('family')%]</td>
@@ -210,7 +228,7 @@
       </td>
       <td align=right>
         [%IF result.t_gene_hits > 0%]
-          <a href="[%rel_cgi_bin_path%]/opossum_[%species%]_ssa?rm=tfbs_details&sid=[%sid%]&tf_id=[%tf.ID%]" target="_blank">[%result.t_gene_hits%]</a>
+          <a href="[%rel_results_dir%]/[%tf_id%].html" target="_blank">[%result.t_gene_hits%]</a>
         [%ELSE%]
           [%result.t_gene_hits%]
         [%END%]
@@ -226,7 +244,7 @@
       <td align=right>[%result.bg_gene_no_hits%]</td>
       <td align=right>
         [%IF result.t_tfbs_hits > 0%]
-          <a href="[%rel_cgi_bin_path%]/opossum_[%species%]_ssa?rm=tfbs_details&sid=[%sid%]&tf_id=[%tf.ID%]" target="_blank">[%result.t_tfbs_hits%]</a>
+          <a href="[%rel_results_dir%]/[%tf_id%].html" target="_blank">[%result.t_tfbs_hits%]</a>
         [%ELSE%]
           [%result.t_tfbs_hits%]
         [%END%]
@@ -262,8 +280,15 @@
   [%END%]
 </table>
 <p class="text" align="center">
-<a href="[%rel_htdocs_results_path%]/[%results_subdir%]/[%result_file%]" target="_blank">Download as a tab delimited text file</a> (results will be kept on the server for [%result_retain_days%] days after analysis)
+<a href="[%rel_results_dir%]/[%results_file%]" target="_blank">Download as a tab delimited text file</a> (results will be kept on the server for [%result_retain_days%] days after analysis)
 </p>
+
+<p class="text" align="center">
+View plot of <a href="[%rel_results_dir%]/[%zscore_plot_file%]" target="_blank">Z-score vs. %GC content</a>
+<br>
+View plot of <a href="[%rel_results_dir%]/[%fisher_plot_file%]" target="_blank">Fisher score vs. %GC content</a>
+</p>
+
 <p align="center"><a href="#top"><img src="[%rel_htdocs_path%]/images/arrow-up.gif" border="0" alt="Back to top"></a></p>
 <p class="text">
 Consult the <a href="javascript:newWindow=window.open('[%rel_htdocs_path%]/help.html','help','width=600,height=800,toolbar=1\

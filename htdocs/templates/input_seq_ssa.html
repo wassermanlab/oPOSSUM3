@@ -184,6 +184,46 @@ function verify(f)
 	  {input.seq_input_method[0].checked=true}}">
     <br><br>
   </p>
+
+  <h4>Optional: Enter the MCP positions for your sequences</h4>
+  
+  <p class="text">[
+    <a href="javascript:newWindow=window.open('[%rel_htdocs_path%]/help/help_ssa.html#select_target',
+    'help','width=800,height=800,toolbar=1,location=0,directories=0,status=0,menuBar=0,scrollBars=1,resizable=1'); newWindow.focus()">HELP</a>
+  ]</p>
+
+  <p class="text">
+    <input type="radio" name="peak_pos_input_method" value="paste" checked>
+    Paste maximum point of confidence (MCP) positions, in the same order as your sequences.<br>
+    (1 position/line. To use this option, input sequences must have chromosomal coordinates as IDs.
+    Refer to help for more details.)
+    <br>
+    <textarea name="peak_pos_list" rows=5 cols=60 wrap=SOFT
+      onFocus="{input.peak_pos_input_method[0].checked=true}" 
+      onChange="{
+        if (!isblank(input.peak_pos_list.value))
+          {input.peak_pos_input_method[0].checked=true}
+        else if (!isblank(input.peak_pos_file.value))
+          {input.peak_pos_input_method[1].checked=true}
+      }"></textarea>
+    <br>
+    <input type="button" name="clear_peak_pos" value="Clear"
+      onClick="{input.peak_pos_list.value=''}">
+    <br><br>
+    <input type="radio" name="peak_pos_input_method" value="upload">
+    <b>OR</b> upload a file containing a list of peak positions (1 position/line):<br>
+    <input type="file" name="peak_pos_file" size="40"
+      onClick="{input.peak_pos_input_method[1].checked=true}"
+      onFocus="{input.peak_pos_input_method[1].checked=true}"
+      onChange="{
+        if (!isblank(input.peak_pos_file.value))
+	  {input.peak_pos_input_method[1].checked=true}}
+	else if (!isblank(input.peak_pos_list.value))
+	  {input.peak_pos_input_method[0].checked=true}}">
+    <br><br>
+  </p>
+
+  <hr noshade><br>
   
   <h3>STEP 2: Enter a background list of sequences</h3>
   
@@ -235,6 +275,44 @@ function verify(f)
     <br>
     <br>
     Generate a background set of sequences which matches the GC composition of your target sequences using <a href="http://opossum.cisreg.ca/GC_compo" target="_blank"><b>this tool</b></a>
+  </p>
+
+  <h4>Optional: Enter the MCP positions for your background sequences</h4>
+  
+  <p class="text">[
+    <a href="javascript:newWindow=window.open('[%rel_htdocs_path%]/help/help_ssa.html#select_target',
+    'help','width=800,height=800,toolbar=1,location=0,directories=0,status=0,menuBar=0,scrollBars=1,resizable=1'); newWindow.focus()">HELP</a>
+  ]</p>
+
+  <p class="text">
+    <input type="radio" name="bg_peak_pos_input_method" value="paste" checked>
+    Paste maximum point of confidence (MCP) positions, in the same order as your sequences.<br>
+    (1 position/line. To use this option, input sequences must have chromosomal coordinates as IDs.
+    Refer to help for more details.)
+    <br>
+    <textarea name="bg_peak_pos_list" rows=5 cols=60 wrap=SOFT
+      onFocus="{input.bg_peak_pos_input_method[0].checked=true}" 
+      onChange="{
+        if (!isblank(input.bg_peak_pos_list.value))
+          {input.bg_peak_pos_input_method[0].checked=true}
+        else if (!isblank(input.bg_peak_pos_file.value))
+          {input.bg_peak_pos_input_method[1].checked=true}
+      }"></textarea>
+    <br>
+    <input type="button" name="clear_bg_peak_pos" value="Clear"
+      onClick="{input.bg_peak_pos_list.value=''}">
+    <br><br>
+    <input type="radio" name="bg_peak_pos_input_method" value="upload">
+    <b>OR</b> upload a file containing a list of peak positions (1 position/line):<br>
+    <input type="file" name="bg_peak_pos_file" size="40"
+      onClick="{input.bg_peak_pos_input_method[1].checked=true}"
+      onFocus="{input.bg_peak_pos_input_method[1].checked=true}"
+      onChange="{
+        if (!isblank(input.bg_peak_pos_file.value))
+	  {input.bg_peak_pos_input_method[1].checked=true}}
+	else if (!isblank(input.bg_peak_pos_list.value))
+	  {input.bg_peak_pos_input_method[0].checked=true}}">
+    <br><br>
   </p>
 
   <hr noshade><br>
@@ -441,6 +519,13 @@ function verify(f)
         <option value=[%cutoff%] [%IF cutoff == dflt_fcutoff%]selected[%END%]>[%cutoff%]</option>
       [%END%]
     </select>
+    and <b>KS score >= </b>
+    <select name="ks_cutoff">
+      [%FOREACH cutoff = kscutoffs%]
+        <option value=[%cutoff%] [%IF cutoff == dflt_kscutoff%]selected[%END%]>[%cutoff%]</option>
+      [%END%]
+    </select>
+    <br>
     (Default values have been chosen based on empirical studies)
     <br>
     <br>
@@ -448,6 +533,7 @@ function verify(f)
     <br>
     <input type="radio" name="result_sort_by" value="zscore" checked>Z-score
     <input type="radio" name="result_sort_by" value="fisher_p_value">Fisher score
+    <input type="radio" name="result_sort_by" value="ks_p_value">KS score
   </p>
 
   <br><hr noshade>

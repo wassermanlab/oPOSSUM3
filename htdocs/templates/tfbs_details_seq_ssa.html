@@ -11,6 +11,7 @@
     [%IF tf_db%]
       <tr>
         <td class="table_title">JASPAR ID:</td>
+        [%collection = tf.tags.collection%]
         <td class="table_text"><a href="javascript:newWindow=window.open('[%jaspar_url%]?rm=present&collection=[%collection%]&ID=[%tf.ID%]', '[%tf.ID%]', 'width=850,height=700,toolbar=0,location=0,directories=0,status=0,menuBar=0,scrollBars=1'); newWindow.focus()">[%tf.ID%]</a></td>
       </tr>
     [%END%]
@@ -86,7 +87,7 @@
           <td align="right">[%IF site.strand == 1%]+[%ELSE%]-[%END%]</td>
           <td align="right">[%formatf(3, site.score)%]</td>
           <td align="right">[%formatf(1, rel_score)%]%</td>
-          <td align="left" class="seqtext">[%site.seq%]</td>
+          <td align="left" class="seqtext">[%site.seq.seq%]</td>
           </tr>
         [%END%]
       [%END%]

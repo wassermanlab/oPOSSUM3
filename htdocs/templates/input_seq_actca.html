@@ -56,10 +56,10 @@ function verify(f)
         }
     }
 
-    if (f.tf_cluster_select_method[1].checked) {
+    if (f.tf_family_select_method[1].checked) {
         var fams_selected = false;
-        for (var i = 0; i < f.tf_cluster_families.options.length; i++) {
-            if (f.tf_cluster_families.options[i].selected) {
+        for (var i = 0; i < f.tf_families.options.length; i++) {
+            if (f.tf_families.options[i].selected) {
                 fams_selected = true;
                 break;
             }
@@ -238,24 +238,38 @@ function verify(f)
     
       <br><br>
 
-    <b>TF Families:</b>
-    <br>
-    <input type="radio" name="tf_cluster_select_method" value="all" checked=true>
+      <b>TF Families:</b>
+      <br>
+      <input type="radio" name="tf_family_select_method" value="all" checked>
         All TF families
-    <br>
-    <input type="radio" name="tf_cluster_select_method" value="specific">
-    <b>OR</b> select specific TF famlies:
-    <br>
-    <table>
-	[%tfc_families = tf_cluster_set.get_tf_families()%]
-	<select multiple size=8 name=tf_cluster_families
-	    onFocus="{input.cluster_type[1].checked=true}">
-	[%FOREACH fam = tfc_families%]
-	    <option value=[%fam%]>[%fam%]</option>
-	[%END%]
-    </select>
-    </table>
-  </p>
+      <br>
+
+      <input type="radio" name="tf_family_select_method" value="specific">
+      <b>OR</b> select specific TF famlies:
+      <br>
+      [%tfc_families = tf_cluster_set.get_tf_families()%]
+      <select multiple size=8 name=tf_families
+          onFocus="{input.tf_family_select_method[1].checked=true}">
+        [%FOREACH fam = tfc_families%]
+            <option value=[%fam%]>[%fam%]</option>
+        [%END%]
+      </select>
+      <br>
+
+      <input type="radio" name="tf_family_select_method" value="upload">
+      <b>OR</b> upload a file containing one or more TF families
+      <br>
+      <input type="file" name="tf_family_upload_file" size="40"
+        onClick="{input.tf_family_select_method[2].checked=true}"
+        onFocus="{input.tf_family_select_method[2].checked=true}"
+        onChange="{
+          if (!isblank(input.tf_family_upload_file.value))
+            {input.tf_family_select_method[2].checked=true}
+          else if (!isblank(input.tf_family_upload_file.value))
+            {input.tf_family_select_method[2].checked=true}
+        }">
+
+    </p>
 
   <div style="clear:left;"></div>
   <br><hr noshade><br>
