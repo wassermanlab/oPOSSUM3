@@ -1,6 +1,6 @@
 =head1 NAME
 
-OPOSSUM::FisherResult.pm - module to hold the result of a Fisher analysis for
+OPOSSUM::Analysis::Cluster::FisherResult.pm - module to hold the result of a Fisher analysis for
 a single TFBS cluster
 
 =head1 AUTHOR
