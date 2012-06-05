@@ -136,7 +136,7 @@ sub get_tf_classes
 		}
     }
     
-	my @sorted_classes = sort {$a <=> $b} @classes;
+	my @sorted_classes = sort {$a cmp $b} @classes;
     return @sorted_classes ? \@sorted_classes : undef;
 }
 
@@ -169,7 +169,7 @@ sub get_tf_families
 		}
     }
     
-	my @sorted_families = sort {$a <=> $b} @families;
+	my @sorted_families = sort {$a cmp $b} @families;
     return @sorted_families ? \@sorted_families : undef;
 }
 
