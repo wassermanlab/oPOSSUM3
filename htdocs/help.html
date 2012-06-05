@@ -108,6 +108,23 @@
 	Negative natural logarithms of the probabilities are used as the Fisher scores.
     </p>
 
+  <h3><a name="ks_pval"></a>KS Score</h3>
+    <p>
+    For sequence-based SSA and TSA, an additional scoring measure that compares
+	the empirical distributions of the TFBS locations between target and background sets
+	is also available. In ChIP-Seq experiments, it is expected that within peak sequence
+	regions	targeted by a specific TF, its binding sites would be located close to the maximum
+	confidence position (MCP) of each sequence In contrast, within background sequences,
+	we expect the binding sites to be distributed randomly. For convenience, we will
+	refer to the distance between a binding site and the MCP as the DistMCP.
+	To compare the empirical distributions of DistMCP in the target and background sequence sets,
+	we employ the Kolmogorov-Smirnoff test. The resulting p-value represents the
+	probability of the PeakDist distributions being the same in both the target
+	and background sequence sets, such that TFs of interest would have low p-values.
+	As in Fisher analysis, negative natural logarithms of the probabilities are used
+	as the KS scores.
+    </p>
+
   <br>
   
   <h2><a name="gene_vs_seq"></a>Gene-Based vs. Sequence-Based</h2>
