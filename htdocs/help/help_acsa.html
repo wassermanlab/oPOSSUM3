@@ -228,12 +228,11 @@
 	  database. These TF sites were stored in the oPOSSUM database and comprise the background set for the default analysis.
 	  The background set was pre-computed with three levels of conservation filter. 
 	  <ul>
-		<li>Level 1 corresponds to non-coding conserved regions with a minimum percent identity of 60%</li>
-		<li>Level 2 corresponds to non-coding conserved regions with a minimum percent identity of 65%</li>
-		<li>Level 3 corresponds to non-coding conserved regions with a minimum percent identity of 70%</li>
+		<li>Level 1 corresponds to non-coding conserved regions with a minimum phastCons score of 0.40</li>
+		<li>Level 2 corresponds to non-coding conserved regions with a minimum phastCons score of 0.60</li>
 	  </ul>
-	  The default conservation level is 0.7 (level 3). If this is too restrictive
-	  for your analysis, you can lower the conservation level to 0.6 (level 1). 
+	  The default conservation level is 0.4 (level 1). If you want to be more restrictive
+	  in your analysis, you can raise the conservation level to 0.6 (level 2). 
 	</p>
 	<p>No conservation filters are used for yeast oPOSSUM and sequence-based systems.</p>
 	<p><hr noshade><br><a href="#top"><img src="../images/arrow-up.gif" align="right" /></a></p>
