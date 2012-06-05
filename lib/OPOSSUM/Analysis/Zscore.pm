@@ -7,7 +7,7 @@ sites
 
  $zscore = OPOSSUM::Analysis::Zscore->new();
 
- $results = $zscore->calculate_zscore($background_counts, $target_counts);
+ $results = $zscore->calculate_Zscore($background_counts, $target_counts);
 
 =head1 DESCRIPTION
 
