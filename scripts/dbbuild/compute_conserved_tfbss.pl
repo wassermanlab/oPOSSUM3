@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl -w
+#!/usr/bin/perl -w
 
 =head1 NAME
 
@@ -7,6 +7,7 @@ compute_conserved_tfbss.pl
 =head1 SYNOPSIS
 
   compute_conserved_tfbss.pl -d opossum_db_name -h opossum_db_host
+    [-c collection] [-t tax_groups] [-ic min_ic] [-i tf_id] [-n tf_name]
     [-s start] [-e end] -o out_tfbs_file [-l log_file]
 
 =head1 ARGUMENTS
@@ -15,6 +16,13 @@ Arguments switches may be abbreviated where unique.
 
    -d opossum_db_name   = Name of ORCA db we are working on.
    -h opossum_db_host   = Host name of the ORCA db.
+   -c collection        = Use the TFBS profiles from this JASPAR collection.
+                          Default = CORE.
+   -t tax_groups        = Limit profiles to ones of these taxonomic
+                          supergroups.
+   -ic min_ic           = Limit profiles to ones with at least this IC
+   -i tf_id             = Use only the profile with this specific ID
+   -n tf_name           = Use only the profile with this specific name
    -s start             = Start computing with this gene id.
    -e end               = Finish computing with this gene id.
    -o out_tfbs_file     = Ouput conserved TFBSs file (for import into
@@ -25,7 +33,7 @@ Arguments switches may be abbreviated where unique.
 
 =head1 DESCRIPTION
 
-This is the oPOSSUM_2010 script for computing conserved TFBSs. The genes,
+This is the oPOSSUM3 script for computing conserved TFBSs. The genes,
 exons(?) and conserved regions tables must already be populated.
 
 =head1 ALGORITHM
@@ -52,20 +60,32 @@ use strict;
 
 # use most current (development) libs
 # comment out to use installed libs
-use lib '/space/devel/oPOSSUM_2010/lib';
-use lib '/space/devel/ORCAtk/lib';
-use lib '/usr/local/src/ensembl-57/ensembl/modules';
+use lib '/apps/oPOSSUM3/lib';
+use lib '/apps/ORCAtk/lib';
+use lib '/home/dave/devel/TFBS';
+use lib '/usr/local/src/ensembl-64/ensembl/modules';
+use lib '/raid2/local/src/ensembl-64/ensembl/modules';
 
 use Getopt::Long;
 use Pod::Usage;
 use Log::Log4perl qw(get_logger :levels);
 use OPOSSUM::DBSQL::DBAdaptor;
 use Bio::EnsEMBL::DBSQL::DBAdaptor;
+use Bio::EnsEMBL::Registry;
 use TFBS::DB::JASPAR5;
 use ORCA::Analysis::PhastCons;
 
 
 use constant DEBUG                      => 0;
+
+#
+# XXX
+# If set, get the latest Ensembl DB from the registry. Otherwise use the
+# Ensembl DB specified in the db_info table. This could be dangerous if the
+# underlying genome assembly has changed!!!
+# XXX
+#
+use constant LATEST_ENSEMBL_DB          => 0;
 
 use constant LOG_FILE 		            => 'compute_conserved_tfbss.log';
 
@@ -80,9 +100,9 @@ use constant ENSEMBL_DB_HOST            => 'vm2.cmmt.ubc.ca';
 use constant ENSEMBL_DB_USER            => 'ensembl_r';
 use constant ENSEMBL_DB_PASS            => '';
 
-# Just use CORE/vertebrate matrices for now
-use constant JASPAR_COLLECTIONS         => ['CORE'];
-use constant JASPAR_TAX_GROUPS          => ['vertebrates'];
+# Default profiles to use are CORE vertebrates with min. IC of 8
+use constant CORE_TAX_GROUPS            => ('vertebrates');
+use constant CORE_MIN_IC                => 8;
 
 use constant MIN_TFBS_CR_OVERLAP        => 1;
 use constant FILTER_OVERLAPPING_TFBSS   => 1;
@@ -91,12 +111,22 @@ use constant FILTER_OVERLAPPING_TFBSS   => 1;
 my $log_file = LOG_FILE;
 my $opossum_db_name;
 my $opossum_db_host;
+my $collection;
+my @tax_groups;
+my $min_ic;
+my $tf_id;
+my $tf_name;
 my $start_gid;
 my $end_gid;
 my $out_tfbs_file;
 GetOptions(
     'd=s'   => \$opossum_db_name,
     'h=s'   => \$opossum_db_host,
+    'c=s'   => \$collection,
+    't=s'   => \@tax_groups,
+    'ic=i'  => \$min_ic,
+    'i=s'   => \$tf_id,
+    'n=s'   => \$tf_name,
     's=i'	=> \$start_gid,
     'e=i'	=> \$end_gid,
     'o=s'	=> \$out_tfbs_file,
@@ -124,6 +154,10 @@ if (!$out_tfbs_file) {
     );
 }
 
+if (@tax_groups) {
+    @tax_groups = split(/\s*,\s*/, join(',', @tax_groups));
+}
+
 #
 # Initialize logging
 #
@@ -146,15 +180,7 @@ my $localtime = localtime($start_time);
 
 $logger->info("compute_conserved_tfbss started on $localtime\n");
 
-my $jdbh = TFBS::DB::JASPAR5->connect(
-    "dbi:mysql:" . JASPAR_DB_NAME . ":" . JASPAR_DB_HOST,
-    JASPAR_DB_USER,
-    JASPAR_DB_PASS
-);
-
-if (!$jdbh) {
-    $logger->logdie("connecting to JASPAR database - $DBI::errstr");
-}
+my $matrix_set = fetch_matrix_set();
 
 my $opdba = OPOSSUM::DBSQL::DBAdaptor->new(
     -host       => $opossum_db_host,
@@ -185,10 +211,10 @@ if (!$ga) {
 #    $logger->logdie("getting PhastConsAdaptor");
 #}
 
-my $tfia = $opdba->get_TFInfoAdaptor;
-if (!$tfia) {
-    $logger->logdie("getting TFInfoAdaptor");
-}
+#my $tfia = $opdba->get_TFInfoAdaptor;
+#if (!$tfia) {
+#    $logger->logdie("getting TFInfoAdaptor");
+#}
 
 my $cra = $opdba->get_ConservedRegionAdaptor;
 if (!$cra) {
@@ -210,11 +236,13 @@ if (!$srla) {
     $logger->logdie("getting SearchRegionLevelAdaptor");
 }
 
-
 my $db_info = $dbia->fetch_db_info;
 if (!$db_info) {
     $logger->logdie("fetching DB info");
 }
+
+my $species = $db_info->species()
+    || $logger->logdie("Species name not set in db_info table");
 
 my $ens_db_name = $db_info->ensembl_db()
     || $logger->logdie("Ensembl DB name not set in db_info table");
@@ -229,22 +257,6 @@ my $ens_db_name = $db_info->ensembl_db()
 #my $ens_lib = "/usr/local/src/ensembl-${ens_ver}/ensembl/modules";
 #
 #use lib $ens_lib;
-
-my $ensdba = Bio::EnsEMBL::DBSQL::DBAdaptor->new(
-    -host    => ENSEMBL_DB_HOST,
-    -user    => ENSEMBL_DB_USER,
-    -pass    => ENSEMBL_DB_PASS,
-    -dbname  => $ens_db_name,
-    -species => $db_info->species(),
-    -driver  => 'mysql'
-);
-
-if (!$ensdba) {
-    $logger->logdie("connecting to Ensembl DB");
-}
-
-my $enssa = $ensdba->get_SliceAdaptor()
-    || $logger->logdie("getting Ensembl SliceAdaptor");
 
 
 my $cl_levels = $cla->fetch_levels;
@@ -283,8 +295,19 @@ if (!$sr_level1) {
 my $max_upstream_bp     = $sr_level1->upstream_bp();
 my $max_downstream_bp   = $sr_level1->downstream_bp();
 
+#
+# Special case for yeast. Set downstream bp to undef so that TFBS search
+# regions extend to 3' end of gene.
+# 
+#if ($species eq 'yeast') {
+#    $max_downstream_bp = undef;
+#}
+
 $logger->info(
-    "max. upstream/downstream bp: $max_upstream_bp/$max_downstream_bp"
+    sprintf("max. upstream/downstream bp: %d/%s",
+        $max_upstream_bp,
+        defined $max_downstream_bp ? $max_downstream_bp : "3' end of gene"
+    )
 );
 
 my $where;
@@ -302,14 +325,32 @@ if (!$gids) {
     $logger->logdie("fetching gene IDs");
 }
 
-my $matrix_set = $jdbh->get_MatrixSet(
-    -collection => JASPAR_COLLECTIONS,
-    -tax_group  => JASPAR_TAX_GROUPS,
-    -matrixtype => 'PWM'
-);
+my $ensdba;
 
-if (!$matrix_set) {
-    $logger->logdie("fetching JASPAR matrix set");
+if (LATEST_ENSEMBL_DB) {
+    Bio::EnsEMBL::Registry->load_registry_from_db(
+        -host    => ENSEMBL_DB_HOST,
+        -user    => ENSEMBL_DB_USER,
+        -pass    => ENSEMBL_DB_PASS,
+        -driver  => 'mysql'
+    );
+
+    $ensdba = Bio::EnsEMBL::Registry->get_DBAdaptor($species, 'core');
+} else {
+    $ensdba = Bio::EnsEMBL::DBSQL::DBAdaptor->new(
+        -host    => ENSEMBL_DB_HOST,
+        -user    => ENSEMBL_DB_USER,
+        -pass    => ENSEMBL_DB_PASS,
+        -dbname  => $ens_db_name,
+        -species => $species,
+        -driver  => 'mysql'
+    );
+}
+
+unless ($ensdba) {
+    $logger->logdie(
+        "connecting to Ensembl $species DB \@" . ENSEMBL_DB_HOST
+    );
 }
 
 #my $tf_id_map = fetch_tf_id_mapping();
@@ -319,11 +360,16 @@ open(OTFH, ">$out_tfbs_file") || $logger->logdie("opening output TFBS file");
 my $min_conservation_level = 1;
 my %cons_lvl_cons_regs;
 foreach my $gid (@$gids) {
+
+    my $enssa = $ensdba->get_SliceAdaptor()
+        || $logger->logdie("getting Ensembl SliceAdaptor");
+
     $logger->info("processing gene $gid");
 
     my $gene = $ga->fetch_by_id($gid);
     if (!$gene) {
-        $logger->logdie("fetching gene");
+        $logger->error("fetching gene");
+        next;
     }
 
     foreach my $level (@$cl_levels) {
@@ -479,28 +525,28 @@ sub filter_conserved_tfbss_by_search_regions
     return @filtered_tfbss ? \@filtered_tfbss : undef;
 }
 
-sub fetch_tf_id_mapping
-{
-    my $tf_info_set = $tfia->fetch_tf_info_set();
-
-    my @tf_ids = $tf_info_set->tf_ids;
-
-    my %map;
-    foreach my $id (@tf_ids) {
-        my $tf_info = $tf_info_set->get_tf_info($id);
-
-        $map{$tf_info->external_id} = $tf_info;
-    }
-
-    return %map ? \%map : undef;
-}
+#sub fetch_tf_id_mapping
+#{
+#    my $tf_info_set = $tfia->fetch_tf_info_set();
+#
+#    my @tf_ids = $tf_info_set->tf_ids;
+#
+#    my %map;
+#    foreach my $id (@tf_ids) {
+#        my $tf_info = $tf_info_set->get_tf_info($id);
+#
+#        $map{$tf_info->external_id} = $tf_info;
+#    }
+#
+#    return %map ? \%map : undef;
+#}
 
 sub write_conserved_tfbss
 {
     my ($fh, $gid, $tfbss) = @_;
 
     foreach my $tfbs (@$tfbss) {
-        printf $fh "%d\t%s\t%d\t%d\t%d\t%.3f\t%.3f\t%s\t%d\t%.3f\n",
+        printf $fh "%d\t%s\t%d\t%d\t%d\t%.3f\t%.3f\t%s\t%d\t%.5f\n",
             $gid,
             # XXX need map of TF ID
             #($tfbs->get_tag_values('tf_id'))[0],
@@ -586,6 +632,10 @@ sub tfbss_set_max_conservation
                 if ($cr->conservation > $max_conservation) {
                     $max_level = $level;
                     $max_conservation = $cr->conservation;
+                } elsif ($cr->conservation == $max_conservation) {
+                    if ($level > $max_level) {
+                        $max_level = $level;
+                    }
                 }
             }
 
@@ -612,4 +662,45 @@ sub tfbss_set_max_conservation
                         . $tfbs->pattern()->name());
         }
     }
+}
+
+sub fetch_matrix_set
+{
+    my $jdbh = TFBS::DB::JASPAR5->connect(
+        "dbi:mysql:" . JASPAR_DB_NAME . ":" . JASPAR_DB_HOST,
+        JASPAR_DB_USER,
+        JASPAR_DB_PASS
+    );
+
+    if (!$jdbh) {
+        $logger->logdie("connecting to JASPAR database - $DBI::errstr");
+    }
+
+    my %matrix_args = (-matrixtype => 'PWM');
+    if ($tf_id) {
+        $matrix_args{-ID} = [$tf_id];
+    } elsif ($tf_name) {
+        $matrix_args{-name} = [$tf_name];
+    } else  {
+        $collection = 'CORE' unless $collection;
+
+        $matrix_args{-collection} = $collection;
+
+        if ($collection eq 'CORE') {
+            @tax_groups = CORE_TAX_GROUPS unless @tax_groups;
+
+            $matrix_args{-tax_group}    = \@tax_groups;
+            $matrix_args{-min_ic}       = $min_ic || CORE_MIN_IC;
+        } else {
+            $matrix_args{-min_ic}     = $min_ic if defined $min_ic;
+        }
+    }
+
+    my $pwm_set = $jdbh->get_MatrixSet(%matrix_args);
+
+    if (!$pwm_set) {
+        $logger->logdie("Could not fetch JASPAR matrix set");
+    }
+
+    return $pwm_set;
 }

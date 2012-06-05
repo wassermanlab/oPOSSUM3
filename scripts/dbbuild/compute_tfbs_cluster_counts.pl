@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl -w
+#!/usr/bin/perl -w
 
 =head1 NAME
 
@@ -6,22 +6,23 @@ compute_tfbs_cluster_counts.pl
 
 =head1 SYNOPSIS
 
-  compute_tfbs_cluster_counts.pl -od opossum_db_name -oh opossum_db_host
-                        -cd cluster_db_name -ch cluster_db_host[-s start] [-e end]
-                        [-id cluster_id] -o out_file [-l log_file]
+  compute_tfbs_cluster_counts.pl
+        -h opossum_db_host -d opossum_db_name
+        -cd cluster_db_name -ch cluster_db_host[-s start] [-e end]
+        [-id cluster_id] -o out_file [-l log_file]
 
 =head1 ARGUMENTS
 
 Arguments switches may be abbreviated where unique.
 
-  -od opossum_db_name = Name of oPOSSUM DB to process
-  -oh opossum_db_host = Host name of oPOSSUM DB to process
-  -cd cluster_db_name = Name of oPOSSUM_cluster DB to process
-  -ch cluster_db_host = Host name of oPOSSUM_cluster DB to process
+  -h opossum_db_host  = Host name of oPOSSUM DB to process
+  -d opossum_db_name  = Name of oPOSSUM DB to process
+  -cd cluster_db_name = Name of TFBS_cluster DB to process
+  -ch cluster_db_host = Host name of TFBS_cluster DB to process
   -s start            = Starting gene ID
   -e end              = Ending gene ID
-  -cid cluster_id      = Specific cluster ID to be counted. If this is specified,
-                        only this cluster hits will be counted.
+  -cid cluster_id     = Specific cluster ID to be counted. If this is
+                        specified, only this cluster hits will be counted.
   -o out_file         = Output TFBS cluster counts file
   -l log_file         = Name of log file to which processing and error
                         messages are written
@@ -45,11 +46,12 @@ table.
 
 =cut
 
-use lib "/space/devel/oPOSSUM3/lib";
-use lib "/space/devel/TFBS_Cluster/lib";
+#use lib "/space/devel/oPOSSUM3/lib";
+#use lib "/space/devel/TFBS_Cluster/lib";
 #use lib "/raid2/tjkwon/oPOSSUM_2010/lib";
 #use lib "/raid2/tjkwon/TFBS_Cluster/lib";
 #use lib '/home/dave/devel/TFBS';
+use lib "/apps/oPOSSUM3/lib";
 
 use strict;
 
@@ -57,7 +59,7 @@ use Getopt::Long;
 use Pod::Usage;
 use Log::Log4perl qw(get_logger :levels);
 use OPOSSUM::DBSQL::DBAdaptor;
-use OPOSSUM::TFBSClusterCount;
+use OPOSSUM::Analysis::Cluster::Counts;
 use OPOSSUM::ConservedTFBS;
 use TFBSCluster::DBSQL::DBAdaptor;
 
@@ -65,10 +67,10 @@ use constant DEBUG     => 1;
 use constant UPDATE_DB => 0;
 use constant LOG_FILE  => 'compute_tfbs_cluster_counts.log';
 
-use constant OPOSSUM_DB_HOST => 'vm5.cmmt.ubc.ca';
+use constant OPOSSUM_DB_HOST => 'opossum.cmmt.ubc.ca';
 
-use constant CLUSTER_DB_NAME => 'oPOSSUM_cluster';
-use constant CLUSTER_DB_HOST => 'vm5.cmmt.ubc.ca';
+use constant CLUSTER_DB_NAME => 'TFBS_cluster';
+use constant CLUSTER_DB_HOST => 'opossum.cmmt.ubc.ca';
 
 my $opossum_db_name;
 my $opossum_db_host;
@@ -80,15 +82,15 @@ my $cid;
 my $out_file;
 my $log_file;
 GetOptions(
-    'od=s' => \$opossum_db_name,
-    'oh=s' => \$opossum_db_host,
-    'cd=s' => \$cluster_db_name,
-    'ch=s' => \$cluster_db_host,
+    'd=s'   => \$opossum_db_name,
+    'h=s'   => \$opossum_db_host,
+    'cd=s'  => \$cluster_db_name,
+    'ch=s'  => \$cluster_db_host,
     'cid=i' => \$cid,
-    's=i' => \$start_gid,
-    'e=i' => \$end_gid,
-    'o=s' => \$out_file,
-    'l=s' => \$log_file
+    's=i'   => \$start_gid,
+    'e=i'   => \$end_gid,
+    'o=s'   => \$out_file,
+    'l=s'   => \$log_file
 );
 
 if (!$opossum_db_name) {
@@ -160,7 +162,7 @@ my $cldba = TFBSCluster::DBSQL::DBAdaptor->new(
 );
 
 if (!$cldba) {
-    $logger->logdie("could not connect to oPOSSUM_cluster database\n" . $DBI::errstr);
+    $logger->logdie("could not connect to TFBS_cluster database\n" . $DBI::errstr);
 }
 
 #

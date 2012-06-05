@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl -w
+#!/usr/bin/perl -w
 
 =head1 NAME
 
@@ -17,6 +17,7 @@ Arguments switches may be abbreviated where unique.
   -h db_host        = Host name of oPOSSUM DB to process
   -s start          = Starting gene pair ID
   -e end            = Ending gene pair ID
+  -i tf_id          = Specific TF ID for which to compute counts
   -t tf_id_type     = The TF ID 'type'. Should be the first two characters
                       in the TF ID to identify which collection it's from,
                       e.g. 'MA', 'PB', 'MF' etc.
@@ -45,8 +46,8 @@ table.
 
 =cut
 
-#use lib '/home/dave/devel/oPOSSUM_2010/lib';
-use lib '/space/devel/oPOSSUM_2010/lib';
+#use lib '/space/devel/oPOSSUM3/lib';
+use lib '/apps/oPOSSUM3/lib';
 
 use strict;
 
@@ -63,6 +64,7 @@ my $opossum_db_name;
 my $opossum_db_host;
 my $start_gid;
 my $end_gid;
+my $tf_id;
 my $tf_id_type;
 my $out_file;
 my $log_file;
@@ -71,6 +73,7 @@ GetOptions(
     'h=s' => \$opossum_db_host,
     's=i' => \$start_gid,
     'e=i' => \$end_gid,
+    'i=s' => \$tf_id,
     't=s' => \$tf_id_type,
     'o=s' => \$out_file,
     'l=s' => \$log_file
@@ -139,6 +142,9 @@ if (!$opdba) {
 #
 # Get some adaptors up front
 #
+my $dbia = $opdba->get_DBInfoAdaptor
+    || $logger->logdie("getting DBInfoAdaptor");
+
 my $ga = $opdba->get_GeneAdaptor
     || $logger->logdie("getting GeneAdaptor");
 
@@ -172,6 +178,10 @@ my $thl_hash = $tla->fetch_threshold_level_hash()
 my $srl_hash = $srla->fetch_search_region_level_hash()
     || $logger->logdie("getting search region levels hash");
 
+my $db_info = $dbia->fetch_db_info() || $logger->logdie("fetch DB info");
+
+my $species = $db_info->species();
+
 my $where;
 if ($start_gid) {
     $where = "gene_id >= $start_gid";
@@ -200,6 +210,14 @@ foreach my $gid (@$gids) {
             my $upstream_bp     = $srl->upstream_bp();
             my $downstream_bp   = $srl->downstream_bp();
 
+            #
+            # Special case for yeast. Set downstream bp to undef which results
+            # in search regions being extended to 3' end of gene.
+            #
+            #if ($species eq 'yeast') {
+            #    $downstream_bp = undef;
+            #}
+
             foreach my $thl_level (@$thl_levels) {
                 $logger->debug("Threshold level $thl_level");
 
@@ -207,8 +225,14 @@ foreach my $gid (@$gids) {
                 my $threshold = $thl->threshold();
 
 
+                my @tf_ids;
+                if ($tf_id) {
+                    push @tf_ids, $tf_id;
+                }
+
                 my $tfbs_counts = $ctfbsa->fetch_gene_tfbs_counts(
                     -gene_id            => $gid,
+                    -tf_ids             => @tf_ids ? \@tf_ids : undef,
                     -conservation_level => $cl_level,
                     -threshold          => $threshold,
                     -upstream_bp        => $upstream_bp,

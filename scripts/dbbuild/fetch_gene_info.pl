@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl -w
+#!/usr/bin/perl -w
 
 =head1 NAME
 
@@ -53,8 +53,8 @@ suitable for loading into oPOSSUM using mysqlimport.
 use strict;
 
 # Ensembl API lib
-use lib '/usr/local/src/ensembl-57/ensembl/modules';
-use lib '/space/devel/oPOSSUM_2010/lib';
+use lib '/raid2/local/src/ensembl-64/ensembl/modules';
+use lib '/apps/oPOSSUM3/lib';
 
 
 use Getopt::Long;
@@ -230,13 +230,12 @@ while (my $stable_id = <IN>) {
         $gene_tss   = $ens_gene->start;
         $gene_end   = $ens_gene->end;
         $gene_start = $gene_tss - $upstream_bp;
+        $gene_start = 1 if $gene_start < 1;
     } elsif ($ens_gene->strand == -1) {
         $gene_start = $ens_gene->start;
         $gene_tss   = $ens_gene->end;
         $gene_end   = $gene_tss + $upstream_bp;
     }
-
-    $gene_start = 1 if $gene_start < 1;
 
     #my $gene = OPOSSUM::Gene->new(
     #    -id             => $gene_id,

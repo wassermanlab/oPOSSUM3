@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl -w
+#!/usr/bin/perl -w
 
 =head1 NAME
 
@@ -15,13 +15,13 @@ update_external_gene_ids.pl
 
   -s species             = Name of species (common name, e.g. 'human').
   -u opossum_db_user     = Name of oPOSSUM DB user.
-  -p opossum_db_pass     = oPOSSUM DB password for above user.
+  [-p opossum_db_pass]   = oPOSSUM DB password for above user.
   -ed ensembl_db_name    = Name of Ensembl DB from which to extract gene
                            information.
   -eh ensembl_db_host    = Ensembl DB host name.
                            Default = 'vm2.cmmt.ubc.ca'
   -d opossum_db          = Name of oPOSSUM DB to update. If not provided,
-                           DB is assumed to be oPOSSUM_2010_<species>.
+                           DB is assumed to be oPOSSUM3_<species>.
   -h opossum_db_host     = oPOSSUM DB host name.
                            Default = 'vm5.cmmt.ubc.ca'
   -t gene_it_type        = Type of external gene ID. This must be a
@@ -57,10 +57,10 @@ later loading into the DB using mysqlimport.
 use strict;
 
 # Ensembl API lib
-use lib '/usr/local/src/ensembl-57/ensembl/modules';
-use lib '/space/devel/oPOSSUM_2010/lib';
-use lib '/raid2/local/src/ensembl-57/ensembl/modules';
-use lib '/home/dave/devel/oPOSSUM_2010/lib';
+use lib '/usr/local/src/ensembl-64/ensembl/modules';
+use lib '/raid2/local/src/ensembl-64/ensembl/modules';
+use lib '/raid2/local/src/ensembl-54/ensembl/modules';
+use lib '/apps/oPOSSUM3/lib';
 
 
 use Getopt::Long;
@@ -121,7 +121,7 @@ if (!$species) {
 }
 
 if (!$opossum_db_name) {
-    $opossum_db_name = "oPOSSUM_2010_$species";
+    $opossum_db_name = "oPOSSUM3_$species";
 }
 
 if (!$opossum_db_user) {
@@ -131,7 +131,7 @@ if (!$opossum_db_user) {
     );
 }
 
-if (!$opossum_db_pass) {
+if (UPDATE_DB && !$opossum_db_pass) {
     pod2usage(
         -msg        => "Please specify the oPOSSUM DB password",
         -verbose    => 1
@@ -301,7 +301,13 @@ foreach my $gid (@$gids) {
 
     #printf "%7d\t%s\t%s:\n", $gid, $ensid, $ensextname;
 
-    foreach my $id_type (sort keys %$xgits) {
+    my @id_type_list;
+    if ($id_type) {
+        push @id_type_list, $id_type;
+    } else {
+        @id_type_list = sort keys %$xgits;
+    }
+    foreach my $id_type (@id_type_list) {
         my $name        = $xgits->{$id_type}->name();
         my $dblink_name = $xgits->{$id_type}->dblink_name();
 

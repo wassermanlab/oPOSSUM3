@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl -w
+#!/usr/bin/perl -w
 
 =head1 NAME
 
@@ -26,7 +26,7 @@ Arguments switches may be abbreviated where unique.
 
 =head1 DESCRIPTION
 
-This is the oPOSSUM_2010 script for computing conserved TFBSs. The genes,
+This is the oPOSSUM3 script for computing conserved TFBSs. The genes,
 promoters, and conserved_regions tables must already be populated. All lengths
 are stored including 0-lengths if there are no conserved regions which fall
 into promoter search regions at a particular conservation and search region
@@ -45,7 +45,7 @@ level.
 
 =cut
 
-use lib '/space/devel/oPOSSUM_2010/lib';
+use lib '/apps/oPOSSUM3/lib';
 
 use strict;
 
@@ -131,6 +131,9 @@ if (!$opdbh) {
     $logger->logdie("could not connect to oPOSSUM DB\n");
 }
 
+my $dbia = $opdbh->get_DBInfoAdaptor;
+$logger->logdie("getting DBInfoAdaptor") if !$dbia;
+
 my $ga = $opdbh->get_GeneAdaptor;
 $logger->logdie("getting GeneAdaptor") if !$ga;
 
@@ -143,6 +146,9 @@ $logger->logdie("getting SearchRegionLevelAdaptor") if !$srla;
 my $cla = $opdbh->get_ConservationLevelAdaptor;
 $logger->logdie("getting ConservationLevelAdaptor") if !$cla;
 
+my $db_info = $dbia->fetch_db_info();
+$logger->logdie("fetching DB info") if !$db_info;
+
 my $cl_levels = $cla->fetch_levels();
 $logger->logdie("getting conservation levels") if !$cl_levels;
 
@@ -154,6 +160,8 @@ $logger->logdie("getting conservation levels") if !$cl_hash;
 
 my $srl_hash = $srla->fetch_search_region_level_hash();
 $logger->logdie("getting search region levels") if !$srl_hash;
+
+my $species = $db_info->species();
 
 my $where;
 if ($start_gid) {
@@ -206,6 +214,14 @@ foreach my $gid (@$gids) {
             my $upstream_bp   = $srl->upstream_bp();
             my $downstream_bp = $srl->downstream_bp();
 
+            #
+            # Special case for yeast. Set downstream_bp undef to force search
+            # regions to end at 3' end of gene.
+            #
+            #if ($species eq 'yeast') {
+            #    $downstream_bp = undef;
+            #}
+
             my $length = $cra->fetch_length_by_upstream_downstream(
                 $gid, $cl_level, $upstream_bp, $downstream_bp
             );
@@ -215,3 +231,10 @@ foreach my $gid (@$gids) {
     }
 }
 close(OFH);
+
+my $end_time = time;
+$localtime = localtime($end_time);
+my $elapsed_secs = $end_time - $start_time;
+
+$logger->info("compute_conserved_region_lengths completed on $localtime");
+$logger->info("Elapsed time (s): $elapsed_secs");

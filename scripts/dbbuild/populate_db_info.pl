@@ -10,8 +10,8 @@ populate_db_info.pl
       -h opossum_db_host -d opossum_db_name -u opossum_db_user
       -p opossum_db_password
       -s species_name -ln latin_name -a assembly -edb ensembl_db_name
-      -udb ucsc_db_name -uct cons_table_name -th min_threshold
-      -ubp max_upstream_bp -crl min_cr_length -t tax_group -ic min_ic
+      -udb ucsc_db_name -uct cons_table_name -t min_threshold
+      -ubp max_upstream_bp -crl min_cr_length -ic min_ic
 
 =head1 ARGUMENTS
 
@@ -28,7 +28,7 @@ populate_db_info.pl
                            is based.
   -uct cons_table_name   = Name of UCSC DB table from which phastCons
                            conservation scores are extracted.
-  -th min_threshold      = The absolute minimum PWM threshold used to
+  -t min_threshold       = The absolute minimum PWM threshold used to
                            compute TFBSs. This must be less than or equal
                            to the threshold value at threshold level 1 in
                            the threshold_levels table.
@@ -38,8 +38,6 @@ populate_db_info.pl
                            the search_region_levels table.
   -crl min_cr_length     = The minimum length of conserved regions to use
                            for TFBS searching.
-  -t tax_group           = The taxonomic supergroup of the JASPAR CORE TFBS
-                           profile matrices to use in TFBS searching.
   -ic min_ic             = The minimum information content of JASPAR TFBS
                            profile matrices to use in TFBS searching.
 
@@ -60,7 +58,7 @@ Populate the oPOSSUM db_info table with the provided values.
 
 use strict;
 
-use lib '/space/devel/oPOSSUM_2010/lib';
+use lib '/apps/oPOSSUM3/lib';
 
 
 use Getopt::Long;
@@ -82,7 +80,6 @@ my $cons_table_name;
 my $min_threshold;
 my $max_upstream_bp;
 my $min_cr_length;
-my $tax_group;
 my $min_ic;
 GetOptions(
     'h=s'   => \$opossum_db_host,
@@ -95,10 +92,9 @@ GetOptions(
     'edb=s' => \$ens_db_name,
     'udb=s' => \$ucsc_db_name,
     'uct=s' => \$cons_table_name,
-    'th=s'  => \$min_threshold,
+    't=s'   => \$min_threshold,
     'ubp=i' => \$max_upstream_bp,
     'crl=i' => \$min_cr_length,
-    't=s'   => \$tax_group,
     'ic=i'  => \$min_ic
 );
 
@@ -193,13 +189,6 @@ if (!$min_cr_length) {
     );
 }
 
-if (!$tax_group) {
-    pod2usage(
-        -msg        => "Please specify the taxonomic supergroup",
-        -verbose    => 1
-    );
-}
-
 if (!defined $min_ic) {
     pod2usage(
         -msg        => "Please specify the minimum IC",
@@ -217,7 +206,6 @@ my $db_info = OPOSSUM::DBInfo->new(
     -min_threshold   => $min_threshold,
     -max_upstream_bp => $max_upstream_bp,
     -min_cr_length   => $min_cr_length,
-    -tax_group       => $tax_group,
     -min_ic          => $min_ic
 );
 
