@@ -1,10 +1,12 @@
-#!/usr/local/bin/perl
+#!/usr/bin/env perl
 
 use strict;
 use warnings;
 
-use oPossumGeneACTCAWeb;
+use lib '/apps/oPOSSUM3/lib';
 
-my $app = oPossumGeneACTCAWeb->new(PARAMS => {species => 'human'});
+use OPOSSUM::Web::GeneACTCA;
+
+my $app = GeneACTCA->new(PARAMS => {species => 'human'});
 
 $app->run();

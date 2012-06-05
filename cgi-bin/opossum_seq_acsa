@@ -1,10 +1,12 @@
-#!/usr/local/bin/perl
+#!/usr/bin/env perl
 
 use strict;
 use warnings;
 
-use oPossumSeqACSAWeb;
+use lib '/apps/oPOSSUM3/lib';
 
-my $app = oPossumSeqACSAWeb->new();
+use OPOSSUM::Web::SeqACSA;
+
+my $app = SeqACSA->new();
 
 $app->run;

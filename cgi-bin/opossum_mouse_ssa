@@ -1,10 +1,12 @@
-#!/usr/local/bin/perl
+#!/usr/bin/env perl
 
 use strict;
 use warnings;
 
-use oPossumGeneSSAWeb;
+use lib '/apps/oPOSSUM3/lib';
 
-my $app = oPossumGeneSSAWeb->new(PARAMS => {species => 'mouse'});
+use OPOSSUM::Web::GeneSSA;
+
+my $app = GeneSSA->new(PARAMS => {species => 'mouse'});
 
 $app->run();
