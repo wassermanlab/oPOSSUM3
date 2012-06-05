@@ -39,7 +39,7 @@ use Carp;
 #
 use constant HOST	=> 'localhost';
 use constant PORT	=> 3306;
-use constant DBNAME	=> 'oPOSSUM_cluster';
+use constant DBNAME	=> 'TFBS_cluster';
 use constant USER	=> 'opossum_r';
 use constant DRIVER	=> 'mysql';
 
