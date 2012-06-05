@@ -155,6 +155,7 @@ sub calculate_Fisher_probability
     my $bg_counts_file = $self->_write_counts($bg_counts);
     if (!$bg_counts_file) {
         carp "error creating temporary background counts file";
+        $self->_clean_temp_files;
         return;
     }
 
