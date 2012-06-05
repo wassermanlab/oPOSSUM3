@@ -23,12 +23,12 @@ by oPOSSUM.
     mysql> grant select on oPOSSUM3_human.* to opossum_r@'%'; (etc..)
 
 2) For web-based oPOSSUM, set up symbolic links from your webserver htdocs and
-   cgi-bin directories. For example if you have installed oPOSSUM under a
-   directory /apps then assuming you are using the Apache server installed in
+   cgi-bin directories. For example if you have installed oPOSSUM in 
+   /apps/oPOSSUM3 then assuming you are using the Apache server installed in
    /usr/local/apache you would use something like the following:
 
-    $ ln -s /apps/oPOSSUM/cgi-bin /usr/local/apache/cgi-bin/oPOSSUM
-    $ ln -s /apps/oPOSSUM/htdocs /usr/local/apache/htdocs/oPOSSUM
+    $ ln -s /apps/oPOSSUM3/cgi-bin /usr/local/apache/cgi-bin/oPOSSUM3
+    $ ln -s /apps/oPOSSUM3/htdocs /usr/local/apache/htdocs/oPOSSUM3
 
    You may have to edit your apache config file (httpd.conf) to allow following
    of symbolic links and executing cgi-bin files, e.g.:
@@ -47,15 +47,15 @@ by oPOSSUM.
     htdocs/results
     logs
 
-   Change the ownership of these directories to that of the user that the
-   web server runs under and/or make these directories at least
-   read/write/executable to to that user, e.g:
+   Change the ownership of these directories to that of the user under which the
+   web server runs (usually 'nobody' or 'apache') and/or make these directories
+   at least read/write/executable to to that user, e.g:
 
        chown apache:apache htdocs/tmp
        chmod 700 htdocs/tmp
 
 4) For web-based oPOSSUM, edit the configuration constants in the main web
-   options file cgi-bin/oPossumWebOpt.pm to reflect your specific
+   options file lib/OPOSSUM/Web/Opt/BaseOpt.pm to reflect your specific
    installation.
 
    Specifically,
@@ -71,8 +71,9 @@ by oPOSSUM.
    
    * edit the JASPAR DB connection constants, JASPAR_DB_HOST etc.
 
-   There are additional option files specific to each flavour of oPOSSUM
-   (oPossumGeneWebOpt.pm etc.).
+   There are additional web and standalone oPOSSUM option files under 
+   lib/OPOSSUM/Web/Opt/ and lib/OPOSSUM/Opt/ that may also require configuring
+   for your specific installation.
 
    * edit the oPOSSUM DB connection constants, OPOSSUM_DB_HOST etc.
    
