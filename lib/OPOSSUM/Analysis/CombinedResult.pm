@@ -1,8 +1,13 @@
 =head1 NAME
 
 OPOSSUM::CombinedResult.pm - module to hold the combined result of a
-Fisher and Z-score analysis for a single TFBS
+Fisher, Z-score and KS analysis for a single TFBS
 
+=head1 MODIFICATIONS
+
+ Andrew Kwon, Nov. 16, 2011
+ - added KS parts
+ 
 =head1 AUTHOR
 
  David Arenillas
@@ -37,7 +42,8 @@ use Carp;
                 -bg_tfbs_rate       => $bg_tfbs_rate,
                 -zscore             => $zscore,
                 -zscore_p_value     => $zscore_pvalue,
-                -fisher_p_value     => $fisher_pvalue
+                -fisher_p_value     => $fisher_pvalue,
+                -ks_p_value         => $ks_pvalue
             );
  Function : Create a new OPOSSUM::Analysis::CombinedResult object.
  Returns  : An OPOSSUM::Analysis::CombinedResult object.
@@ -72,6 +78,8 @@ use Carp;
             fisher_p_value  - Fisher probability measure of number of
                               target genes which had at least one site for
                               this TF vs. the background set
+            ks_p_value      - K-S test p-value for the test and background
+                              distributions of peak-to-site distances
 
 =cut
 
@@ -370,5 +378,27 @@ sub fisher_score
 
     return $self->fisher_p_value($score);
 }
-    
+   
+=head2 ks_p_value
+
+ Title    : ks_p_value
+ Usage    : $p_value = $result->ks_p_value();
+            $result->ks_p_value($p_value);
+ Function : Get/set the KS test p_value of this result.
+ Returns  : Real p_value.
+ Args     : Optional real p_value.
+
+=cut
+
+sub ks_p_value
+{
+    my ($self, $p_value) = @_;
+
+    if (defined $p_value) {
+        $self->{-ks_p_value} = $p_value;
+    }
+
+    return $self->{-ks_p_value};
+}
+ 
 1;

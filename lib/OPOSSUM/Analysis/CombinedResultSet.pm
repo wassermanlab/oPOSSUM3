@@ -6,6 +6,11 @@ OPOSSUM::CombinedResultSet.pm - module to hold the results of a Combined analysi
 
 Implements a set of CombinedResult objects
 
+=head1 MODIFICATIONS
+
+ Andrew Kwon, Nov. 16, 2011
+ - added provisions for K-S test results
+ 
 =head1 AUTHOR
 
  David Arenillas
@@ -48,12 +53,13 @@ sub new
 
     my $frs = $args{-fisher_result_set};
     my $zrs = $args{-zscore_result_set};
+    my $ksrs = $args{-ks_result_set};
 
     if (   $frs && $frs->isa('OPOSSUM::Analysis::FisherResultSet')
         && $zrs && $zrs->isa('OPOSSUM::Analysis::ZscoreResultSet')
     )
     {
-        $self->_combine_results($frs, $zrs);
+        $self->_combine_results($frs, $zrs, $ksrs);
     }
 
     return $self;
@@ -187,7 +193,9 @@ sub get_result_by_id
                 -num_results    = The top number of results to return.
                 -zscore_cutoff  = Return only results whose z-score is at
                                   least this value.
-                -fisher_cutoff  = Return only results whose Fisher p-valie
+                -fisher_cutoff  = Return only results whose Fisher p-value
+                                  is at most this value.
+                -ks_cutoff      = Return only results whose KS p-value
                                   is at most this value.
                 -sort_by        = A field to sort on, e.g. 'id', 'zscore',
                                   'fisher_p_value'.
@@ -207,6 +215,7 @@ sub get_list
     my $nresults = $params{-num_results};
     my $zcut     = $params{-zscore_cutoff};
     my $fcut     = $params{-fisher_cutoff};
+    my $kscut    = $params{-ks_cutoff};
     my $sort_by  = $params{-sort_by};
     my $reverse  = $params{-reverse};
 
@@ -216,6 +225,7 @@ sub get_list
         my $result = $self->get_result($id);
         my $zscore = $result->zscore();
         my $fisher_p_value = $result->fisher_p_value();
+        my $ks_p_value = $result->ks_p_value();
 
         my $include = 1;
 
@@ -231,6 +241,12 @@ sub get_list
             $include = 0;
         }
 
+        # Same for KS. -ln instead of p-value.
+        # should really change all names to fisher_score and ks_score...
+        if (defined $kscut && $ks_p_value < $kscut) {
+            $include = 0;
+        }
+        
         if ($include) {
             push @list, $result;
         }
@@ -274,8 +290,7 @@ sub get_list
         carp "Invalid sort field $sort_by\n";
     }
 
-    if (defined $nresults && $nresults !~ /^all$/i && $nresults < scalar @list)
-    {
+    if ($nresults && $nresults !~ /^all$/i && $nresults < scalar @list) {
         return [@list[0..$nresults-1]] || undef;
     } else {
         return \@list || undef;
@@ -308,11 +323,11 @@ sub param
 }
 
 #
-# Combine Fisher and Z-score results
+# Combine Fisher and Z-score results and optionally KS results
 #
 sub _combine_results
 {
-    my ($self, $frs, $zrs) = @_;
+    my ($self, $frs, $zrs, $ksrs) = @_;
 
     return if !$frs || !$zrs;
 
@@ -341,9 +356,14 @@ sub _combine_results
             carp "No Z-score result for ID $id\n";
         }
 
-        #if ($zresult->bg_gene_hits() == 0) {
-        #    carp "No background gene hits for TF $id\n";
-        #}
+        my $ksresult;
+        if ($ksrs) {
+            my $ksrs_size = $ksrs->size() || 0;
+            $ksresult = $ksrs->get_result($id);
+            if (!$ksresult) {
+                carp "No KS-test result for ID $id\n";
+            }
+        }
 
         my $cresult = OPOSSUM::Analysis::CombinedResult->new(-id => $id);
 
@@ -363,9 +383,14 @@ sub _combine_results
             $cresult->zscore($zresult->z_score());
             $cresult->zscore_p_value($zresult->p_value());
         }
-
+        
+        if ($ksresult) {
+            $cresult->ks_p_value($ksresult->p_value());
+        }
+        
         $self->add_result($cresult);
     }
 }
+
 
 1;
