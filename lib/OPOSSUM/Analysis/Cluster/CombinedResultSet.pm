@@ -7,6 +7,11 @@ OPOSSUM::Analysis::Cluster::CombinedResultSet.pm - module to hold the results
 
 Implements a set of CombinedResult objects
 
+=head1 MODIFICATIONS
+
+ Andrew Kwon, Nov. 16, 2011
+ - added provisions for K-S test results
+
 =head1 AUTHOR
 
  David Arenillas
@@ -49,12 +54,13 @@ sub new
 
     my $frs = $args{-fisher_result_set};
     my $zrs = $args{-zscore_result_set};
+    my $ksrs = $args{-ks_result_set};
 
     if (   $frs && $frs->isa('OPOSSUM::Analysis::Cluster::FisherResultSet')
         && $zrs && $zrs->isa('OPOSSUM::Analysis::Cluster::ZscoreResultSet')
     )
     {
-        $self->_combine_results($frs, $zrs);
+        $self->_combine_results($frs, $zrs, $ksrs);
     }
 
     return $self;
@@ -190,6 +196,8 @@ sub get_result_by_id
                                   least this value.
                 -fisher_cutoff  = Return only results whose Fisher p-valie
                                   is at most this value.
+                -ks_cutoff      = Return only results whose KS p-value
+                                  is at most this value.
                 -sort_by        = A field to sort on, e.g. 'id', 'zscore',
                                   'fisher_p_value'.
                 -reverse        = Boolean which if true, causes list to
@@ -208,6 +216,7 @@ sub get_list
     my $nresults = $params{-num_results};
     my $zcut     = $params{-zscore_cutoff};
     my $fcut     = $params{-fisher_cutoff};
+    my $kscut    = $params{-ks_cutoff};
     my $sort_by  = $params{-sort_by};
     my $reverse  = $params{-reverse};
 
@@ -217,6 +226,7 @@ sub get_list
         my $result = $self->get_result($id);
         my $zscore = $result->zscore();
         my $fisher_p_value = $result->fisher_p_value();
+        my $ks_p_value = $result->ks_p_value();
 
         my $include = 1;
 
@@ -224,7 +234,11 @@ sub get_list
             $include = 0;
         }
 
-        if (defined $fcut && $fisher_p_value > $fcut) {
+        if (defined $fcut && $fisher_p_value < $fcut) {
+            $include = 0;
+        }
+        
+        if (defined $kscut && $ks_p_value < $kscut) {
             $include = 0;
         }
 
@@ -309,7 +323,7 @@ sub param
 #
 sub _combine_results
 {
-    my ($self, $frs, $zrs) = @_;
+    my ($self, $frs, $zrs, $ksrs) = @_;
 
     return if !$frs || !$zrs;
 
@@ -337,6 +351,16 @@ sub _combine_results
         if (!$zresult) {
             carp "No Z-score result for ID $id\n";
         }
+        
+        my $ksresult;
+        if ($ksrs)
+        {
+            my $ksrs_size = $ksrs->size() || 0;
+            $ksresult = $ksrs->get_result($id);
+            if (!$ksresult) {
+                carp "No KS-test result for ID $id\n";
+            }
+        }
 
         #if ($zresult->bg_gene_hits() == 0) {
         #    carp "No background gene hits for TF $id\n";
@@ -359,6 +383,10 @@ sub _combine_results
             $cresult->bg_cluster_rate($zresult->bg_rate());
             $cresult->zscore($zresult->z_score());
             $cresult->zscore_p_value($zresult->p_value());
+        }
+
+        if ($ksresult) {
+            $cresult->ks_p_value($ksresult->p_value());
         }
 
         $self->add_result($cresult);
