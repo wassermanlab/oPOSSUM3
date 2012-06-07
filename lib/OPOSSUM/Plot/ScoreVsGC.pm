@@ -7,7 +7,7 @@ vs. GC content of the TFs.
 
  $plotter = OPOSSUM::Plot::ScoreVsGC->new();
 
- $plotter->run($results, $tf_set, $plot_type, $sd_fold, $filename);
+ $plotter->plot($results, $tf_set, $plot_type, $sd_fold, $filename);
 
 =head1 DESCRIPTION
 
@@ -32,7 +32,12 @@ package OPOSSUM::Plot::ScoreVsGC;
 use strict;
 
 use Carp;
+use POSIX;
 use Statistics::R;
+
+my $inf    = 9**9**9;
+my $neginf = -9**9**9;
+my $nan    = -sin(9**9**9);
 
 =head2 new
 
@@ -98,7 +103,14 @@ sub plot
     my ($self, $results, $tf_set, $plot_type, $sd_fold, $filename,
         $error) = @_;
 
+    $$error = "";
+
     unless ($results) {
+        carp "No result set provided";
+        return;
+    }
+
+    unless (ref $results eq 'ARRAY' && $results->[0]) {
         carp "No result set provided";
         return;
     }
@@ -123,9 +135,7 @@ sub plot
         return;
     }
 
-    unless (ref $results eq 'ARRAY' && $results->[0]
-        && $results->[0]->isa("OPOSSUM::Analysis::CombinedResult"))
-    {
+    unless ($results->[0]->isa("OPOSSUM::Analysis::CombinedResult")) {
         carp "Results is not an array ref of OPOSSUM::Analysis::CombinedResult"
             . " objects";
         return;
@@ -156,16 +166,19 @@ sub plot
     foreach my $result (@$results) {
         my $id = $result->id;
 
+        my $score;
         if ($plot_type eq 'Z') {
-            next unless defined $result->zscore();
-            push @scores, $result->zscore();
+            $score = $result->zscore();
         } elsif ($plot_type eq 'Fisher') {
-            next unless defined $result->fisher_p_value();
-            push @scores, $result->fisher_p_value();
+            $score = $result->fisher_p_value();
         } elsif ($plot_type eq 'KS') {
-            next unless defined $result->ks_p_value();
-            push @scores, $result->ks_p_value();
+            $score = $result->ks_p_value();
         }
+
+        next unless defined $score;
+        next if $score == $nan;
+
+        push @scores, $score;
 
         my $tf = $tf_set->get_tf($id);
 
@@ -177,28 +190,47 @@ sub plot
     my $sd = _compute_sd(\@scores, $mean);
     my $threshold = _compute_threshold($mean, $sd, $sd_fold);
 
-    my $max_score = -9999;
-    my $min_score = 9999;
+    my $max_score = $neginf;
+    my $min_score = $inf;
     my @gc_above;
     my @scores_above;
     my @names_above;
     #my @gc_below;
     #my @scores_below;
-    my $num = scalar @scores;
-    foreach my $i (0..$num - 1) {
-        next unless defined $scores[$i];
 
-        if ($scores[$i] > $max_score) {
-            $max_score = $scores[$i];
+    #
+    # Find max/min scores. Scores of inf/-inf are treated as 500/-100.
+    # Find all IDs whose scores are above threshold and store the information
+    # for labelling on the graph.
+    #
+    my $has_inf = 0;
+    my $num_scores = scalar @scores;
+    foreach my $i (0..$num_scores - 1) {
+        my $score = $scores[$i];
+
+        next unless defined $score;
+        next if $score == $nan;
+
+        if ($score > $max_score) {
+            if ($score == $inf) {
+                $max_score = 500;
+                $has_inf = 1;
+            } else {
+                $max_score = $score;
+            }
         }
 
-        if ($scores[$i] < $min_score) {
-            $min_score = $scores[$i];
+        if ($score < $min_score) {
+            if ($score == $neginf) {
+                $min_score = -100;
+            } else {
+                $min_score = $score;
+            }
         }
 
-        if ($scores[$i] >= $threshold) {
+        if ($score >= $threshold) {
             push @gc_above, $gc[$i];
-            push @scores_above, $scores[$i];
+            push @scores_above, $score;
             push @names_above, $names[$i];
         #} else {
         #    push @gc_below, $gc[$i];
@@ -207,18 +239,51 @@ sub plot
     }
 
     if ($max_score > 50) {
-        $max_score = (int($max_score / 100) + 1) * 100;
+        #
+        # Round max score up to closest 100
+        #
+        $max_score = ceil($max_score / 100) * 100;
     } else {
-        $max_score = (int($max_score / 10) + 1) * 10;
+        #
+        # Round max score up to closest 10
+        #
+        $max_score = ceil($max_score / 10) * 10;
     }
 
-    if ($min_score < -50) {
-        $min_score = (int($min_score / 100) - 1) * 100;
+    if ($min_score < 0) {
+        $min_score = floor($min_score / 10) * 10;
     } else {
-        $min_score = (int($min_score / 10) - 1) * 10;
+        $min_score = 0;
+    }
+
+    #
+    # Convert inf/-inf scores to max/min
+    #
+    foreach my $i (0..$num_scores - 1) {
+        if ($scores[$i] == $nan) {
+            $scores[$i] = 0;
+        } elsif ($scores[$i] > $max_score) {
+            $scores[$i] = $max_score;
+        } elsif ($scores[$i] < $min_score) {
+            $scores[$i] = $min_score;
+        }
+    }
+
+    my $num_scores_above = scalar @scores_above;
+    foreach my $i (0..$num_scores_above - 1) {
+        if ($scores[$i] == $nan) {
+            $scores[$i] = 0;
+        } elsif ($scores_above[$i] > $max_score) {
+            $scores_above[$i] = $max_score;
+        } elsif ($scores_above[$i] < $min_score) {
+            $scores_above[$i] = $min_score;
+        }
     }
 
     my $R = $self->R;
+
+    my @legend;
+    push @legend, "mean + $sd_fold * sd";
 
     $R->set('scores', \@scores);
     $R->set('gc', \@gc);
@@ -226,24 +291,36 @@ sub plot
     $R->set('scores_above', \@scores_above);
     $R->set('names_above', \@names_above);
     $R->set('gc', \@gc);
-    $R->set('scores', \@scores);
     $R->set('title', $title);
-    $R->set('legend', "mean + $sd_fold * sd");
+    $R->set('leg', \@legend);
     $R->set('max_score', $max_score);
     $R->set('min_score', $min_score);
     $R->set('threshold', $threshold);
     $R->set('fname', $filename);
 
-    my $out = $R->run(
-        q`xlimit = c(0, 100)`,
-        q`ylimit = c(min_score, max_score)`,
-        q`png(filename=fname, units="px", width=1024, height=1024, res=NA, pointsize=16, bg="white")`,
-        q`plot(gc, scores, cex=0.5, cex.axis=0.9, cex.main=0.8, main=title, xlab="TF profile %GC composition", ylab="Z-score", xlim=xlimit, ylim=ylimit, las=1)`,
-        q`text(gc_above, scores_above, labels=names_above, offset=0.5, cex=0.8)`,
-        q`abline(h=threshold, col="red", lty=2)`,
-        q`legend("topright", legend=c(legend), cex=0.8, col="red", lty=2, bty="n")`,
-        q`dev.off()`
-    );
+    my @R_cmds;
+
+    push @R_cmds, q`xlimit = c(0, 100)`;
+    push @R_cmds, q`ylimit = c(min_score, max_score)`;
+    push @R_cmds, q`png(filename=fname, units="px", width=1024, height=1024, res=NA, pointsize=16, bg="white")`;
+
+    if (@scores && $scores[0]) {
+        push @R_cmds, q`plot(gc, scores, cex=0.5, cex.axis=0.9, cex.main=0.8, main=title, xlab="TF profile %GC composition", ylab="Z-score", xlim=xlimit, ylim=ylimit, las=1)`;
+    }
+
+    if (@scores_above && $scores_above[0]) {
+        push @R_cmds, q`text(gc_above, scores_above, labels=names_above, pos=3, offset=0.2, cex=0.8)`;
+    }
+
+    if ($has_inf) {
+        push @R_cmds, q`text(c(0), c(max_score), labels=c("(Inf)"), pos=2, cex=0.9)`;
+    }
+
+    push @R_cmds, q`abline(h=threshold, col="red", lty=2)`;
+    push @R_cmds, q`legend("topright", legend=leg, cex=0.8, col="red", lty=2, bty="n")`;
+    push @R_cmds, q`dev.off()`;
+
+    my $out = $R->run(@R_cmds);
 
     if ($out) {
         $$error = "R plotting call returned: $out";
@@ -277,6 +354,8 @@ sub _compute_mean
     my $sum = 0;
     foreach my $score (@$scores) {
         next unless defined $score;
+        next if $score == $inf || $score == $neginf || $score == $nan;
+
         $sum += $score;
         $n++;
     }
@@ -293,6 +372,8 @@ sub _compute_sd
     my $n = 0;
     foreach my $score (@$scores) {
         next unless defined $score;
+        next if $score == $inf || $score == $neginf || $score == $nan;
+
         $sum += ($score - $mean)**2;
         $n++;
     }
