@@ -52,6 +52,17 @@ sub tf_cluster_set_search_seqs
     my $cluster_ids = $tf_cluster_set->ids();
 
     my @seq_ids = keys %$seq_id_seqs;
+                
+    #
+    # If threshold is specified as a decimal, convert it to a
+    # percentage, otherwise the TFBS::Matrix::PWM::search_seq
+    # method treats the number as an absolute matrix score which
+    # is not what we intended. DJA 2012/06/07
+    #
+    unless ($threshold =~ /(.+)%$/ || $threshold > 1) {
+        $threshold *= 100;
+        $threshold .= '%';
+    }
 
     my %cluster_seq_sites;
 
@@ -77,7 +88,7 @@ sub tf_cluster_set_search_seqs
                 } else {
                     $pwm = $matrix;
                 }
-                
+
                 my $siteset = $pwm->search_seq(
                     -seqobj     => $seq,
                     -threshold  => $threshold

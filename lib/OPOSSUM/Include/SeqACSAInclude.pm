@@ -40,6 +40,17 @@ sub anchored_tf_set_search_seqs
         $anchor_pwm = $anchor_matrix;
     }
 
+    #
+    # If threshold is specified as a decimal, convert it to a
+    # percentage, otherwise the TFBS::Matrix::PWM::search_seq method
+    # treats the number as an absolute matrix score which is not what
+    # we intended. DJA 2012/06/07
+    #
+    unless ($threshold =~ /(.+)%$/ || $threshold > 1) {
+        $threshold *= 100;
+        $threshold .= '%';
+    }
+
     my %tf_seq_sites;
     my %tf_seq_sitepairs;
     foreach my $seq_id (@seq_ids) {
