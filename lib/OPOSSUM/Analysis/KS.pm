@@ -207,7 +207,13 @@ sub calculate_KS_with_bg_values
 	
 		close(RFILE);
 
-		my $R_cmd = "/usr/local/bin/R --no-save < $R_file 2>&1 1> $log_file";
+		#my $R_cmd = "/usr/local/bin/R --no-save < $R_file 2>&1 1> $log_file";
+        #
+        # Do not assume a full path to R! It may not be installed in the
+        # standard location. Better to assume it is in the user's path.
+        # DJA 2012/06/11
+        #
+		my $R_cmd = "R --no-save < $R_file 2>&1 1> $log_file";
 		my $R_err = `$R_cmd`;
 		if ($? >> 8) {
 			carp "error running R command:\n\t$R_cmd\n$R_err";
