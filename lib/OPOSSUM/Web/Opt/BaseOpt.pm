@@ -18,7 +18,7 @@
 # General constants
 #
 use constant VERSION                    => '3.0';
-use constant DEVEL_VERSION              => 1;
+use constant DEVEL_VERSION              => 0;
 use constant ADMIN_EMAIL                => 'opossum@cmmt.ubc.ca';
 use constant RESULTS_TEXT_FILENAME      => 'results.txt';
 use constant RESULTS_HTDOCS_FILENAME    => 'results.html';
