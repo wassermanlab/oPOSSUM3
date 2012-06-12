@@ -501,28 +501,28 @@ function verify(f)
     <br>
     <input type="radio" name="result_type" value="top_x_results" checked> Top
     <select name="num_display_results">
-      <option value="5">5</option>
-      <option value="10">10</option>
-      <option value="20">20</option>
-      <option value="All" selected>All</option>
+      <option value="5" onClick="{input.result_type[0].checked=true}">5</option>
+      <option value="10" onClick="{input.result_type[0].checked=true}">10</option>
+      <option value="20" onClick="{input.result_type[0].checked=true}">20</option>
+      <option value="All" selected onClick="{input.result_type[0].checked=true}">All</option>
     </select> results
     <br>
     <input type="radio" name="result_type" value="significant_hits"> <b>OR</b> only results with <b>Z-score >= </b>
     <select name="zscore_cutoff">
       [%FOREACH cutoff = zcutoffs%]
-        <option value=[%cutoff%] [%IF cutoff == dflt_zcutoff%]selected[%END%]>[%cutoff%]</option>
+        <option value=[%cutoff%] [%IF cutoff == dflt_zcutoff%]selected[%END%] onClick="{input.result_type[1].checked=true}">[%cutoff%]</option>
       [%END%]
     </select>
     and <b>Fisher score >= </b>
     <select name="fisher_cutoff">
       [%FOREACH cutoff = fcutoffs%]
-        <option value=[%cutoff%] [%IF cutoff == dflt_fcutoff%]selected[%END%]>[%cutoff%]</option>
+        <option value=[%cutoff%] [%IF cutoff == dflt_fcutoff%]selected[%END%] onClick="{input.result_type[1].checked=true}">[%cutoff%]</option>
       [%END%]
     </select>
     and <b>KS score >= </b>
     <select name="ks_cutoff">
       [%FOREACH cutoff = kscutoffs%]
-        <option value=[%cutoff%] [%IF cutoff == dflt_kscutoff%]selected[%END%]>[%cutoff%]</option>
+        <option value=[%cutoff%] [%IF cutoff == dflt_kscutoff%]selected[%END%] onClick="{input.result_type[1].checked=true}">[%cutoff%]</option>
       [%END%]
     </select>
     <br>
