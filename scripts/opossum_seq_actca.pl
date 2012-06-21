@@ -176,7 +176,7 @@ use strict;
 
 use warnings;
 
-use lib '/apps/oPOSSUM3/lib';
+use lib '/devel/oPOSSUM3/lib';
 
 use Getopt::Long;
 use Pod::Usage;
@@ -694,7 +694,7 @@ sub write_results_text
         my $tfcl = $tf_cluster_set->get_tf_cluster($result->id());
 
         printf FH 
-            "%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%s\t%s\t%s\n",
+            "%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%s\t%d\t%s\t%s\t%s\n",
             $tfcl->name(),
             $tfcl->class() || 'N/A',
             $tfcl->family() || 'N/A',
@@ -703,9 +703,9 @@ sub write_results_text
             $result->bg_gene_hits() || 0,
             $result->bg_gene_no_hits() || 0,
             $result->t_cluster_hits() || 0,
-            $result->bg_cluster_hits() || 0,
             defined $result->t_cluster_rate()
                 ? sprintf("%.3f", $result->t_cluster_rate()) : 'N/A',
+            $result->bg_cluster_hits() || 0,
             defined $result->bg_cluster_rate()
                 ? sprintf("%.3f", $result->bg_cluster_rate()) : 'N/A',
             defined $result->zscore()

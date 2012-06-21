@@ -172,7 +172,7 @@ sub write_results_text
     #
 	my $text .= "TF Name\t";
     $text .= "JASPAR_ID\t";
-    $text .= "Class\tFamily\tTax Group\tIC\tGC Content\tTarget seq hits\tTarget seq non-hits\tBackground seq hits\tBackground seq non-hits\tTarget TFBS hits\tBackground TFBS hits\tTarget TFBS nucleotide rate\tBackground TFBS nucleotide rate\tZ-score\tFisher score\n";
+    $text .= "Class\tFamily\tTax Group\tIC\tGC Content\tTarget seq hits\tTarget seq non-hits\tBackground seq hits\tBackground seq non-hits\tTarget TFBS hits\tTarget TFBS nucleotide rate\tBackground TFBS hits\tBackground TFBS nucleotide rate\tZ-score\tFisher score\n";
 
     foreach my $result (@$results) 
 	{
@@ -190,7 +190,7 @@ sub write_results_text
 		$text .= $tf->name() . "\t";
 		$text .= $tf->ID() . "\t" if $tf_db;
         $text .= sprintf 
-			"%s\t%s\t%s\t%s\t%.3f\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%s\t%s\t%s\n",
+			"%s\t%s\t%s\t%s\t%.3f\t%d\t%d\t%d\t%d\t%d\t%s\t%d\t%s\t%s\t%s\n",
             $tf->class() || 'NA',
             $tf->tag('family') || 'NA',
             $tf->tag('tax_group') || 'NA',
@@ -201,9 +201,9 @@ sub write_results_text
             $result->bg_gene_hits() || 0,
             $result->bg_gene_no_hits() || 0,
             $result->t_tfbs_hits() || 0,
-            $result->bg_tfbs_hits() || 0,
             defined $result->t_tfbs_rate()
                 ? sprintf("%.3f", $result->t_tfbs_rate()) : 'NA',
+            $result->bg_tfbs_hits() || 0,
             defined $result->bg_tfbs_rate()
                 ? sprintf("%.3f", $result->bg_tfbs_rate()) : 'NA',
             defined $result->zscore()

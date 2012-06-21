@@ -263,7 +263,7 @@ sub write_results_text
             my $gc_content = sprintf("%.3f", $tf->tag('gc_content'));
 
             $text .= sprintf 
-                "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%s\t%s\t%s\t%s\n",
+                "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%s\t%d\t%s\t%s\t%s\t%s\n",
                 $tf->name(),
                 $tf->ID(),
                 $tf->class() || 'NA',
@@ -276,9 +276,9 @@ sub write_results_text
                 $result->bg_gene_hits() || 0,
                 $result->bg_gene_no_hits() || 0,
                 $result->t_tfbs_hits() || 0,
-                $result->bg_tfbs_hits() || 0,
                 defined $result->t_tfbs_rate()
                     ? sprintf("%.3f", $result->t_tfbs_rate()) : 'NA',
+                $result->bg_tfbs_hits() || 0,
                 defined $result->bg_tfbs_rate()
                     ? sprintf("%.3f", $result->bg_tfbs_rate()) : 'NA',
                 defined $result->zscore()
@@ -289,7 +289,7 @@ sub write_results_text
                     ? sprintf("%.3f", $result->ks_p_value()) : 'NA';
         }
     } else {
-        $text = "TF Name\tClass\tFamily\tTax Group\tIC\tTarget seq hits\tTarget seq non-hits\tBackground seq hits\tBackground seq non-hits\tTarget TFBS hits\tBackground TFBS hits\tTarget TFBS nucleotide rate\tBackground TFBS nucleotide rate\tZ-score\tFisher score\tPeakDist p-value\n";
+        $text = "TF Name\tClass\tFamily\tTax Group\tIC\tTarget seq hits\tTarget seq non-hits\tBackground seq hits\tBackground seq non-hits\tTarget TFBS hits\tTarget TFBS nucleotide rate\tBackground TFBS hits\tBackground TFBS nucleotide rate\tZ-score\tFisher score\tPeakDist p-value\n";
 
         foreach my $result (@$results) {
             my $tf = $tf_set->get_tf($result->id());
@@ -302,7 +302,7 @@ sub write_results_text
             }
 
             $text .= sprintf 
-                "%s\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%s\t%s\t%s\t%s\n",
+                "%s\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%s\t%d\t%s\t%s\t%s\t%s\n",
                 $tf->name(),
                 $tf->class() || 'NA',
                 $tf->tag('family') || 'NA',
@@ -313,9 +313,9 @@ sub write_results_text
                 $result->bg_gene_hits() || 0,
                 $result->bg_gene_no_hits() || 0,
                 $result->t_tfbs_hits() || 0,
-                $result->bg_tfbs_hits() || 0,
                 defined $result->t_tfbs_rate()
                     ? sprintf("%.3f", $result->t_tfbs_rate()) : 'NA',
+                $result->bg_tfbs_hits() || 0,
                 defined $result->bg_tfbs_rate()
                     ? sprintf("%.3f", $result->bg_tfbs_rate()) : 'NA',
                 defined $result->zscore()
