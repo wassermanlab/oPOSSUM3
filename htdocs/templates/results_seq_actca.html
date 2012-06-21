@@ -150,7 +150,7 @@
   <p class="warn_text">[%message%]</p>
 [%ELSIF results%]
   [%IF warn_zero_bg_gene_hits%]
-    <p class="warn_text"><b>Warning</b>: the provided background sequence set resulted in zero binding sites for one or more TFs. In these cases the Z-score is undefined and is marked as N/A. In cases where there were one or more binding sites in the target gene set, the result could still be considered significant. Results for which this was the case are marked with an asterisk (*).
+    <p class="warn_text"><b>Warning</b>: the provided background sequence set resulted in zero binding sites for one or more TFs. In these cases the Z-score is undefined and is marked as NA. In cases where there were one or more binding sites in the target gene set, the result could still be considered significant. Results for which this was the case are marked with an asterisk (*).
     </p>
   [%END%]
 
@@ -225,7 +225,7 @@
 
       <td align=right>
         [%IF result.bg_gene_hits == 0%]
-          <b class="warn_table_text">N/A</b>
+          <b class="warn_table_text">NA</b>
         [%ELSE%]
           [%formatf(3, result.zscore)%]
         [%END%]

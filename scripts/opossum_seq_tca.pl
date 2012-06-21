@@ -849,7 +849,7 @@ sub write_results_html
                                         my $f = shift;
                                         return ($f || $f eq '0')
                                             ? sprintf("%.*f", $dec, $f)
-                                            : 'N/A'
+                                            : 'NA'
                                    },
 
         formatg                 => sub {
@@ -857,7 +857,7 @@ sub write_results_html
                                         my $f = shift;
                                         return ($f || $f eq '0')
                                             ? sprintf("%.*g", $dec, $f)
-                                            : 'N/A'
+                                            : 'NA'
                                    },
 
         var_template            => "results_seq_tca.html"

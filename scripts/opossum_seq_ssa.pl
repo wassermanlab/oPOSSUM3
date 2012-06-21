@@ -188,7 +188,6 @@ use warnings;
 
 use lib '/apps/oPOSSUM3/lib';
 
-
 use Getopt::Long;
 use Pod::Usage;
 use Carp;
@@ -879,7 +878,7 @@ sub write_results_html
                                         my $f = shift;
                                         return ($f || $f eq '0')
                                             ? sprintf("%.*f", $dec, $f)
-                                            : 'N/A'
+                                            : 'NA'
                                    },
 
         formatg                 => sub {
@@ -887,7 +886,7 @@ sub write_results_html
                                         my $f = shift;
                                         return ($f || $f eq '0')
                                             ? sprintf("%.*g", $dec, $f)
-                                            : 'N/A'
+                                            : 'NA'
                                    },
 
         var_template            => "results_seq_ssa.html"

@@ -696,22 +696,22 @@ sub write_results_text
         printf FH 
             "%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%s\t%d\t%s\t%s\t%s\n",
             $tfcl->name(),
-            $tfcl->class() || 'N/A',
-            $tfcl->family() || 'N/A',
+            $tfcl->class() || 'NA',
+            $tfcl->family() || 'NA',
             $result->t_gene_hits() || 0,
             $result->t_gene_no_hits() || 0,
             $result->bg_gene_hits() || 0,
             $result->bg_gene_no_hits() || 0,
             $result->t_cluster_hits() || 0,
             defined $result->t_cluster_rate()
-                ? sprintf("%.3f", $result->t_cluster_rate()) : 'N/A',
+                ? sprintf("%.3f", $result->t_cluster_rate()) : 'NA',
             $result->bg_cluster_hits() || 0,
             defined $result->bg_cluster_rate()
-                ? sprintf("%.3f", $result->bg_cluster_rate()) : 'N/A',
+                ? sprintf("%.3f", $result->bg_cluster_rate()) : 'NA',
             defined $result->zscore()
-                ? sprintf("%.3f", $result->zscore()) : 'N/A',
+                ? sprintf("%.3f", $result->zscore()) : 'NA',
             defined $result->fisher_p_value()
-                ? sprintf("%.3g", $result->fisher_p_value()) : 'N/A';
+                ? sprintf("%.3g", $result->fisher_p_value()) : 'NA';
     }
     close(FH);
 }
@@ -811,7 +811,7 @@ sub write_results_html
                                     my $f = shift;
                                     return ($f || $f eq '0')
                                         ? sprintf("%.*f", $dec, $f)
-                                        : 'N/A'
+                                        : 'NA'
                                },
 
         formatg             => sub {
@@ -819,7 +819,7 @@ sub write_results_html
                                     my $f = shift;
                                     return ($f || $f eq '0')
                                         ? sprintf("%.*g", $dec, $f)
-                                        : 'N/A'
+                                        : 'NA'
                                },
 
         var_template        => "results_seq_actca.html"
@@ -909,16 +909,16 @@ sub write_tfbs_cluster_details_text
 	printf FH "$anchor_name\n\n";
 
     printf FH "TFBS Cluster ID:\t%s\n", $anchor_cluster->id();
-    printf FH "Class:    \t%s\n", $anchor_cluster->class() || 'N/A';
-    printf FH "Family:   \t%s\n", $anchor_cluster->family() || 'N/A';
+    printf FH "Class:    \t%s\n", $anchor_cluster->class() || 'NA';
+    printf FH "Family:   \t%s\n", $anchor_cluster->family() || 'NA';
 
     printf FH "\n\n";
 
     printf FH "%s\n\n", $tfcl->name();
 
     printf FH "TFBS Cluster ID:\t%s\n", $tfcl->id();
-    printf FH "Class:    \t%s\n", $tfcl->class() || 'N/A';
-    printf FH "Family:   \t%s\n", $tfcl->family() || 'N/A';
+    printf FH "Class:    \t%s\n", $tfcl->class() || 'NA';
+    printf FH "Family:   \t%s\n", $tfcl->family() || 'NA';
 
     printf FH "\n\nc%s - c%s Binding Site Cluster Combinations\n\n",
         $anchor_cluster->name(), $tfcl->name();
@@ -1020,7 +1020,7 @@ sub write_tfbs_cluster_details_html
                                     my $f = shift;
                                     return ($f || $f eq '0')
                                         ? sprintf("%.*f", $dec, $f)
-                                        : 'N/A'
+                                        : 'NA'
                                },
 
 		tf_db               => $tf_db,

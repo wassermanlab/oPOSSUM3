@@ -970,8 +970,8 @@ sub write_results_text
         printf FH 
             "%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%s\t%s\t%s\t%s\n",
             $tfcl->name(),
-            $tfcl->class() || 'N/A',
-            $tfcl->family() || 'N/A',
+            $tfcl->class() || 'NA',
+            $tfcl->family() || 'NA',
             $result->t_gene_hits() || 0,
             $result->t_gene_no_hits() || 0,
             $result->bg_gene_hits() || 0,
@@ -979,13 +979,13 @@ sub write_results_text
             $result->t_cluster_hits() || 0,
             $result->bg_cluster_hits() || 0,
             defined $result->t_cluster_rate()
-                ? sprintf("%.3f", $result->t_cluster_rate()) : 'N/A',
+                ? sprintf("%.3f", $result->t_cluster_rate()) : 'NA',
             defined $result->bg_cluster_rate()
-                ? sprintf("%.3f", $result->bg_cluster_rate()) : 'N/A',
+                ? sprintf("%.3f", $result->bg_cluster_rate()) : 'NA',
             defined $result->zscore()
-                ? sprintf("%.3f", $result->zscore()) : 'N/A',
+                ? sprintf("%.3f", $result->zscore()) : 'NA',
             defined $result->fisher_p_value()
-                ? sprintf("%.3g", $result->fisher_p_value()) : 'N/A';
+                ? sprintf("%.3g", $result->fisher_p_value()) : 'NA';
     }
     close(FH);
 }
@@ -1097,7 +1097,7 @@ sub write_results_html
                                     my $f = shift;
                                     return ($f || $f eq '0')
                                         ? sprintf("%.*f", $dec, $f)
-                                        : 'N/A'
+                                        : 'NA'
                                },
 
         formatg             => sub {
@@ -1105,7 +1105,7 @@ sub write_results_html
                                     my $f = shift;
                                     return ($f || $f eq '0')
                                         ? sprintf("%.*g", $dec, $f)
-                                        : 'N/A'
+                                        : 'NA'
                                },
 
         var_template        => "results_gene_actca.html"
