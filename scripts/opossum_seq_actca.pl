@@ -176,7 +176,7 @@ use strict;
 
 use warnings;
 
-use lib '/devel/oPOSSUM3/lib';
+use lib '/apps/oPOSSUM3/lib';
 
 use Getopt::Long;
 use Pod::Usage;
