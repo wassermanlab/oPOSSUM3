@@ -202,10 +202,10 @@ sub write_results_text
             $result->bg_gene_no_hits() || 0,
             $result->t_tfbs_hits() || 0,
             defined $result->t_tfbs_rate()
-                ? sprintf("%.3f", $result->t_tfbs_rate()) : 'NA',
+                ? sprintf("%.3g", $result->t_tfbs_rate()) : 'NA',
             $result->bg_tfbs_hits() || 0,
             defined $result->bg_tfbs_rate()
-                ? sprintf("%.3f", $result->bg_tfbs_rate()) : 'NA',
+                ? sprintf("%.3g", $result->bg_tfbs_rate()) : 'NA',
             defined $result->zscore()
                 ? sprintf("%.3f", $result->zscore()) : 'NA',
             defined $result->fisher_p_value()

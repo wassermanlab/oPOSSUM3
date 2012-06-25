@@ -37,17 +37,17 @@ sub write_results_text
 
     return unless $results && $results->[0];
 
-    my $text = "TFBS Cluster ID\tClass\tFamily\t";
-    $text .= "Target gene hits\tTarget gene non-hits\t";
-    $text .= "Background gene hits\tBackground gene non-hits\t";
-    $text .= "Target cluster hits\tBackground cluster hits\t";
-    $text .= "Target cluster nucleotide rate\tBackground cluster nucleotide rate\t";
-    $text .= "Z-score\tFisher score\n";
+    my $text = "TFBS Cluster ID\tClass\tFamily";
+    $text .= "\tTarget gene hits\tTarget gene non-hits";
+    $text .= "\tBackground gene hits\tBackground gene non-hits";
+    $text .= "\tTarget cluster hits\tTarget cluster nucleotide rate";
+    $text .= "\tBackground cluster hits\tBackground cluster nucleotide rate";
+    $text .= "\tZ-score\tFisher score\n";
 
     foreach my $result (@$results) {
         my $cl = $tf_cluster_set->get_tf_cluster($result->id());
 
-        $text .= sprintf "%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%s\t%s\t%s\n",
+        $text .= sprintf "%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%s\t%d\t%s\t%s\t%s\n",
             'c' . $cl->id(),
             $cl->class() || 'NA',
             $cl->family() || 'NA',
@@ -56,11 +56,11 @@ sub write_results_text
             $result->bg_gene_hits() || 0,
             $result->bg_gene_no_hits() || 0,
             $result->t_cluster_hits() || 0,
-            $result->bg_cluster_hits() || 0,
             defined $result->t_cluster_rate()
-                ? sprintf("%.3f", $result->t_cluster_rate()) : 'NA',
+                ? sprintf("%.3g", $result->t_cluster_rate()) : 'NA',
+            $result->bg_cluster_hits() || 0,
             defined $result->bg_cluster_rate()
-                ? sprintf("%.3f", $result->bg_cluster_rate()) : 'NA',
+                ? sprintf("%.3g", $result->bg_cluster_rate()) : 'NA',
             defined $result->zscore()
                 ? sprintf("%.3f", $result->zscore()) : 'NA',
             defined $result->fisher_p_value()

@@ -29,7 +29,7 @@ sub write_results_text
         my $gc_content = sprintf("%.3f", $tf->tag('gc_content'));
 
         printf FH 
-            "%s\t%s\t%s\t%s\t%s\t%.3f\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%s\t%s\t%s\n",
+            "%s\t%s\t%s\t%s\t%s\t%.3f\t%s\t%d\t%d\t%d\t%d\t%d\t%s\t%d\t%s\t%s\t%s\n",
             $tf->name(),
             $tf->ID(),
             $tf->class() || 'NA',
@@ -42,11 +42,11 @@ sub write_results_text
             $result->bg_gene_hits() || 0,
             $result->bg_gene_no_hits() || 0,
             $result->t_tfbs_hits() || 0,
-            $result->bg_tfbs_hits() || 0,
             defined $result->t_tfbs_rate()
-                ? sprintf("%.3f", $result->t_tfbs_rate()) : 'NA',
+                ? sprintf("%.3g", $result->t_tfbs_rate()) : 'NA',
+            $result->bg_tfbs_hits() || 0,
             defined $result->bg_tfbs_rate()
-                ? sprintf("%.3f", $result->bg_tfbs_rate()) : 'NA',
+                ? sprintf("%.3g", $result->bg_tfbs_rate()) : 'NA',
             defined $result->zscore()
                 ? sprintf("%.3f", $result->zscore()) : 'NA',
             defined $result->fisher_p_value()
