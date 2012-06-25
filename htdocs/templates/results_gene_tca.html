@@ -188,8 +188,8 @@
 [%IF message%]
   <p class="warn_text">[%message%]</p>
 [%ELSIF results%]
-  [%IF warn_zero_bg_gene_hits%]
-    <p class="warn_text"><b>Warning</b>: The provided background gene set resulted in zero binding sites for one or more TFs. In these cases the Z-score is undefined and is marked as NA. In cases where there were one or more binding sites in the target gene set, the result could still be considered significant. Results for which this was the case are marked with an asterisk (*).
+  [%IF warn_zero_bg_hits%]
+    <p class="warn_text"><b>Warning</b>: The provided background set resulted in zero binding sites for one or more TF clusters. These cases are highlighted in red. In cases where there were also zero binding sites for the target set, the Z-score is undefined (NA). In cases where there were one or more binding sites in the target set, the Z-score is infinite (Inf). However, the result may or may not be considered significant. Results for which this was the case are marked with an asterisk (*).
     </p>
   [%END%]
 
@@ -255,13 +255,17 @@
 	      [%formatg(3, result.bg_cluster_rate)%]
 	    [%END%]
 	  </td>
-	  <td align=right>
-		[%IF result.bg_gene_hits == 0%]
-		  <b class="warn_table_text">[%formatf(3, result.zscore)%]*</b>
-		[%ELSE%]
-		  [%formatf(3, result.zscore)%]
-		[%END%]
-	  </td>
+
+    [%IF result.bg_gene_hits == 0%]
+      [%IF result.zscore == 'inf' or result.zscore == 'Inf'%]
+        <td sorttable_customkey="999999999" align=right nowrap><b class="warn_table_text">Inf</b></td>
+      [%ELSE%]
+        <td align=right nowrap><b class="warn_table_text">NA</b></td>
+      [%END%]
+    [%ELSE%]
+      <td align=right nowrap>[%formatf(3, result.zscore)%]</td>
+    [%END%]
+
     [%IF result.fisher_p_value == 'inf' or result.fisher_p_value == 'Inf'%]
       <td sorttable_customkey="999999999" align=right nowrap>Inf</td>
     [%ELSE%]
