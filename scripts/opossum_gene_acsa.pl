@@ -952,10 +952,10 @@ exit;
 #
 sub write_results_html
 {
-    my $warn_zero_bg_gene_hits = 0;
+    my $warn_zero_bg_hits = 0;
     foreach my $result (@$cresults) {
-        if ($result->bg_gene_hits() == 0 && $result->t_gene_hits() > 0) {
-            $warn_zero_bg_gene_hits = 1;
+        if ($result->bg_gene_hits() == 0) {
+            $warn_zero_bg_hits = 1;
             last;
         }
     }
@@ -1030,7 +1030,7 @@ sub write_results_html
         zscore_cutoff       => $zscore_cutoff,
         fisher_cutoff       => $fisher_cutoff,
         result_sort_by      => $sort_by,
-        warn_zero_bg_gene_hits  => $warn_zero_bg_gene_hits,
+        warn_zero_bg_hits   => $warn_zero_bg_hits,
         results_file        => RESULTS_TEXT_FILENAME,
         zscore_plot_file    => ZSCORE_PLOT_FILENAME,
         fisher_plot_file    => FISHER_PLOT_FILENAME,
