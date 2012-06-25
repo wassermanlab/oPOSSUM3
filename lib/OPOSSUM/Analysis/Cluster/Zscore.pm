@@ -122,6 +122,8 @@ sub calculate_Zscore
 {
     my ($self, $bg_counts, $t_counts, $bg_seq_len, $t_seq_len) = @_;
 
+    my $inf = 9**9**9;
+
     if (!$bg_counts) {
         carp "background counts not specified\n";
         return;
@@ -233,16 +235,19 @@ sub calculate_Zscore
 
         my $Z;
         my $p_value;
-        if ($S != 0) {
+        if ($S == 0) {
+            if ($Nb == 0 && $Nt > 0) {
+                $Z       = $inf;    # set to infinite
+                $p_value = 0;
+            } else {
+                #
+                # Leave as undefined DJA 2010/03/11
+                #
+            }
+        } else {
             $Z = ($Nt - $Ne - 0.5) / $S;
             #$Z = ($Ht - $He - 0.5) / $S;
             $p_value = Statistics::Distributions::uprob($Z);
-        } else {
-            #
-            # Leave as undefined DJA 2010/03/11
-            #
-            #$Z       = 1e999;    # set to infinite
-            #$p_value = 0;
         }
 
         #if (defined $Z) {
