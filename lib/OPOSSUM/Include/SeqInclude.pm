@@ -81,6 +81,16 @@ sub id_seqs
     
         $seq_id_display_ids{$seq_id} = $display_id;
         $seq_id_seqs{$seq_id} = $seq;
+
+        #
+        # There is a bug with TFBS whereby it the seq ID is very long part
+        # of the ID is pre-pended to the sequence and the TFBS positions are
+        # reported with coordinates off the end of the sequence which causes
+        # an exception to be thrown, so set the ID to the simplified seq#
+        # ID. Previously implemented this change and it was lost?
+        # DJA 2012/08/25
+        #
+        $seq->id($seq_id);
     
         $seq_num++;
     }
