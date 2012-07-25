@@ -193,9 +193,9 @@
     <th title="Target TFBS cluster nucleotide rate (click to sort)">Target cluster nucleotide rate</th>
     <th title="Background TFBS cluster hits (click to sort)">Background cluster hits</th>
     <th title="Background TFBS cluster nucleotide rate (click to sort)">Background cluster nucleotide rate</th>
-    <th title="Assesses TFBS clusters per basepair (click to sort)">Z-score</th>
-    <th title="Assesses TFBS clusters per sequence (click to sort)">Fisher score</th>
-    <th title="Assesses TFBS distances from sequence peaks (click to sort)">KS score</th>
+    <th title="Assesses the enrichment of TFBS cluster bp density (click to sort)">Z-score</th>
+    <th title="Assesses the enrichment of sequences with one or more TFBS clusters (click to sort)">Fisher score</th>
+    <th title="Assesses the tendency for TFBS to be situated near the MCP (or peak centre if no MCP given) of a ChIP-Seq region (click to sort)">KS score</th>
   </tr>
   [%FOREACH result = results%]
     [%cl = tf_cluster_set.get_tf_cluster(result.id)%]
