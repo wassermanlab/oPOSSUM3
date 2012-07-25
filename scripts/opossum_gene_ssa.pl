@@ -494,13 +494,6 @@ if (scalar @$t_gene_ids > MAX_TARGET_GENES) {
    );
 }
 
-if (scalar @$t_gene_ids > MAX_TARGET_GENES) {
-    fatal(
-          "Number of target genes input exceeds maximum of " . MAX_TARGET_GENES
-        . " allowed", %job_args
-   );
-}
-
 my $bg_gene_ids;
 if ($bg_gene_file) {
     $logger->info("Reading background gene IDs file");
