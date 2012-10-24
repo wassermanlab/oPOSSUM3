@@ -208,7 +208,6 @@ use OPOSSUM::Analysis::Cluster::KS;
 use OPOSSUM::Analysis::Cluster::Counts;
 use OPOSSUM::Analysis::Cluster::Values;
 use OPOSSUM::Analysis::Cluster::CombinedResultSet;
-use OPOSSUM::Plot::ScoreVsGC;
 
 use Statistics::Distributions;
 
@@ -834,9 +833,6 @@ sub write_results_html
         result_sort_by          => $sort_by,
         warn_zero_bg_hits       => $warn_zero_bg_hits,
         results_file            => RESULTS_TEXT_FILENAME,
-        zscore_plot_file        => ZSCORE_PLOT_FILENAME,
-        fisher_plot_file        => FISHER_PLOT_FILENAME,
-        ks_plot_file            => KS_PLOT_FILENAME,
         user_tf_family_file     => $user_tf_family_file,
         user_seq_file           => $user_seq_file,
         user_bg_seq_file        => $user_bg_seq_file,

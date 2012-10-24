@@ -344,8 +344,8 @@ my %job_args = (
 	-logger => $logger
 );
 
-unless ($anchor_tf_id) {
-    fatal("No anchor TF ID specified", %job_args);
+unless ($anchor_tf_id || $anchor_matrix_file) {
+    fatal("No anchoring TF specified", %job_args);
 }
 
 unless ($t_seq_file) {
@@ -679,28 +679,36 @@ if ($ok)
 $logger->info("Plotting scores vs. profile \%GC content");
 
 my $plotter = OPOSSUM::Plot::ScoreVsGC->new();
-unless ($plotter) {
-    $logger->error("Could not initialize plotting");
-} else {
-    my $plot_err;
+if ($plotter) {
+    $logger->info(
+        "Plotting Z-scores vs. profile \%GC content plotting"
+    );
 
     my $z_plot_file = "$abs_results_dir/" . ZSCORE_PLOT_FILENAME;
+
+    my $plot_err;
     unless($plotter->plot(
         $cresults, $tf_set, 'Z', ZSCORE_PLOT_SD_FOLD, $z_plot_file,
         \$plot_err
     )) {
-        $logger->error("Could not plot Z-scores vs. GC content. $plot_err");
+        $logger->error("Plotting error: $plot_err");
     }
 
+    $logger->info(
+        "Plotting Fisher scores vs. profile \%GC content plotting"
+    );
+
     my $fisher_plot_file = "$abs_results_dir/" . FISHER_PLOT_FILENAME;
+
+    $plot_err = "";
     unless($plotter->plot(
         $cresults, $tf_set, 'Fisher', FISHER_PLOT_SD_FOLD, $fisher_plot_file,
         \$plot_err
     )) {
-        $logger->error(
-            "Could not plot Fisher scores vs. GC content. $plot_err"
-        );
+        $logger->error("Plotting error: $plot_err");
     }
+} else {
+    $logger->error("Error initializing content plotting");
 }
 
 $job_args{-web} = $web;

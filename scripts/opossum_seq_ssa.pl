@@ -717,36 +717,49 @@ if ($ok) {
 $logger->info("Plotting scores vs. profile \%GC content");
 
 my $plotter = OPOSSUM::Plot::ScoreVsGC->new();
-unless ($plotter) {
-    $logger->error("Could not initialize plotting");
-} else {
-    my $plot_err;
+if ($plotter) {
+    $logger->info(
+        "Plotting Z-scores vs. profile \%GC content plotting"
+    );
 
     my $z_plot_file = "$abs_results_dir/" . ZSCORE_PLOT_FILENAME;
+
+    my $plot_err;
     unless(
         $plotter->plot(
             $cresults, $tf_set, 'Z', ZSCORE_PLOT_SD_FOLD, $z_plot_file,
             \$plot_err
     )) {
-        $logger->error("Could not plot Z-scores vs. GC content. $plot_err");
+        $logger->error("Plotting error: $plot_err");
     }
+    $logger->info(
+        "Plotting Fisher scores vs. profile \%GC content plotting"
+    );
 
     my $fisher_plot_file = "$abs_results_dir/" . FISHER_PLOT_FILENAME;
+
+    $plot_err = "";
     unless($plotter->plot(
         $cresults, $tf_set, 'Fisher', FISHER_PLOT_SD_FOLD, $fisher_plot_file,
         \$plot_err
     )) {
-        $logger->error(
-            "Could not plot Fisher scores vs. GC content. $plot_err"
-        );
+        $logger->error("Plotting error: $plot_err");
     }
 
+    $logger->info(
+        "Plotting KS scores vs. profile \%GC content plotting"
+    );
+
     my $ks_plot_file = "$abs_results_dir/" . KS_PLOT_FILENAME;
+
+    $plot_err = "";
     unless($plotter->plot(
         $cresults, $tf_set, 'KS', KS_PLOT_SD_FOLD, $ks_plot_file
     )) {
-        $logger->error("Could not plot KS scores vs. GC content. $plot_err");
+        $logger->error("Plotting error: $plot_err");
     }
+} else {
+    $logger->error("Error initializing plotting");
 }
 
 #

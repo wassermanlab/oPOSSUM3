@@ -897,27 +897,32 @@ if ($ok) {
 $logger->info("Plotting scores vs. profile \%GC content");
 
 my $plotter = OPOSSUM::Plot::ScoreVsGC->new();
-unless ($plotter) {
-    $logger->error("Could not initialize plotting");
-} else {
-    my $plot_err;
+if ($plotter) {
+    $logger->info("Plotting Z-scores vs. profile \%GC content");
 
     my $z_plot_file = "$abs_results_dir/" . ZSCORE_PLOT_FILENAME;
+
+    my $plot_err;
     unless($plotter->plot(
-        $cresults, $tf_set, 'Z', ZSCORE_PLOT_SD_FOLD, $z_plot_file,
-        \$plot_err
+        $cresults, $tf_set, 'Z', ZSCORE_PLOT_SD_FOLD,
+        $z_plot_file, \$plot_err
     )) {
-        $logger->error("Could not plot Z-scores vs. GC content. $plot_err");
+        $logger->error("Plotting error: $plot_err");
     }
 
+    $logger->info("Plotting Fisher scores vs. profile \%GC content");
+
     my $fisher_plot_file = "$abs_results_dir/" . FISHER_PLOT_FILENAME;
+
+    $plot_err = "";
     unless($plotter->plot(
-        $cresults, $tf_set, 'Fisher', FISHER_PLOT_SD_FOLD, $fisher_plot_file,
-        \$plot_err
+        $cresults, $tf_set, 'Fisher', FISHER_PLOT_SD_FOLD,
+        $fisher_plot_file, \$plot_err
     )) {
-        $logger->error(
-            "Could not plot Fisher scores vs. GC content. $plot_err");
+        $logger->error("Plotting error: $plot_err");
     }
+} else {
+    $logger->error("Error initializing plotting");
 }
 
 $job_args{-web} = $web;
@@ -1096,8 +1101,11 @@ sub write_tfbs_details
 
 		my $tf_name = $tf->name();
 
-		my $text_filename = "$abs_results_dir/$tf_id.txt";
-		my $html_filename = "$abs_results_dir/$tf_id.html";
+        my $fname = $tf_id;
+        $fname =~ s/\//_/g;
+
+        my $text_filename = "$abs_results_dir/$fname.txt";
+        my $html_filename = "$abs_results_dir/$fname.html";
 
 		# XXX
 		# Fetch TFBSs for this TF and all genes and pass to routines
