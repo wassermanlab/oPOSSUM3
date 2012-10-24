@@ -365,8 +365,11 @@ sub write_tfbs_details
 
             my $tf = $tf_set->get_tf($tf_id);
 
-            my $text_filename = sprintf "$abs_results_dir/$tf_id.txt";
-            my $html_filename = sprintf "$abs_results_dir/$tf_id.html";
+            my $fname = $tf_id;
+            $fname =~ s/\//_/g;
+
+            my $text_filename = "$abs_results_dir/$fname.txt";
+            my $html_filename = "$abs_results_dir/$fname.html";
         
             write_tfbs_details_text(
                 $text_filename,
