@@ -29,9 +29,13 @@ sub get_seq_file
             return;
         }
 
+        unless ($self->check_seq_text($sl)) {
+            return;
+        }
+
         $filename = "$tempdir/seqs.fa";
         unless (open(FH, ">$filename")) {
-            $self->_error("Unable to create target sequences file $filename\n");
+            $self->_error("Unable to create target sequence file $filename");
             return;
         }
         print FH $sl;
@@ -46,13 +50,17 @@ sub get_seq_file
         }
 
         if (!$sl) {
-            $self->_error("File $file is empty\n");
+            $self->_error("Target sequence upload file is empty");
+            return;
+        }
+
+        unless ($self->check_seq_text($sl)) {
             return;
         }
 
         $filename = "$tempdir/seqs.fa";
         unless (open(FH, ">$filename")) {
-            $self->_error("Unable to create target sequences file $filename\n");
+            $self->_error("Unable to create target sequence file $filename");
             return;
         }
         print FH $sl;
@@ -87,10 +95,14 @@ sub get_back_seq_file
             return;
         }
 
+        unless ($self->check_seq_text($sl)) {
+            return;
+        }
+
         $filename = "$tempdir/back_seqs.fa";
         unless (open(FH, ">$filename")) {
             $self->_error(
-                "Unable to create background sequences file $filename\n"
+                "Unable to create background sequence file $filename"
             );
             return;
         }
@@ -105,14 +117,18 @@ sub get_back_seq_file
         }
 
         if (!$sl) {
-            $self->_error("File $file is empty\n");
+            $self->_error("Background sequence upload file is empty");
+            return;
+        }
+
+        unless ($self->check_seq_text($sl)) {
             return;
         }
 
         $filename = "$tempdir/back_seqs.fa";
         unless (open(FH, ">$filename")) {
             $self->_error(
-                "Unable to create background sequences file $filename\n"
+                "Unable to create background sequence file $filename"
             );
             return;
         }
@@ -142,7 +158,7 @@ sub get_peak_pos_file
 
         $filename = "$tempdir/peak_pos.txt";
         unless (open(FH, ">$filename")) {
-            $self->_error("Unable to create target sequence peak position file $filename\n");
+            $self->_error("Unable to create target sequence peak position file $filename");
             return;
         }
         print FH $sl;
@@ -157,13 +173,13 @@ sub get_peak_pos_file
         }
 
         if (!$sl) {
-            $self->_error("File $file is empty\n");
+            $self->_error("Target peak position file is empty");
             return;
         }
 
         $filename = "$tempdir/peak_pos.txt";
         unless (open(FH, ">$filename")) {
-            $self->_error("Unable to create target sequence peak position file $filename\n");
+            $self->_error("Unable to create target sequence peak position file $filename");
             return;
         }
         print FH $sl;
@@ -192,7 +208,7 @@ sub get_bg_peak_pos_file
 
         $filename = "$tempdir/bg_peak_pos.txt";
         unless (open(FH, ">$filename")) {
-            $self->_error("Unable to create background sequence peak position file $filename\n");
+            $self->_error("Unable to create background sequence peak position file $filename");
             return;
         }
         print FH $sl;
@@ -207,13 +223,13 @@ sub get_bg_peak_pos_file
         }
 
         if (!$sl) {
-            $self->_error("File $file is empty\n");
+            $self->_error("Background peak position upload file is empty");
             return;
         }
 
         $filename = "$tempdir/bg_peak_pos.txt";
         unless (open(FH, ">$filename")) {
-            $self->_error("Unable to create background sequence peak position file $filename\n");
+            $self->_error("Unable to create background sequence peak position file $filename");
             return;
         }
         print FH $sl;
@@ -240,7 +256,7 @@ sub write_matrix_file
     }
 
     unless (open(FH, ">$filename")) {
-        $self->_error("Unable to create matrix file $filename\n");
+        $self->_error("Unable to create matrix file $filename");
         return;
     }
     
@@ -360,6 +376,40 @@ sub parse_matrix_text
     }
 
     return $matrix_count ? $matrix_set : undef;
+}
+
+sub check_seq_text
+{
+    my ($self, $seq_text) = @_;
+
+    my $seq_text_len = length $seq_text;
+    #carp "Sequence text length is $seq_text_len\n";
+    if ($seq_text_len > MAX_SEQ_FILE_SIZE) {
+        $self->_error(
+            "Total sequence size exceeds maximum allowed size of "
+            .  MAX_SEQ_FILE_SIZE . " bytes"
+        );
+        return;
+    }
+
+    my @lines = split /\n/, $seq_text;
+    foreach my $line (@lines) {
+        chomp $line;
+        $line =~ s/^\s+//;
+        $line =~ s/\s+$//;
+        next unless $line;
+        unless ($line =~ /^\s*>/) {
+            if ($line =~ /[^actgnxACTGNX]/) {
+                $self->_error(
+                      "Sequences contain invalid characters. Please make sure"
+                      . " the sequences are in plain text fasta format"
+                );
+                return;
+            }
+        }
+    }
+
+    return 1;
 }
 
 1;
