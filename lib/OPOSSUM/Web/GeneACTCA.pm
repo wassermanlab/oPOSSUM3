@@ -83,6 +83,9 @@ sub setup
     #    Data::Dumper::Dumper($self->state())
     #);
 
+    $self->errors(undef);
+    $self->warnings(undef);
+
     unless ($self->opossum_db_connect()) {
         return $self->error("Could not connect to oPOSSUM DB");
     }
@@ -324,7 +327,6 @@ sub process
 	my $collections_str = 'CORE';
 
     #my $tax_group = $db_info->tax_group();
-
 
     #
     # Fetch all the input form entries and store them in the state
@@ -805,8 +807,8 @@ sub initialize_state
     $state->title("oPOSSUM $heading");
     $state->bg_color_class(BG_COLOR_CLASS);
 
-    $state->errors(undef);
-    $state->warnings(undef);
+    #$state->errors(undef);
+    #$state->warnings(undef);
 }
 
 1;

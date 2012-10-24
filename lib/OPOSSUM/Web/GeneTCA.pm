@@ -84,6 +84,9 @@ sub setup
 
     $self->state($state);
 
+    $self->errors(undef);
+    $self->warnings(undef);
+
     #printf STDERR sprintf("\n\noPOSSUM State:\n%s\n\n",
     #    Data::Dumper::Dumper($self->state())
     #);
@@ -748,8 +751,8 @@ sub initialize_state
     $state->title("oPOSSUM $heading");
     $state->bg_color_class(BG_COLOR_CLASS);
 
-    $state->errors(undef);
-    $state->warnings(undef);
+    #$state->errors(undef);
+    #$state->warnings(undef);
 }
 
 1;

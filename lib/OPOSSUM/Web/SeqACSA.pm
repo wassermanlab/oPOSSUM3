@@ -78,6 +78,9 @@ sub setup
 
     $self->state($state);
 
+    $self->errors(undef);
+    $self->warnings(undef);
+
     #printf STDERR sprintf("\n\noPOSSUM State:\n%s\n\n",
     #    Data::Dumper::Dumper($self->state())
     #);
@@ -235,12 +238,6 @@ sub process
 	my $dflt_tax_groups	= JASPAR_CORE_TAX_GROUPS;
     
 	my $num_tax_groups = scalar @$dflt_tax_groups;
-
-    my $anchor_tf_id = $q->param('anchor_tf_id');
-    if (!$anchor_tf_id) {
-        return $self->error("Anchoring TF not specified");
-    }
-
 
 	my $tf_db;
 	my $collection;
@@ -465,12 +462,12 @@ sub process
 
     my $seq_input_method = $q->param('seq_input_method');
     if (!$seq_input_method) {
-        $self->error("No target sequences specified");
+        return $self->error("No target sequences specified");
     }
 
     my $bg_seq_input_method = $q->param('bg_seq_input_method');
     if (!$bg_seq_input_method) {
-        $self->error("No background sequence specified");
+        return $self->error("No background sequence specified");
     }
 
     my $user_seq_file;
@@ -521,14 +518,36 @@ sub process
         $tempdir
     );
 
-    return $self->error() if !$seq_filename;
+    unless ($seq_filename) {
+        if ($seq_input_method eq 'upload') {
+            return $self->error(
+                "There was a problem with the provided target sequence file"
+            );
+        } elsif ($seq_input_method eq 'paste') {
+            return $self->error(
+                "There was a problem with the pasted target sequence text"
+            );
+        }
+    }
 
     my $bg_seq_filename = $self->get_back_seq_file(
         $bg_seq_input_method,
         $tempdir
     );
 
-    return $self->error('No background sequence file') if !$bg_seq_filename;
+    unless ($bg_seq_filename) {
+        if ($bg_seq_input_method eq 'upload') {
+            return $self->error(
+                "There was a problem with the provided background sequence file"
+            );
+        } elsif ($bg_seq_input_method eq 'paste') {
+            return $self->error(
+                "There was a problem with the pasted background sequence text"
+            );
+        } else {
+            return $self->error();
+        }
+    }
 
     my $matrix_filename;
     if ($tf_select_criteria eq 'paste' || $tf_select_criteria eq 'upload') {
@@ -697,8 +716,8 @@ sub initialize_state
     $state->title("oPOSSUM $heading");
     $state->bg_color_class(BG_COLOR_CLASS);
 
-    $state->errors(undef);
-    $state->warnings(undef);
+    #$state->errors(undef);
+    #$state->warnings(undef);
 }
 
 1;

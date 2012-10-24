@@ -98,6 +98,9 @@ sub setup
 
     #printf STDERR "%s: connecting to oPOSSUM DB\n", scalar localtime;
 
+    $self->errors(undef);
+    $self->warnings(undef);
+
     unless ($self->opossum_db_connect()) {
         return $self->error("Could not connect to oPOSSUM DB");
     }
@@ -817,8 +820,8 @@ sub initialize_state
 	$state->title("oPOSSUM $heading");
 	$state->bg_color_class(BG_COLOR_CLASS);
 
-	$state->errors(undef);
-	$state->warnings(undef);
+	#$state->errors(undef);
+	#$state->warnings(undef);
 }
 
 1;

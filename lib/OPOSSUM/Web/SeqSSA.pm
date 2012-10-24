@@ -83,6 +83,9 @@ sub setup
 
     $self->state($state);
 
+    $self->errors(undef);
+    $self->warnings(undef);
+
     #printf STDERR sprintf("\n\noPOSSUM State:\n%s\n\n",
     #    Data::Dumper::Dumper($self->state())
     #);
@@ -383,8 +386,7 @@ sub process
 
         my $matrix_text = $self->upload_matrix_file($matrix_upload_fh);
         if (!$matrix_text) {
-            $self->_error("Uploading TFBS profile matrices");
-            return;
+            return $self->error("Error uploading TFBS profile matrices file");
         }
 
         #printf STDERR "matrix_text:\n$matrix_text\n\n";
@@ -400,12 +402,12 @@ sub process
 
     my $seq_input_method = $q->param('seq_input_method');
     if (!$seq_input_method) {
-        $self->error("No target sequences specified");
+        return $self->error("No target sequences specified");
     }
 
     my $bg_seq_input_method = $q->param('bg_seq_input_method');
     if (!$bg_seq_input_method) {
-        $self->error("No background sequence specified");
+        return $self->error("No background sequences specified");
     }
 
     my $user_seq_file;
@@ -451,8 +453,11 @@ sub process
     
     # make sure that bg_peak_pos is specified only if user is supplying own
     # background sequence set
-    if ($bg_seq_input_method eq 'default' and defined $bg_peak_pos_input_method) {
-        $self->error("Cannot specify peak max positions when using default sequence sets");
+    if ($bg_seq_input_method eq 'default' && defined $bg_peak_pos_input_method)
+    {
+        return $self->error(
+            "Cannot specify peak max positions when using default sequence sets"
+        );
     }
     
     #
@@ -479,14 +484,36 @@ sub process
         $tempdir
     );
 
-    return $self->error() if !$seq_filename;
+    unless ($seq_filename) {
+        if ($seq_input_method eq 'upload') {
+            return $self->error(
+                "There was a problem with the provided target sequence file"
+            );
+        } elsif ($seq_input_method eq 'paste') {
+            return $self->error(
+                "There was a problem with the pasted target sequence text"
+            );
+        }
+    }
 
     my $bg_seq_filename = $self->get_back_seq_file(
         $bg_seq_input_method,
         $tempdir
     );
 
-    return $self->error('No background sequence file') if !$bg_seq_filename;
+    unless ($bg_seq_filename) {
+        if ($bg_seq_input_method eq 'upload') {
+            return $self->error(
+                "There was a problem with the provided background sequence file"
+            );
+        } elsif ($bg_seq_input_method eq 'paste') {
+            return $self->error(
+                "There was a problem with the pasted background sequence text"
+            );
+        } else {
+            return $self->error();
+        }
+    }
 
     my $peak_pos_filename;
     if (defined $user_peak_pos_file)
@@ -675,8 +702,8 @@ sub initialize_state
     $state->title("oPOSSUM $heading");
     $state->bg_color_class(BG_COLOR_CLASS);
 
-    $state->errors(undef);
-    $state->warnings(undef);
+    #$state->errors(undef);
+    #$state->warnings(undef);
 }
 
 1;
