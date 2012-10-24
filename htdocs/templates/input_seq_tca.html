@@ -62,10 +62,11 @@ function verify(f)
         }
     }
 	
-    if (f.email.value == null || f.email.value == ""
-        || isblank(f.email.value))
-    {
-	    errors += "No email was provided\n";
+    if (   f.email.value == null
+        || f.email.value == ""
+        || isblank(f.email.value)
+    ) {
+        errors += "No email was provided. This is required to send notification when your analyis results are ready.\n";
     }
 		
     if (!errors) return true;

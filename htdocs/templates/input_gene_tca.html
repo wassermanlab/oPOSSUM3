@@ -1,4 +1,5 @@
 <script language="JavaScript">
+<!-- BEGIN script hiding
 function isblank(s)
 {
     for (var i = 0; i < s.length; i++) {
@@ -33,13 +34,13 @@ function verify(f)
         ) {
             errors += "No gene IDs were pasted into the target Paste Gene IDs";
             errors += " box\n";
+        /*
+         * Removed this check as it has trouble with trailing newlines,
+         * is not robust anyway, is not implemented for other gene ID types
+         * and the perl code does much better parsing/checking of IDs
+         * anyway. DJA 2012/04/20
+         *
         } else {
-            /*
-             * Removed this check as it has trouble with trailing newlines,
-             * is not robust anyway, is not implemented for other gene ID types
-             * and the perl code does much better parsing/checking of IDs
-             * anyway. DJA 2012/04/20
-             *
             if (f.t_gene_id_type[0].selected) {
                 var valid = 1;
 
@@ -57,7 +58,7 @@ function verify(f)
                     errors += " Ensembl IDs or change the target Gene ID type.\n";
                 }
             }
-            */
+        */
         }
     } else if (f.t_id_input_method[1].checked) {
         if (   f.t_gene_file.value == null
@@ -84,13 +85,13 @@ function verify(f)
         ) {
             errors += "No background gene IDs were pasted into the";
             errors += " Paste Gene IDs box\n";
+        /*
+         * Removed this check as it has trouble with trailing newlines,
+         * is not robust anyway, is not implemented for other gene ID types
+         * and the perl code does much better parsing/checking of IDs
+         * anyway. DJA 2012/04/20
+         *
         } else {
-            /*
-             * Removed this check as it has trouble with trailing newlines,
-             * is not robust anyway, is not implemented for other gene ID types
-             * and the perl code does much better parsing/checking of IDs
-             * anyway. DJA 2012/04/20
-             *
             if (f.bg_gene_id_type[0].selected) {
                 var valid = 1;
 
@@ -109,7 +110,7 @@ function verify(f)
                     errors += " type.\n";
                 }
             }
-            */
+        */
         }
     } else if (f.bg_id_input_method[3].checked) {
         if (   f.bg_gene_file.value == null
@@ -120,7 +121,7 @@ function verify(f)
         }
     }
 
-    if (f.cluster_type[1].checked) {
+    if (f.tf_family_select_method[1].checked) {
         var tfs_selected = false;
         for (var i = 0; i < f.tf_families.options.length; i++) {
             if (f.tf_families.options[i].selected) {
@@ -132,6 +133,20 @@ function verify(f)
         if (!tfs_selected) {
             errors += "No specific TFBS cluster families were selected\n";
         }
+    } else if (f.tf_family_select_method[2].checked) {
+        if (   f.tf_family_upload_file.value == null
+            || f.tf_family_upload_file.value == ""
+            || isblank(f.tf_family_upload_file.value)
+        ) {
+            errors += "No TF family upload file was selected\n";
+        }
+    }
+
+    if (   f.email.value == null
+        || f.email.value == ""
+        || isblank(f.email.value)
+    ) {
+        errors += "No email was provided. This is required to send notification when your analyis results are ready.\n";
     }
 
     if (!errors) return true;
@@ -141,10 +156,12 @@ function verify(f)
     msg += "Please correct these problem(s) and re-submit.\n";
     msg += "________________________________________________________\n\n";
     msg += errors;
+
     alert(msg);
 
     return false;
 }
+// END script hiding -->
 </script>
 
 <form name="input" enctype="multipart/form-data" method="post" onSubmit="return verify(this)" target="_blank">
@@ -169,7 +186,7 @@ function verify(f)
       onClick="{input.t_id_input_method[0].checked=true; input.t_gene_id_type[1].selected=true; input.t_gene_text.value=document.getElementById('sample_genes_[%species%]').value}">
     <br>
     <textarea name="t_gene_text" rows=5 cols=50 wrap=SOFT
-      onFocus="{input.t_id_input_method[0].checked=true}"
+      onClick="{input.t_id_input_method[1].checked=true}"
       onChange="{
         if (!isblank(input.t_gene_text.value))
           {input.t_id_input_method[0].checked=true}
@@ -186,7 +203,6 @@ function verify(f)
     <span class="subtext">
     <input type="file" name="t_gene_file" size="40"
       onClick="{input.t_id_input_method[1].checked=true}"
-      onFocus="{input.t_id_input_method[1].checked=true}"
       onChange="{
         if (!isblank(input.t_gene_file.value))
           {input.t_id_input_method[1].checked=true}
@@ -219,13 +235,13 @@ function verify(f)
   <p class="text">
     <input type="radio" name="bg_id_input_method" value="all" checked>All <b>[%total_genes%]</b> genes in the oPOSSUM database
     <br><br>
-    <input type="radio" name="bg_id_input_method" value="random"> <b>OR</b> a <b>random</b> set of&nbsp;<input type="text" name="bg_num_rand_genes" value=[%dflt_bg_num_rand_genes%] size="5" onFocus="{input.bg_id_input_method[1].checked=true}">&nbsp;genes from the oPOSSUM database
+    <input type="radio" name="bg_id_input_method" value="random"> <b>OR</b> a <b>random</b> set of&nbsp;<input type="text" name="bg_num_rand_genes" value=[%dflt_bg_num_rand_genes%] size="5" onClick="{input.bg_id_input_method[1].checked=true}">&nbsp;genes from the oPOSSUM database
     <br><br>
     <input type="radio" name="bg_id_input_method" value="paste">
     <b>OR</b> paste gene IDs:
     <br>
     <textarea name="bg_gene_text" rows=5 cols=50 wrap=SOFT
-      onFocus="{input.bg_id_input_method[2].checked=true}"
+      onClick="{input.bg_id_input_method[2].checked=true}"
       onChange="{
         if (!isblank(input.bg_gene_text.value))
           {input.bg_id_input_method[2].checked=true}
@@ -243,13 +259,12 @@ function verify(f)
     <br>
     <span class="subtext">
     <input type="file" name="bg_gene_file" size="40"
-      onClick="{input.bg_id_input_method[2].checked=true}"
-      onFocus="{input.bg_id_input_method[2].checked=true}"
+      onClick="{input.bg_id_input_method[3].checked=true}"
       onChange="{
         if (!isblank(input.bg_gene_file.value))
-          {input.bg_id_input_method[2].checked=true}
+          {input.bg_id_input_method[3].checked=true}
         else if (!isblank(input.bg_gene_text.value))
-          {input.bg_id_input_method[1].checked=true}
+          {input.bg_id_input_method[2].checked=true}
         else
           {input.bg_id_input_method[0].checked=true}
       }">
@@ -287,7 +302,7 @@ function verify(f)
     <br>
 	[%tfc_families = tf_cluster_set.get_tf_families()%]
 	<select multiple size=8 name=tf_families
-	    onFocus="{input.tf_family_select_method[1].checked=true}">
+	    onClick="{input.tf_family_select_method[1].checked=true}">
 	[%FOREACH fam = tfc_families%]
 	    <option value=[%fam%]>[%fam%]</option>
 	[%END%]
@@ -299,12 +314,11 @@ function verify(f)
     <br>
     <input type="file" name="tf_family_upload_file" size="40"
       onClick="{input.tf_family_select_method[2].checked=true}"
-      onFocus="{input.tf_family_select_method[2].checked=true}"
       onChange="{
         if (!isblank(input.tf_family_upload_file.value))
           {input.tf_family_select_method[2].checked=true}
-        else if (!isblank(input.tf_family_upload_file.value))
-          {input.tf_family_select_method[2].checked=true}
+        else
+          {input.tf_family_select_method[0].checked=true}
       }">
   </div>
   

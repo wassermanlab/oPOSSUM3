@@ -97,8 +97,9 @@ function verify(f)
     if (f.email.value == null || f.email.value == ""
         || isblank(f.email.value))
     {
-	    	errors += "No email was provided\n";
+        errors += "No email was provided. This is required to send notification when your analyis results are ready.\n";
     }
+
 		
     if (!errors) return true;
 
@@ -240,9 +241,9 @@ function verify(f)
 
   <p class="text">
     <input type="radio" name="anchor_tf_select_method" value="paste">
-    <b>OR</b> paste a TFBS profile (retrieve from <a href="http://www.pazar.info/" target="_blank">PAZAR</a>)
+    <b>OR</b> paste a TFBS profile (retrieve from <a href="http://www.pazar.info/" target="_blank">PAZAR</a> or from <a href = "http://jaspar.genereg.net" target="_blank">JASPAR</a>)
     <br>
-    <textarea name="anchor_matrix_paste_text" rows=5 cols=50 wrap=SOFT
+    <textarea name="anchor_matrix_paste_text" rows=5 cols=60 wrap=SOFT
       onFocus="{input.anchor_tf_select_method[1].checked=true}"
       onChange="{
         if (!isblank(input.anchor_matrix_paste_text.value))
@@ -321,7 +322,7 @@ function verify(f)
 
   <p class="text"> 
     <input type="radio" name="tf_select_method" value="paste">
-    <b>OR</b> paste one or more TFBS profiles (retrieve from <a href="http://www.pazar.info/" target="_blank">PAZAR</a>)
+    <b>OR</b> paste one or more TFBS profiles (retrieve from <a href="http://www.pazar.info/" target="_blank">PAZAR</a> or from <a href = "http://jaspar.genereg.net" target="_blank">JASPAR</a>)
     <br>
     <textarea name="matrix_paste_text" rows=5 cols=50 wrap=SOFT
       onFocus="{input.tf_select_method[2].checked=true}"
