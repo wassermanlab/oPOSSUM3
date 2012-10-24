@@ -31,11 +31,12 @@ sub error
 {
     my ($self, $error) = @_;
 
-    my $state = $self->state();
-
     $self->_error($error) if $error;
 
-    my $errors = $state->errors();
+    my $errors = $self->errors();
+
+    my $err_str = join "\n", @$errors;
+    carp "\nERROR:\n$err_str\n";
 
     my $error_html;
     foreach my $err (@$errors) {
@@ -43,6 +44,8 @@ sub error
         $err =~ s/\n/<br>/g;
         $error_html .= "$err<br>";
     }
+
+    my $state = $self->state;
 
     my $vars = {
         abs_htdocs_path  => ABS_HTDOCS_PATH,
@@ -55,13 +58,13 @@ sub error
         section          => 'Error',
         version          => VERSION,
         devel_version    => DEVEL_VERSION,
-        errors           => $error_html,
+        error            => $error_html,
         var_template     => "error.html"
     };
 
     my $output = $self->process_template('master.html', $vars);
 
-    $self->state->errors(undef);
+    $self->errors(undef);
 
     return $output;
 }
@@ -74,11 +77,9 @@ sub warning
 {
     my ($self, $warning) = @_;
 
-    my $state = $self->state();
-
     $self->_warning($warning) if $warning;
 
-    my $warnings = $state->warnings();
+    my $warnings = $self->warnings();
 
     my $warning_html;
     foreach my $warn (@$warnings) {
@@ -87,7 +88,7 @@ sub warning
         $warning_html .= "$warn<br>";
     }
 
-    my $warnings = $self->warnings;
+    my $state = $self->state;
 
     my $vars = {
         abs_htdocs_path  => ABS_HTDOCS_PATH,
@@ -100,13 +101,13 @@ sub warning
         section          => 'Warning',
         version          => VERSION,
         devel_version    => DEVEL_VERSION,
-        warnings         => $warning_html,
+        warning          => $warning_html,
         var_template     => "warning.html"
     };
 
     my $output = $self->process_template('master.html', $vars);
 
-    $self->state->errors(undef);
+    $self->warnings(undef);
 
     return $output;
 }
@@ -182,24 +183,34 @@ sub state
 
 sub errors
 {
-    my ($self, $errors) = @_;
+    my $self = shift;
 
     if (@_) {
-        $self->state->errors(shift);
+        my @errors = @_;
+        if (defined $errors[0]) {
+            $self->param('errors', \@errors);
+        } else {
+            $self->param('errors', undef);
+        }
     }
 
-    return $self->state->errors();
+    return $self->param('errors');
 }
 
 sub warnings
 {
-    my ($self, $warnings) = @_;
+    my $self = shift;
 
     if (@_) {
-        $self->state->warnings(shift);
+        my @warnings = @_;
+        if (defined $warnings[0]) {
+            $self->param('warnings', \@warnings);
+        } else {
+            $self->param('warnings', undef);
+        }
     }
 
-    return $self->state->warnings();
+    return $self->param('warnings');
 }
 
 sub jaspar_db_connect
@@ -272,17 +283,42 @@ sub create_local_working_file
 # Low-level error routine. Add latest error to internal error list and
 # output to stderr (log file).
 #
+# Errors are now stored in the CGI::Application params rather than the
+# state object.
+# DJA 2012/10/17
+#
+#
 sub _error
 {
     my ($self, $error) = @_;
 
-    carp "\nERROR: $error\n";
+    return unless $error;
 
-    my $errors = $self->state->errors();
+    #
+    # Don't carp errors to log file yet. Do it in high level error routine
+    # so that related errors are written in the correct order, see comments
+    # above.
+    # DJA 2012/10/17
+    #
+    #carp "\nERROR: $error\n";
 
-    push @$errors, "$error";
+    #
+    # Now put new errors on the front of the list so errors will be written
+    # in the correct order. More general, higher level routine's errors are
+    # added latter but should be written earlier.
+    # DJA 2012/10/17
+    #
+    my @errors;
+    push @errors, $error;
 
-    $self->state->errors($errors);
+    my $cur_errors = $self->errors();
+    if ($cur_errors) {
+        push @errors, @$cur_errors;
+    }
+
+    $self->param('errors', \@errors);
+
+    return @errors ? \@errors : undef;
 }
 
 #
@@ -293,13 +329,21 @@ sub _warning
 {
     my ($self, $warning) = @_;
 
+    return unless $warning;
+
     carp "\nWarning: $warning\n";
 
-    my $warnings = $self->state->warnings();
+    my @warnings;
+    push @warnings, $warning;
 
-    push @$warnings, "$warning";
+    my $cur_warnings = $self->warnings();
+    if ($cur_warnings) {
+        push @warnings, @$cur_warnings;
+    }
 
-    $self->state->warnings($warnings);
+    $self->param('warnings', \@warnings);
+
+    return @warnings ? \@warnings : undef;
 }
 
 sub _clean_tempfiles
