@@ -39,6 +39,11 @@ DJA 2010-09-29
 - changed methods which call _fetch_by_external_id_helper just to retrieve
   gene IDs to call the _fetch_gene_ids_by_external_id_helper method instead
 - added filter for distinct genes to _fetch_by_external_id_helper
+DJA 2012-06-12
+- added fetch_gene_ids_by_any_id and _fetch_gene_ids_by_any_helper to fetch
+  gene IDs for any/all types of input gene ID(s) including symbols, Ensembl IDs
+  or external IDs without having to know the gene ID type. The input gene IDs
+  can even be of mixed types.
 
 =cut
 
@@ -193,14 +198,21 @@ sub fetch_where
 
     return @genes if wantarray();
 
-    if ($row_count) {
-        if ($row_count > 1) {
-            return \@genes;
-        }
-        return $genes[0];
-    }
+    #
+    # This is actually a really bad idea as it puts the onus on the calling
+    # program to determine if it got an array ref or a single gene. Change
+    # the code in the individual callers (e.g. fetch_by_id to return the
+    # expected result.
+    # DJA 2012/10/23
+    #
+    #if ($row_count) {
+    #    if ($row_count > 1) {
+    #        return \@genes;
+    #    }
+    #    return $genes[0];
+    #}
 
-    return undef;
+    return @genes ? \@genes : undef;
 }
 
 =head2 fetch_gene_ids
@@ -330,7 +342,13 @@ sub fetch_by_id
 
     my $where = "where gene_id = $id";
 
-    return $self->fetch_where($where);
+    my $genes = $self->fetch_where($where);
+
+    if ($genes && $genes->[0]) {
+        return $genes->[0];
+    }
+
+    return undef;
 }
 
 =head2 fetch_by_gene_id
@@ -368,7 +386,13 @@ sub fetch_by_ensembl_id
 
     my $where = "where ensembl_id = '$ensembl_id'";
 
-    return $self->fetch_where($where);
+    my $genes = $self->fetch_where($where);
+
+    if ($genes && $genes->[0]) {
+        return $genes->[0];
+    }
+
+    return undef;
 }
 
 =head2 fetch_by_symbol
@@ -388,7 +412,13 @@ sub fetch_by_symbol
 
     my $where = "where symbol = '$symbol'";
 
-    return $self->fetch_where($where);
+    my $genes = $self->fetch_where($where);
+
+    if ($genes && $genes->[0]) {
+        return $genes->[0];
+    }
+
+    return undef;
 }
 
 =head2 fetch_by_gene_ids
@@ -407,6 +437,7 @@ sub fetch_by_gene_ids
 	my ($self, $gene_ids) = @_;
 	
 	my $where = "gene_id in (" . join(",", @$gene_ids) . ")";
+
 	return $self->fetch_where($where);
 }
 
@@ -444,6 +475,7 @@ sub fetch_by_ensembl_ids
 	my ($self, $ensembl_ids) = @_;
 	
 	my $where = "ensembl_id in ('" . join("','", @$ensembl_ids) . "')";
+
 	return $self->fetch_where($where);
 }
 
@@ -481,6 +513,7 @@ sub fetch_by_symbols
 	my ($self, $symbols) = @_;
 	
 	my $where = "symbol in ('" . join("','", @$symbols) . "')";
+
 	return $self->fetch_where($where);
 }
 
@@ -651,7 +684,7 @@ sub _fetch_by_external_id_helper
     $sth->finish();
 
     #
-    # Determine which of the input Ensembl / external gene IDs where not mapped
+    # Determine which of the input Ensembl / external gene IDs were not mapped
     # to an oPOSSUM gene ID (missing).
     #
     foreach my $ext_id (@$ext_ids) {
@@ -789,7 +822,145 @@ sub _fetch_gene_ids_by_external_id_helper
     $sth->finish;
 
     #
-    # Determine which of the input Ensembl / external gene IDs where not mapped
+    # Determine which of the input Ensembl / external gene IDs were not mapped
+    # to an oPOSSUM gene ID (missing).
+    #
+    foreach my $ext_id (@$ext_ids) {
+        unless ($ext_id_included{$ext_id}) {
+            push @$unmapped_ext_ids, $ext_id;
+        }
+    }
+
+    return @gene_ids ? \@gene_ids : undef;
+}
+
+=head2 _fetch_gene_ids_by_any_id_helper
+
+ Title   : _fetch_gene_ids_by_any_id_helper
+ Usage   : $gene_ids = $ga->_fetch_gene_ids_by_any_id_helper(
+               -ext_id              => $ext_id,
+               -ext_ids             => $ext_ids,
+               -mapped_ext_ids      => $mapped_ext_ids,
+               -unmapped_ext_ids    => $unmapped_ext_ids,
+               -gene_id_ensembl_ids => $gene_id_ensembl_ids,
+               -gene_id_ext_ids     => $gene_id_ext_ids,
+               -ext_id_gene_ids     => $ext_id_gene_ids
+           );
+ Function: Fetch oPOSSUM gene IDs from the DB by all possible gene
+           ID/name/symbol mappings, i.e. the ensembl_id column or symbol
+           column of the gene record or an external id mapped to the
+           gene record that matches the input gene ID/name/symbol(s).
+           Internal method only.
+ Args    : A single value or listref of gene ID/name/symbol(s),
+           OPTIONAL output arguments:
+               mapped_ext_ids - a listref which is set to the list of
+                    external IDs which are actually mapped to opossum genes,
+               unmapped_ext_IDs - a listref which is set to the list of
+                    external IDs which are NOT mapped to opossum genes,
+               gene_id_ensembl_ids - a hashref which is set to the mapping
+                    between opossum gene IDs and Ensembl IDs (1-to-1)
+               gene_id_ext_ids - a hashref which is set to the mapping from
+                    opossum gene IDs to external IDs (1-to-many),
+               ext_id_gene_ids mapping - a hashref which is set to the
+                    mapping from external IDs to opossum gene IDs (1-to-many)
+ Returns : A listref of gene IDs.
+
+=cut
+
+sub _fetch_gene_ids_by_any_id_helper
+{
+    my ($self, %args) = @_;
+	
+	my $ext_id          = $args{-ext_id};
+    my $ext_ids         = $args{-ext_ids};
+	
+	unless ($ext_id or $ext_ids) {
+		carp "Must specify external gene id(s)\n";
+		return;
+	}
+	
+	if ($ext_id and $ext_ids) {
+		carp "Both ext_id and ext_ids specified\n";
+	}
+	
+    #
+    # The following are optional return variables which are updated by the
+    # routine.
+    #
+    my $mapped_ext_ids      = $args{-mapped_ext_ids};       # listref
+    my $unmapped_ext_ids    = $args{-unmapped_ext_ids};     # listref
+    my $gene_id_ensembl_ids = $args{-gene_id_ensembl_ids};  # hashref
+    my $gene_id_ext_ids     = $args{-gene_id_ext_ids};      # hashref
+    my $ext_id_gene_ids     = $args{-ext_id_gene_ids};      # hashref
+
+    push @$ext_ids, $ext_id if $ext_id;
+	
+    my $sql =
+        qq{select gene_id, ensembl_id from genes
+           where ensembl_id = ? or symbol = ? or gene_id = (
+               select gene_id from external_gene_ids where external_id = ?)};
+			
+    my $sth = $self->prepare($sql);
+    if (!$sth) {
+        carp "Error preparing fetch gene ID:\n$sql\n"
+            . $self->errstr;
+        return;
+    }
+
+    my @gene_ids;
+    my %gene_included;
+    my %ext_id_included;
+    foreach my $ext_id (@$ext_ids) {
+        if (!$sth->execute($ext_id)) {
+            carp "Error executing fetch gene ID:\n$sql\n"
+                . "with external_id = $ext_id"
+                . $self->errstr;
+            next;
+        }
+
+        #
+        # There can be a many-to-many mapping of oPOSSUM gene IDs and
+        # external gene IDs.
+        #
+        while (my @row = $sth->fetchrow_array) {
+            my $gene_id = $row[0];
+            my $ensid   = $row[1];
+
+            #
+            # There is a 1-to-1 mapping of oPOSSUM gene IDs
+            # and Ensembl IDs.
+            #
+            unless ($gene_included{$gene_id}) {
+                $gene_included{$gene_id} = 1;
+
+                push @gene_ids, $gene_id;
+
+                $gene_id_ensembl_ids->{$gene_id} = $ensid;
+            }
+
+            #
+            # Each external gene ID can have multiple oPOSSUM gene IDs
+            # mapped to it.
+            #
+            unless ($ext_id_included{$ext_id}) {
+                push @$mapped_ext_ids, $ext_id;
+
+                $ext_id_included{$ext_id} = 1;
+            }
+
+            #
+            # Note in the case that the input external gene IDs were themselves
+            # Ensembl IDs, they will be mapped to the oPOSSUM gene IDs below
+            # and in the $gene_id_ensembl_ids hash.
+            #
+            push @{$ext_id_gene_ids->{$ext_id}}, $gene_id;
+            push @{$gene_id_ext_ids->{$gene_id}}, $ext_id;
+        }
+    }
+    $sth->finish;
+
+    #
+    # Determine which of the input Ensembl / external gene IDs were not mapped
     # to an oPOSSUM gene ID (missing).
     #
     foreach my $ext_id (@$ext_ids) {
@@ -931,6 +1102,28 @@ sub fetch_gene_ids_by_external_id
     );
 }
 
+=head2 fetch_gene_ids_by_any_id
+
+ Title   : fetch_gene_ids_by_any_id
+ Usage   : $gene_ids = $ga->fetch_gene_ids_by_any_id($id);
+ Function: Fetch gene IDs from the DB corresponding to any type of gene
+           ID/name/symbol.
+ Args    : Some kind of gene ID/name/symbol,
+           OPTIONAL return arguments (see *_helper method for details)
+ Returns : A listref of oPOSSUM gene IDs
+
+=cut
+
+sub fetch_gene_ids_by_any_id
+{
+	my ($self, $id, %return_args) = @_;
+	
+    return $self->_fetch_gene_ids_by_any_id_helper(
+        -ext_id => $id,
+        %return_args
+    );
+}
+
 =head2 fetch_gene_ids_by_external_ids
 
  Title   : fetch_gene_ids_by_external_ids
@@ -1037,7 +1230,7 @@ sub fetch_gene_ids_by_ensembl_ids
     $sth->finish;
 
     #
-    # Determine which of the input Ensembl IDs where not mapped
+    # Determine which of the input Ensembl IDs were not mapped
     # to an oPOSSUM gene ID (missing).
     #
     foreach my $ensid (@$ensids) {

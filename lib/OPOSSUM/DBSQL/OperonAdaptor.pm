@@ -117,13 +117,13 @@ sub fetch_where
 	
     return @operons if wantarray();
 
-    if (scalar @operons == 1) {
-		return $operons[0];
-    } else {
-		return \@operons;
-	}
+    #if (scalar @operons == 1) {
+	#	return $operons[0];
+    #} else {
+	#	return \@operons;
+	#}
 
-    return undef;
+    return @operons ? \@operons : undef;
 }
 
 =head2 fetch_operon_ids
@@ -271,7 +271,13 @@ sub fetch_by_id
 
     my $where = "where operon_id = $id";
 
-    return $self->fetch_where($where);
+    my $operons = $self->fetch_where($where);
+
+    if ($operons && $operons->[0]) {
+        return $operons->[0];
+    }
+
+    return undef;
 }
 
 #
@@ -375,7 +381,13 @@ sub fetch_by_symbol
 
     my $where = "where symbol = '$symbol'";
 
-    return $self->fetch_where($where);
+    my $operons = $self->fetch_where($where);
+
+    if ($operons && $operons->[0]) {
+        return $operons->[0];
+    }
+
+    return undef;
 }
 
 =head2 store
