@@ -73,46 +73,45 @@ sub fetch_where
 	
     my @tf_clusters;
     while (my @row = $sth->fetchrow_array) {
-	
-	my $tf_cluster = TFBSCluster::TFCluster->new(
-	    -adaptor	=> $self,
-	    -cluster_id => $row[0],
-	    -class	=> $row[1],
-	    -family	=> $row[2],
-	    -avg_width	=> $row[3]
-	);
-		
-	my $tf_sql = "select tf_id from tfs where cluster_id = " . $row[0];
-	my $tf_sth = $self->prepare($tf_sql);
-	if (!$tf_sth) {
-	    carp "Error preparing fetch tfs:\n$tf_sql\n" . $self->errstr;
-	    return;
-	}
-	if (!$tf_sth->execute) {
-	    carp "Error executing fetch tfs:\n$tf_sql\n" . $self->errstr;
-	    return;
-	}
-	my @tf_ids;
-	while (my ($tf_id) = $tf_sth->fetchrow_array) {
-	    push @tf_ids, $tf_id;
-	}
-	$tf_sth->finish;
-	$tf_cluster->add_tf_ids(\@tf_ids);
-	push @tf_clusters, $tf_cluster;
+        my $tf_cluster = TFBSCluster::TFCluster->new(
+            -adaptor	=> $self,
+            -cluster_id => $row[0],
+            -class	=> $row[1],
+            -family	=> $row[2],
+            -avg_width	=> $row[3]
+        );
+            
+        my $tf_sql = "select tf_id from tfs where cluster_id = " . $row[0];
+        my $tf_sth = $self->prepare($tf_sql);
+        if (!$tf_sth) {
+            carp "Error preparing fetch tfs:\n$tf_sql\n" . $self->errstr;
+            return;
+        }
+
+        if (!$tf_sth->execute) {
+            carp "Error executing fetch tfs:\n$tf_sql\n" . $self->errstr;
+            return;
+        }
+
+        my @tf_ids;
+        while (my ($tf_id) = $tf_sth->fetchrow_array) {
+            push @tf_ids, $tf_id;
+        }
+
+        $tf_sth->finish;
+
+        $tf_cluster->add_tf_ids(\@tf_ids);
+
+        push @tf_clusters, $tf_cluster;
     }
+
     $sth->finish;
+
     #carp "Array size = " . scalar @tf_clusters . "\n";
 	
-    # fetch the cluster tf ids
     return @tf_clusters if wantarray();
 
-    if (scalar @tf_clusters == 1) {
-	return $tf_clusters[0];
-    } else {
-	return \@tf_clusters;
-    }
-
-    return undef;
+	return @tf_clusters ? \@tf_clusters : undef;
 }
 
 =head2 fetch_all
@@ -148,7 +147,13 @@ sub fetch_by_cluster_id
 
     my $where = "cluster_id = $id";
 
-    return $self->fetch_where($where);
+    my $clusters = $self->fetch_where($where);
+
+    if ($clusters && $clusters->[0]) {
+        return $clusters->[0];
+    }
+
+    return undef;
 }
 
 =head2 fetch_by_tf_id
@@ -176,6 +181,7 @@ sub fetch_by_tf_id
         carp "Error executing fetch tfs:\n$sql\n" . $self->errstr;
         return;
     }
+
 	my ($cluster_id) = $sth->fetchrow_array;
 	if (!$cluster_id) {
 		carp "No cluster associated with the given tf id $tfid\n";
@@ -209,8 +215,7 @@ sub fetch_by_tf_id_list
     }
 
     my @clusters;
-    foreach my $tfid (@$tf_ids)
-	{
+    foreach my $tfid (@$tf_ids) {
         if (!$sth->execute($tfid)) {
             carp "error fetching cluster_id for TF ID $tfid\n"
                 . $self->errstr;
@@ -243,13 +248,13 @@ sub fetch_by_tf_classes
 
     my $class_string;
     if (ref $classes eq 'ARRAY') {
-	$class_string = join("','", @$classes);
-	$class_string = "'" . $class_string . "'";
+        $class_string = join("','", @$classes);
+        $class_string = "'" . $class_string . "'";
     } elsif (ref $classes eq 'SCALAR') {
-	$class_string = "'$classes'";
+        $class_string = "'$classes'";
     } else {
-	carp "Provided argument is not a string or listref of strings\n";
-	return;
+        carp "Provided argument is not a string or listref of strings\n";
+        return;
     }
     
     my $where = "class in ($class_string)";
@@ -273,13 +278,13 @@ sub fetch_by_tf_families
 
     my $family_string;
     if (ref $families eq 'ARRAY') {
-	$family_string = join("','", @$families);
-	$family_string = "'" . $family_string . "'";
+        $family_string = join("','", @$families);
+        $family_string = "'" . $family_string . "'";
     } elsif (ref $families eq 'SCALAR') {
-	$family_string = "'$families'";
+        $family_string = "'$families'";
     } else {
-	carp "Provided argument is not a string or listref of strings\n";
-	return;
+        carp "Provided argument is not a string or listref of strings\n";
+        return;
     }
     
     my $where = "family in ($family_string)";
@@ -343,8 +348,7 @@ sub fetch_by_cluster_id_list
     my ($self, $cluster_ids) = @_;
 
     my @clusters;
-    foreach my $cid (@$cluster_ids)
-	{
+    foreach my $cid (@$cluster_ids) {
 		my $cluster = $self->fetch_by_cluster_id($cid);
 		push @clusters, $cluster;
     }

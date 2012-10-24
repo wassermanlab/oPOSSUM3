@@ -100,14 +100,14 @@ sub fetch_where
 
     return @tf_info_list if wantarray();
 
-    if ($row_count) {
-        if ($row_count > 1) {
-            return \@tf_info_list;
-        }
-        return $tf_info_list[0];
-    }
+    #if ($row_count) {
+    #    if ($row_count > 1) {
+    #        return \@tf_info_list;
+    #    }
+    #    return $tf_info_list[0];
+    #}
 
-    return undef;
+    return @tf_info_list ? \@tf_info_list : undef;
 }
 
 =head2 fetch_by_tf_id
@@ -126,7 +126,13 @@ sub fetch_by_tf_id
     
     my $where = "tf_id = '$tf_id'";
     
-    return $self->fetch_where($where);
+    my $tf_info_list = $self->fetch_where($where);
+
+    if ($tf_info_list && $tf_info_list->[0]) {
+        return $tf_info_list->[0];
+    }
+
+    return undef;
 }
 
 =head2 fetch_by_external_id
@@ -145,7 +151,13 @@ sub fetch_by_external_id
 
     my $where = "external_id = '$id'";
 
-    return $self->fetch_where($where);
+    my $tf_info_list = $self->fetch_where($where);
+
+    if ($tf_info_list && $tf_info_list->[0]) {
+        return $tf_info_list->[0];
+    }
+
+    return undef;
 }
 
 =head2 fetch_by_name
