@@ -41,7 +41,7 @@
     <tr class="table_text">
       <td align="left" class="table_title">GC content:</td>
       <td align="left" class="table_text">
-      [%gc = anchor_matrix.tag('gc_content')%]
+      [%gc = formatf(3, anchor_matrix.tag('gc_content'))%]
       [%IF gc > high_matrix_gc or gc < low_matrix_gc%]
         <b class="warn_table_text">[%gc%]</b>
       [%ELSE%]
@@ -84,7 +84,7 @@
     <tr class="table_text">
       <td align="left" class="table_title">GC content:</td>
       <td align="left" class="table_text">
-      [%gc = tf.tag('gc_content')%]
+      [%gc = formatf(3, tf.tag('gc_content'))%]
       [%IF gc > high_matrix_gc or gc < low_matrix_gc%]
         <b class="warn_table_text">[%gc%]</b>
       [%ELSE%]
