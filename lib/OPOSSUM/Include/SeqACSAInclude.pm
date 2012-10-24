@@ -10,17 +10,15 @@ use constant BG_COLOR_CLASS => 'bgc_seq_acsa';
 #
 # Return two hashrefs:
 #
-# The first hashref refers to a hash of hashes of sites indexed on seq ID
-# and TF ID. In the case where there were no TFBSs for a seq/TF combo,
-# the value of the hash is undef.
+# The first hashref refers to a hash of hashes of a list of sites keyed on
+# TF ID and sequence ID. In the case where there were no TFBSs for a TF/seq
+# combo, the value of the hash is undef.
 #
-# The second hasref refers to a hash of listrefs of sequence IDs, indexed
-# on TF ID. Only seq IDs for which there were TFBSs for this TF are stored
-# in the list.
+# The second hasref refers to a hash of hashes of a list of site pairs.
 #
 # i.e.:
-# $hashref1->{$seq_id}->{$tf_id} = $siteset
-# $hashref2->{$tf_id} = \@seq_ids
+# $hashref1->{$tf_id}->{$seq_id} = $sites
+# $hashref2->{$tf_id}->{$seq_id} = $site_pairs
 #
 sub anchored_tf_set_search_seqs
 {
@@ -121,6 +119,118 @@ sub anchored_tf_set_search_seqs
     return ($retval1, $retval2);
 }
 
+#
+# Same idea as above except it takes a list of anchoring matrices instead of
+# just a single anchor matrix.
+#
+# The returned hash refs have an extra level keyed on the anchor TF ID.
+# i.e.:
+# $hashref1->{$anchor_tf_id}->{$tf_id}->{$seq_id} = $sites
+# $hashref2->{$anchor_tf_id}->{$tf_id}->{$seq_id} = $site_pairs
+#
+sub multi_anchored_tf_set_search_seqs
+{
+    my ($tf_set, $anchor_matrices, $max_site_dist, 
+		$seq_id_seqs, $threshold, %job_args) = @_;
+
+	my $logger = $job_args{-logger};
+
+    my $tf_ids = $tf_set->ids();
+
+    my @seq_ids = keys %$seq_id_seqs;
+
+    my @anchor_pwms;
+    foreach my $anchor_matrix (@$anchor_matrices) {
+        if ($anchor_matrix->isa("TFBS::Matrix::PFM")) {
+            push @anchor_pwms, $anchor_matrix->to_PWM();
+        } else {
+            push @anchor_pwms, $anchor_matrix;
+        }
+    }
+
+    #
+    # If threshold is specified as a decimal, convert it to a
+    # percentage, otherwise the TFBS::Matrix::PWM::search_seq method
+    # treats the number as an absolute matrix score which is not what
+    # we intended. DJA 2012/06/07
+    #
+    unless ($threshold =~ /(.+)%$/ || $threshold > 1) {
+        $threshold *= 100;
+        $threshold .= '%';
+    }
+
+    my %tf_seq_sites;
+    my %tf_seq_sitepairs;
+    foreach my $seq_id (@seq_ids) {
+        $logger->debug("\nSequence: $seq_id\n");
+
+        my $seq = $seq_id_seqs->{$seq_id};
+
+        my %anchor_siteset;
+        foreach my $anchor_pwm (@anchor_pwms) {
+            my $siteset = $anchor_pwm->search_seq(
+                -seqobj     => $seq,
+                -threshold  => $threshold
+            );
+
+            next if !$siteset || $siteset->size() == 0;
+
+            my $filtered_anchor_siteset = filter_overlapping_sites(
+                $siteset
+            );
+
+            next if !$filtered_anchor_siteset
+                || $filtered_anchor_siteset->size() == 0;
+
+            $anchor_siteset{$anchor_pwm->ID} = $siteset;
+        }
+
+        foreach my $tf_id (@$tf_ids) {
+            #next if $tf_id eq $anchor_matrix->ID;
+
+            my $matrix = $tf_set->get_matrix($tf_id);
+
+            my $pwm;
+            if ($matrix->isa("TFBS::Matrix::PFM")) {
+                $pwm = $matrix->to_PWM();
+            } else {
+                $pwm = $matrix;
+            }
+
+            my $siteset = $pwm->search_seq(
+                -seqobj     => $seq,
+                -threshold  => $threshold
+            );
+
+            next if !$siteset || $siteset->size == 0;
+
+            my $filtered_siteset = filter_overlapping_sites($siteset);
+
+            next if !$filtered_siteset || $filtered_siteset->size == 0;
+
+            foreach my $anchor_tf_id (keys %anchor_siteset) {
+                my ($prox_sites, $sitepairs) = proximal_sites(
+                    $anchor_siteset{$anchor_tf_id},
+                    $filtered_siteset,
+                    $max_site_dist
+                );
+
+                if ($prox_sites) {
+                    $tf_seq_sites{$anchor_tf_id}->{$tf_id}->{$seq_id}
+                        = $prox_sites;
+                    $tf_seq_sitepairs{$anchor_tf_id}->{$tf_id}->{$seq_id}
+                        = $sitepairs;
+                }
+            }
+        }
+    }
+
+    my $retval1 = %tf_seq_sites ? \%tf_seq_sites : undef;
+    my $retval2 = %tf_seq_sitepairs ? \%tf_seq_sitepairs : undef;
+
+    return ($retval1, $retval2);
+}
+
 sub compute_site_counts
 {
     my ($tf_set, $seq_ids, $tf_seq_sites) = @_;
@@ -146,6 +256,45 @@ sub compute_site_counts
     }
 
     return $counts;
+}
+
+#
+# As above but works on multiple anchor TF IDs. Note for this the $tf_seq_sites
+# is actually a hash ref with the structure:
+#     $tf_seq_sites->{$anchor_tf_id}->{$tf_id}->{$seq_id}->sites
+#
+# This routine is not really necessary. Just call above routine in a loop.
+#
+sub compute_site_counts_multi_anchor
+{
+    my ($tf_set, $anchor_tf_ids, $seq_ids, $tf_seq_sites) = @_;
+
+    my $tf_ids  = $tf_set->ids();
+
+    my %anchor_tf_counts;
+    foreach my $anchor_tf_id (@$anchor_tf_ids) {
+        my $counts = OPOSSUM::Analysis::Counts->new(
+            -gene_ids       => $seq_ids,
+            -tf_ids         => $tf_ids
+        );
+
+        foreach my $seq_id (@$seq_ids) {
+            foreach my $tf_id (@$tf_ids) {
+                my $sites = $tf_seq_sites->{$anchor_tf_id}->{$tf_id}->{$seq_id};
+
+                if ($sites) {
+                    # Note set size could be 0.
+                    $counts->gene_tfbs_count($seq_id, $tf_id, scalar @$sites);
+                } else {
+                    $counts->gene_tfbs_count($seq_id, $tf_id, 0);
+                }
+            }
+        }
+
+        $anchor_tf_counts{$anchor_tf_id} = $counts;
+    }
+
+    return %anchor_tf_counts ? \%anchor_tf_counts : undef;
 }
 
 
@@ -242,8 +391,11 @@ sub write_tfbs_details
 
             my @seq_ids = keys %$seq_sitepairs;
 
-            my $text_filename = sprintf "$abs_results_dir/$tf_id.txt";
-            my $html_filename = sprintf "$abs_results_dir/$tf_id.html";
+            my $fname = $tf_id;
+            $fname =~ s/\//_/g;
+
+            my $text_filename = "$abs_results_dir/$fname.txt";
+            my $html_filename = "$abs_results_dir/$fname.html";
         
             write_tfbs_details_text(
                 $text_filename,
