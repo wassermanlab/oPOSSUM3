@@ -8,6 +8,11 @@
 
   Contains all options and routines that are common to all the analyses.
 
+=head1 REVISIONS
+
+  2012-06-25
+  - AK: added read_from_BED_file function
+
 =head1 AUTHOR
 
   Andrew Kwon & David Arenillas
@@ -122,6 +127,46 @@ sub read_file
     return $text;
 }
 
+#
+# read and parse BED file
+# at least 3 fields required; max = 12
+# AK - not sure if using read_file is a good idea...but.
+# - BioPerl BED IO is rudimentary
+sub read_from_BED_file
+{
+	my ($file, %job_args) = @_;
+
+	my $text = read_file($file, %job_args);
+	my @lines = split /\n/, $text;
+
+	my @regions;
+	foreach my $line (@lines)
+	{
+		my @row = split /\t/, $line;
+		if (scalar @row < 3 or scalar @row > 12) {
+			fatal("Incorrect number of fields in BED file", %job_args);
+		}
+		my $region = {
+			'chrom' => $row[0],
+			'chromStart' => $row[1],
+			'chromEnd' => $row[2],
+		};
+		$$region{'name'} = $row[3] if $row[3];
+		$$region{'score'} = $row[4] if $row[4];
+		$$region{'strand'} = $row[5] if $row[5];
+		$$region{'thickStart'} = $row[6] if $row[6];
+		$$region{'thickEnd'} = $row[7] if $row[7];
+		$$region{'itemRgb'} = $row[8] if $row[8];
+		$$region{'blockCount'} = $row[9] if $row[9];
+		$$region{'blockSizes'} = $row[10] if $row[10];
+		$$region{'blockStarts'} = $row[11] if $row[11];
+
+		push @regions, $region;
+	}
+
+	return \@regions ? \@regions : undef;
+}
+
 sub parse_id_text
 {
     my $text = shift;
@@ -174,6 +219,7 @@ sub read_matrices
 
     my $matrix_set = TFBS::MatrixSet->new();
 
+    my $id              = '';
     my $name            = '';
     my $matrix_string   = '';
     my $line_count      = 0;
@@ -183,7 +229,11 @@ sub read_matrices
 
         next if !$line;
 
-        if ($line =~ /^>\s*(\S+)/) {
+        if ($line =~ /^>\s*(\S+)\s+(\S+)/) {
+            $id   = $1;
+            $name = $2;
+        } elsif ($line =~ /^>\s*(\S+)/) {
+            $id   = $1;
             $name = $1;
         } else {
             if ($line =~ /^\s*[ACGT]\s*\[\s*(.*)\s*\]/) {
@@ -198,7 +248,9 @@ sub read_matrices
             $line_count++;
 
             if ($line_count == 4) {
-                my $id = sprintf "matrix%d", $matrix_count + 1;
+                unless ($id) {
+                    $id = sprintf "matrix%d", $matrix_count + 1;
+                }
 
                 unless ($name) {
                     $name = $id;
@@ -231,6 +283,7 @@ sub read_matrices
                 $matrix_set->add_matrix($matrix);
 
                 $matrix_string = '';
+                $id = '';
                 $name = '';
                 $line_count = 0;
                 $matrix_count++;
@@ -238,6 +291,8 @@ sub read_matrices
         }
     }
     close(FH);
+
+    matrix_set_compute_gc_content($matrix_set);
 
     return $matrix_set;
 }
@@ -560,17 +615,26 @@ sub fatal
     $msg .= "\nJob ID: $job_id\n";
     $msg .= "\nError: $error\n";
 
-    if (open(SM, "|" . $cmd)) {
-        printf SM "To: %s\n", ADMIN_EMAIL;
-        print SM "Subject: oPOSSUM $heading fatal error\n\n";
-        print SM "$msg" ;
-        print SM "\nUser e-mail: $email\n" if $email;
+    #
+    # Send error email to oPOSSUM administrator if we are in web context
+    #
+    if ($web) {
+        if (open(SM, "|" . $cmd)) {
+            printf SM "To: %s\n", ADMIN_EMAIL;
+            print SM "Subject: oPOSSUM $heading fatal error\n\n";
+            print SM "$msg" ;
+            print SM "\nUser e-mail: $email\n" if $email;
 
-        close(SM);
-    } else {
-        $logger->error("Could not open sendmail - $!") if $logger;
+            close(SM);
+        } else {
+            $logger->error("Could not open sendmail - $!") if $logger;
+        }
     }
 
+    #
+    # Send error email to oPOSSUM user if an email address is available,
+    # i.e. it was a background processing oPOSSUM analysis type.
+    #
     if ($email) {
         if (open(SM, "|" . $cmd)) {
             printf SM "To: %s\n", $email;
@@ -579,6 +643,8 @@ sub fatal
             print SM "$msg" ;
 
             close(SM);
+        } else {
+            $logger->error("Could not open sendmail - $!") if $logger;
         }
     }
 
