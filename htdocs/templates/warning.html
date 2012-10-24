@@ -1,14 +1,13 @@
-<form name="possum_warning" enctype="multipart/form-data" method="post" action="none">
-  <p class="title">Warning</p>
+<form name="opossum_warning" enctype="multipart/form-data" method="post" action="none">
   <p class="subtitle">The following warning(s) occured</p>
   <p class="text">
-  <b>
-  [%FOREACH warn = warnings%]
-    [%warn%]<br>
-  [%END%]
-  </b>
+    <b>[%warning%]<br></b>
   </p>
   <p class="text">
-  If the above warning(s) were the result of inproper input, please use the back button on your browser, correct the input and re-submit the analysis. If the problem persists please use the Contact link to contact the site administrator.
+  If the above warning(s) were the result of inproper input, please correct
+  the input and re-submit the analysis.
+  </p>
+  <p class="text">
+  If there is a problem with the oPOSSUM software please contact the <a href="[%rel_htdocs_path%]/contact.html" target="_blank">oPOSSUM administrators</a> with a detailed description of the error.
   </p>
 </form>
