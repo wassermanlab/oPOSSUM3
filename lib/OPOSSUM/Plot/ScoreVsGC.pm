@@ -106,58 +106,72 @@ sub plot
     $$error = "";
 
     unless ($results) {
-        carp "No result set provided";
+        $$error = "No result set provided";
+        carp $$error;
         return;
     }
 
     unless (ref $results eq 'ARRAY' && $results->[0]) {
-        carp "No result set provided";
+        $$error = "No result set provided";
+        carp $$error;
         return;
     }
 
     unless ($tf_set) {
-        carp "No TF set provided";
+        $$error = "No TF set provided";
+        carp $$error;
         return;
     }
 
     unless ($plot_type) {
-        carp "No plot type provided";
+        $$error = "No plot type provided";
+        carp $$error;
         return;
     }
 
     unless ($sd_fold) {
-        carp "No SD fold provided";
+        $$error = "No SD fold provided";
+        carp $$error;
         return;
     }
 
     unless ($filename) {
-        carp "No output plot file name provided";
+        $$error = "No output plot file name provided";
+        carp $$error;
         return;
     }
 
     unless ($results->[0]->isa("OPOSSUM::Analysis::CombinedResult")) {
-        carp "Results is not an array ref of OPOSSUM::Analysis::CombinedResult"
-            . " objects";
+        $$error = "Results is not an arrayref of"
+                . " OPOSSUM::Analysis::CombinedResult objects";
+        carp $$error;
         return;
     }
 
     unless (ref $tf_set && $tf_set->isa("OPOSSUM::TFSet")) {
-        carp "TF set is not an OPOSSUM::TFSet object";
+        $$error = "TF set is not an OPOSSUM::TFSet object";
+        carp $$error;
         return;
     }
 
-    unless ($plot_type eq 'Z' || $plot_type eq 'Fisher' || $plot_type eq 'KS') {
-        carp "Provided plot type is not one of 'Z', 'F' or 'KS'";
+    unless ($plot_type eq 'Z' || $plot_type eq 'Fisher' || $plot_type eq 'KS')
+    {
+        $$error = "Provided plot type is not one of 'Z', 'F' or 'KS'";
+        carp $$error;
         return;
     }
 
     my $title;
+    my $ylab;
     if ($plot_type eq 'Z') {
         $title = 'Z-score vs. TF profile %GC composition';
+        $ylab = 'Z-score';
     } elsif ($plot_type eq 'Fisher') {
         $title = 'Fisher score vs. TF profile %GC composition';
+        $ylab = 'Fisher score';
     } elsif ($plot_type eq 'KS') {
         $title = 'KS-score vs. TF profile %GC composition';
+        $ylab = 'KS score';
     }
 
     my @gc;
@@ -291,39 +305,47 @@ sub plot
     $R->set('scores_above', \@scores_above);
     $R->set('names_above', \@names_above);
     $R->set('gc', \@gc);
-    $R->set('title', $title);
     $R->set('leg', \@legend);
-    $R->set('max_score', $max_score);
-    $R->set('min_score', $min_score);
-    $R->set('threshold', $threshold);
-    $R->set('fname', $filename);
 
     my @R_cmds;
 
-    push @R_cmds, q`xlimit = c(0, 100)`;
-    push @R_cmds, q`ylimit = c(min_score, max_score)`;
-    push @R_cmds, q`png(filename=fname, units="px", width=1024, height=1024, res=NA, pointsize=16, bg="white")`;
+    push @R_cmds, q{xlimit = c(0, 100)};
+    push @R_cmds, qq{ylimit = c($min_score, $max_score)};
+    push @R_cmds, qq{png(filename="$filename", units="px", width=1024, height=1024, res=NA, pointsize=16, bg="white")};
 
     if (@scores && $scores[0]) {
-        push @R_cmds, q`plot(gc, scores, cex=0.5, cex.axis=0.9, cex.main=0.8, main=title, xlab="TF profile %GC composition", ylab="Z-score", xlim=xlimit, ylim=ylimit, las=1)`;
+        push @R_cmds, qq{plot(gc, scores, cex=0.5, cex.axis=0.9, cex.main=0.8, main="$title", xlab="TF profile \%GC composition", ylab="$ylab", xlim=xlimit, ylim=ylimit, las=1)};
     }
 
     if (@scores_above && $scores_above[0]) {
-        push @R_cmds, q`text(gc_above, scores_above, labels=names_above, pos=3, offset=0.2, cex=0.8)`;
+        push @R_cmds, q{text(gc_above, scores_above, labels=names_above, pos=3, offset=0.2, cex=0.8)};
     }
 
     if ($has_inf) {
-        push @R_cmds, q`text(c(0), c(max_score), labels=c("(Inf)"), pos=2, cex=0.9)`;
+        push @R_cmds, qq{text(c(0), c($max_score), labels=c("(Inf)"), pos=2, cex=0.9)};
     }
 
-    push @R_cmds, q`abline(h=threshold, col="red", lty=2)`;
-    push @R_cmds, q`legend("topright", legend=leg, cex=0.8, col="red", lty=2, bty="n")`;
-    push @R_cmds, q`dev.off()`;
+    push @R_cmds, qq{abline(h=$threshold, col="red", lty=2)};
+    push @R_cmds, q{legend("topright", legend=leg, cex=0.8, col="red", lty=2, bty="n")};
+    #
+    # Note: this returns message "null device 1"
+    #
+    push @R_cmds, q{dev.off()};
 
-    my $out = $R->run(@R_cmds);
+    my $out;
+    eval {
+        $out = $R->run(@R_cmds);
+    };
 
     if ($out) {
-        $$error = "R plotting call returned: $out";
+        unless ($out =~ /^null device/) {
+            $$error = $out;
+        }
+    }
+
+    if ($$error) {
+        carp $$error;
+        return;
     }
 
     return 1;
