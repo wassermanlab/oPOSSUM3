@@ -54,37 +54,39 @@ sub merge_tfbss
 	
 	my @sorted_sites = sort {$a->start <=> $b->start} @$tfsites;
 
+	my $site1 = $sorted_sites[0];
+
+    $site1->id($cluster_id);
+
 	#
 	# Let's not mess around setting and resetting strand info. Strand is
-	# meainingless for clusters. Just keep everything on the +ve strand.
+	# meaningless for clusters. Just keep everything on the +ve strand.
 	# DJA 2011/06/01
 	#
-	my $site1 = $sorted_sites[0];
 	if ($site1->strand == -1) {
-		$site1->strand();
+		$site1->strand(1);
 		$site1->seq(revcom($site1->seq));
 	}
 
 	my @merged_sites;
 	push @merged_sites, $site1;
 
-	for (my $i = 1; $i < scalar(@sorted_sites); $i++)
-	{
+	for (my $i = 1; $i < scalar @sorted_sites; $i++) {
 		my $tfsite = $sorted_sites[$i];
+
+        $tfsite->id($cluster_id);
+
 		if ($tfsite->strand == -1) {
 			$tfsite->strand(1);
 			$tfsite->seq(revcom($tfsite->seq));
 		}
 
 		my $prevsite = $merged_sites[$#merged_sites];
-		$prevsite->id($cluster_id);
 
 		# if overlap, keep the max score
 		# merge the two sites
-		if (overlap($prevsite, $tfsite))
-		{
+		if (overlap($prevsite, $tfsite)) {
 			if ($prevsite->end < $tfsite->end) {
-
 				# merge the sequences
 				my $ext_seq = substr(
 					$tfsite->seq, $prevsite->end - $tfsite->start + 1
@@ -110,7 +112,7 @@ sub merge_tfbss
 		}
 	}
 
-	return \@merged_sites;
+	return @merged_sites ? \@merged_sites : undef;
 }
 
 1;
