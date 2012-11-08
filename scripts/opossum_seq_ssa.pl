@@ -350,10 +350,14 @@ $logger->info("Starting analysis");
 my $heading = "Sequence-Based Single Site Analysis";
 
 my %job_args = (
-    -job_id => $job_id,
-    -heading => $heading,
-    -email => $email,
-    -logger => $logger
+    -job_id             => $job_id,
+    -heading            => $heading,
+    -email              => $email,
+    -web                => $web,
+    -logger             => $logger,
+    -results_dir        => $results_dir,
+    -abs_results_dir    => $abs_results_dir,
+    -rel_results_dir    => $rel_results_dir,
 );
 
 unless ($t_seq_file) {
@@ -466,6 +470,7 @@ my $tf_db;
 unless ($matrix_file) {
     $tf_db = JASPAR_DB_NAME;
 }
+$job_args{-tf_db} = $tf_db;
 
 my $matrix_set;
 my $tf_select_criteria;
@@ -526,58 +531,75 @@ my $tf_set = OPOSSUM::TFSet->new(-matrix_set => $matrix_set);
 
 
 #
-# Search sequences with the matrix set
+# Search sequences with the matrix set.
+# The separate routines for searching the sequences, computing counts and
+# computing peak distances have now been replaced by a single routine to
+# avoid the neccessity of storing the all the binding sites in memory.
+# DJA 2012/11/07
 #
 
-$logger->info("Searching target sequences for TFBSs");
-#my ($t_tf_seq_siteset, $t_tf_seqs)
-my $t_tf_seq_siteset
-    = tf_set_search_seqs($tf_set, $t_seq_id_seqs, $threshold, %job_args);
+my $write_details = 1;
+$logger->info(
+    "Searching target sequences for TFBSs, computing counts and TFBS"
+    . " to peak max. distances"
+);
+my ($t_counts, $t_dists) = search_seqs_compute_tfbs_counts_and_distances(
+    $tf_set, $t_seq_id_seqs, $t_seq_id_display_ids, $t_peak_pos,
+    $threshold, $write_details, %job_args
+);
 
 fatal("No TFBSs found in target sequences", %job_args)
-    if !$t_tf_seq_siteset;
+    if !$t_counts;
 
-$logger->info("Searching background sequences for TFBSs");
-#my ($bg_tf_seq_siteset, $bg_tf_seqs)
-my $bg_tf_seq_siteset
-    = tf_set_search_seqs($tf_set, $bg_seq_id_seqs, $threshold, %job_args);
+#
+# Don't write TFBS details for background (would overwrite the target details)
+#
+$write_details = 0;
+$logger->info(
+    "Searching background sequences for TFBSs, computing counts and TFBS"
+    . " to peak max. distances"
+);
+my ($bg_counts, $bg_dists) = search_seqs_compute_tfbs_counts_and_distances(
+    $tf_set, $bg_seq_id_seqs, $bg_seq_id_display_ids,
+    $bg_peak_pos, $threshold, $write_details, %job_args
+);
 
 fatal("No TFBSs found in control sequences", %job_args)
-    if !$bg_tf_seq_siteset;
+    if !$bg_counts;
 
 #
 # Compute TFBS counts
 #
 
-$logger->info("Computing target sequence TFBS counts");
-my $t_counts = compute_site_counts($tf_set, $t_seq_ids, $t_tf_seq_siteset);
+#$logger->info("Computing target sequence TFBS counts");
+#my $t_counts = compute_site_counts($tf_set, $t_seq_ids, $t_tf_seq_siteset);
 
 #$logger->debug("Target TFBS counts:\n" . Data::Dumper::Dumper($t_counts));
 
-$logger->info("Computing background sequence TFBS counts");
-my $bg_counts = compute_site_counts($tf_set, $bg_seq_ids, $bg_tf_seq_siteset);
+#$logger->info("Computing background sequence TFBS counts");
+#my $bg_counts = compute_site_counts($tf_set, $bg_seq_ids, $bg_tf_seq_siteset);
 
-unless ($t_counts) {
-    fatal("Error fetching target sequence TFBS counts", %job_args);
-}
+#unless ($t_counts) {
+#    fatal("Error fetching target sequence TFBS counts", %job_args);
+#}
 
-unless ($bg_counts) {
-    fatal("Error fetching background sequence TFBS counts", %job_args);
-}
+#unless ($bg_counts) {
+#    fatal("Error fetching background sequence TFBS counts", %job_args);
+#}
 
 #
 # Compute peak to site distances
 #
 
-$logger->info("Computing sequence peak to TFBS distances");
+#$logger->info("Computing sequence peak to TFBS distances");
 
-my $t_dists = compute_tfbs_peak_distances(
-    $tf_set, $t_seq_id_seqs, $t_seq_id_display_ids, $t_tf_seq_siteset, $t_peak_pos
-);
+#my $t_dists = compute_tfbs_peak_distances(
+#    $tf_set, $t_seq_id_seqs, $t_seq_id_display_ids, $t_tf_seq_siteset, $t_peak_pos
+#);
 
-my $bg_dists = compute_tfbs_peak_distances(
-    $tf_set, $bg_seq_id_seqs, $bg_seq_id_display_ids, $bg_tf_seq_siteset, $bg_peak_pos
-);
+#my $bg_dists = compute_tfbs_peak_distances(
+#    $tf_set, $bg_seq_id_seqs, $bg_seq_id_display_ids, $bg_tf_seq_siteset, $bg_peak_pos
+#);
 
 #
 # Score calculations
@@ -707,10 +729,7 @@ if ($ok) {
     
     if (!$nh) {
         $logger->info("Writing TFBS details");
-        write_tfbs_details($tf_set, $tf_db, $t_tf_seq_siteset,
-                           $t_seq_id_display_ids,
-                           $abs_results_dir, $rel_results_dir, $web,
-                           %job_args);
+        write_tfbs_details($tf_set, $t_seq_id_display_ids, %job_args);
     }
 }
 
@@ -732,27 +751,38 @@ if ($plotter) {
     )) {
         $logger->error("Plotting error: $plot_err");
     }
+} else {
+    $logger->error("Error initializing plotting");
+}
+
+$plotter = OPOSSUM::Plot::ScoreVsGC->new();
+if ($plotter) {
     $logger->info(
         "Plotting Fisher scores vs. profile \%GC content plotting"
     );
 
     my $fisher_plot_file = "$abs_results_dir/" . FISHER_PLOT_FILENAME;
 
-    $plot_err = "";
+    my $plot_err = "";
     unless($plotter->plot(
         $cresults, $tf_set, 'Fisher', FISHER_PLOT_SD_FOLD, $fisher_plot_file,
         \$plot_err
     )) {
         $logger->error("Plotting error: $plot_err");
     }
+} else {
+    $logger->error("Error initializing plotting");
+}
 
+$plotter = OPOSSUM::Plot::ScoreVsGC->new();
+if ($plotter) {
     $logger->info(
         "Plotting KS scores vs. profile \%GC content plotting"
     );
 
     my $ks_plot_file = "$abs_results_dir/" . KS_PLOT_FILENAME;
 
-    $plot_err = "";
+    my $plot_err = "";
     unless($plotter->plot(
         $cresults, $tf_set, 'KS', KS_PLOT_SD_FOLD, $ks_plot_file
     )) {
