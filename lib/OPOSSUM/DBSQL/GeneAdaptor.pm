@@ -44,6 +44,14 @@ DJA 2012-06-12
   gene IDs for any/all types of input gene ID(s) including symbols, Ensembl IDs
   or external IDs without having to know the gene ID type. The input gene IDs
   can even be of mixed types.
+DJA 2012-10-31
+- modified _fetch_gene_ids_by_external_id_helper to fetch the id_type from
+  the external_gene_ids table and set a return ID type, the idea being that
+  if no external gene ID type is passed to the routine via the -ext_id_type
+  parameter, then the routine will fetch by any external gene ID type and if
+  all rows fetched happen to match the same external gene ID type then this
+  is returned via the -return_ext_id_type parameter (the -return_ext_id_type
+  is set to -ext_id_type if this is passed in).
 
 =cut
 
@@ -707,7 +715,8 @@ sub _fetch_by_external_id_helper
                -unmapped_ext_ids    => $unmapped_ext_ids,
                -gene_id_ensembl_ids => $gene_id_ensembl_ids,
                -gene_id_ext_ids     => $gene_id_ext_ids,
-               -ext_id_gene_ids     => $ext_id_gene_ids
+               -ext_id_gene_ids     => $ext_id_gene_ids,
+               -return_ext_id_type  => $return_ext_id_type
            );
  Function: Fetch gene IDs from the DB by external gene ID(s).
            Internal method only.
@@ -724,6 +733,12 @@ sub _fetch_by_external_id_helper
                     opossum gene IDs to external IDs (1-to-many),
                ext_id_gene_ids mapping - a hashref which is set to the
                     mapping from external IDs to opossum gene IDs (1-to-many)
+               return_ext_id_type - a scalar ref which is set to the actual
+                    external gene ID type of the input external gene IDs
+                    IF AND ONLY IF the external gene ID type was passed in
+                    via the -ext_id_type parameter OR if ALL the external
+                    gene IDs provided were mapped to the same external gene ID
+                    type.
  Returns : A listref of gene IDs.
 
 =cut
@@ -754,16 +769,17 @@ sub _fetch_gene_ids_by_external_id_helper
     my $gene_id_ensembl_ids = $args{-gene_id_ensembl_ids};  # hashref
     my $gene_id_ext_ids     = $args{-gene_id_ext_ids};      # hashref
     my $ext_id_gene_ids     = $args{-ext_id_gene_ids};      # hashref
+    my $return_ext_id_type  = $args{-return_ext_id_type};   # scalar ref
 
     push @$ext_ids, $ext_id if $ext_id;
 	
     my $sql =
-        qq{select g.gene_id, g.ensembl_id
+        qq{select g.gene_id, g.ensembl_id, xgi.id_type
            from genes g, external_gene_ids xgi
            where g.gene_id = xgi.gene_id
            and xgi.external_id = ?};
 			
-    if ($ext_id_type) {
+    if (defined $ext_id_type) {
         $sql .= " and xgi.id_type = $ext_id_type";
     }
 
@@ -777,6 +793,8 @@ sub _fetch_gene_ids_by_external_id_helper
     my @gene_ids;
     my %gene_included;
     my %ext_id_included;
+    my %gene_id_ext_id_included;
+    my %ext_id_type_included;
     foreach my $ext_id (@$ext_ids) {
         if (!$sth->execute($ext_id)) {
             carp "Error executing fetch gene ID:\n$sql\n"
@@ -792,6 +810,13 @@ sub _fetch_gene_ids_by_external_id_helper
         while (my @row = $sth->fetchrow_array) {
             my $gene_id = $row[0];
             my $ensid   = $row[1];
+            my $id_type = $row[2];
+
+            #
+            # Keep track of which external ID type was mapped to the
+            # external gene ID of the fetched row.
+            #
+            $ext_id_type_included{$id_type} = 1;
 
             #
             # There is a 1-to-1 mapping of oPOSSUM gene IDs
@@ -815,8 +840,21 @@ sub _fetch_gene_ids_by_external_id_helper
                 $ext_id_included{$ext_id} = 1;
             }
 
-            push @{$ext_id_gene_ids->{$ext_id}}, $gene_id;
-            push @{$gene_id_ext_ids->{$gene_id}}, $ext_id;
+            #
+            # If not limiting to a specific external gene ID type, we could
+            # have duplicate oPOSSUM gene ID to external gene ID mappings
+            # as the same external ID can be stored as with more than one
+            # external gene ID type, e.g. for some fly/worm/yeast genes the
+            # symbols used by Ensembl are not Ensembl specific (ENS*) gene
+            # symbols and duplicate the flyBase, wormBase etc symbols.
+            # DJA 2012/11/1
+            #
+            unless ($gene_id_ext_id_included{$gene_id}->{$ext_id}) {
+                push @{$ext_id_gene_ids->{$ext_id}}, $gene_id;
+                push @{$gene_id_ext_ids->{$gene_id}}, $ext_id;
+
+                $gene_id_ext_id_included{$gene_id}->{$ext_id} = 1;
+            }
         }
     }
     $sth->finish;
@@ -828,6 +866,21 @@ sub _fetch_gene_ids_by_external_id_helper
     foreach my $ext_id (@$ext_ids) {
         unless ($ext_id_included{$ext_id}) {
             push @$unmapped_ext_ids, $ext_id;
+        }
+    }
+
+    if (defined $ext_id_type) {
+        $$return_ext_id_type = $ext_id_type;
+    } else {
+        #
+        # Check ID type returned
+        #
+        my @ext_id_types = keys %ext_id_type_included;
+
+        if (scalar @ext_id_types == 1) {
+            $$return_ext_id_type = $ext_id_types[0];
+        } else {
+            $$return_ext_id_type = undef;
         }
     }
 
@@ -1147,7 +1200,7 @@ sub fetch_gene_ids_by_external_ids
 
 	return $self->_fetch_gene_ids_by_external_id_helper(
 		-ext_ids     => $ext_ids,
-		-ext_id_type => $ext_id_type,
+        -ext_id_type => $ext_id_type,
         %return_args
 	);
 }
@@ -1259,9 +1312,11 @@ sub fetch_gene_ids_by_ensembl_ids
 
 sub fetch_gene_id_list_by_external_id_list
 {
-    my ($self, $ext_ids, $ext_id_type) = @_;
+    my ($self, $ext_ids, $ext_id_type, %return_args) = @_;
 
-    return $self->fetch_gene_ids_by_external_ids($ext_ids, $ext_id_type);
+    return $self->fetch_gene_ids_by_external_ids(
+        $ext_ids, $ext_id_type, %return_args
+    );
 }
 
 
