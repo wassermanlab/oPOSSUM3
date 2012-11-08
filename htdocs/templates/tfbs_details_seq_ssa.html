@@ -58,8 +58,10 @@
   <br>
   <h3>[%tf.name%] Binding Sites</h3>
 
+  [%USE sites = datafile(data_file)%]
+
   <table width="100%" border="0" cellpadding="2" cellspacing="1">
-    [%IF seq_ids%]
+    [%IF sites%]
       <tr align="left" class="table_title">
         <th align="left">Sequence ID</th>
         <th align="right">Start</th>
@@ -70,27 +72,28 @@
         <th align="left">TFBS Sequence</th>
       </tr>
 
-      [%FOREACH seq_id = seq_ids%]
-        [%display_id = seq_id_display_ids.$seq_id%]
+      [%last_seq_id = ''%]
+      [%FOREACH site = sites%]
         <tr align="left" class="table_text">
-        <td>[%display_id%]</td>
-        [%first = 1%]
-        [%FOREACH site = seq_sites.$seq_id%]
-          [%rel_score = site.rel_score * 100%]
-          [%UNLESS first == 1%]
-            <tr align="left" class="table_text">
-            <td></td>
-          [%END%]
-          [%first = 0%]
-          <td align="right">[%site.start%]</td>
-          <td align="right">[%site.end%]</td>
-          <td align="right">[%IF site.strand == 1%]+[%ELSE%]-[%END%]</td>
-          <td align="right">[%formatf(3, site.score)%]</td>
-          <td align="right">[%formatf(1, rel_score)%]%</td>
-          <td align="left" class="seqtext">[%site.seq.seq%]</td>
-          </tr>
+
+        [%seq_id = site.seq_id%]
+        [%IF seq_id != last_seq_id%]
+          [%display_id = seq_id_display_ids.$seq_id%]
+
+          <td>[%display_id%]</td>
+
+          [%last_seq_id = seq_id%]
+        [%ELSE%]
+          <td></td>
         [%END%]
-      [%END%]
+        <td align="right">[%site.start%]</td>
+        <td align="right">[%site.end%]</td>
+        <td align="right">[%site.strand%]</td>
+        <td align="right">[%formatf(3, site.score)%]</td>
+        <td align="right">[%formatf(1, rel_score)%]%</td>
+        <td align="left" class="seqtext">[%site.seq%]</td>
+        </tr>
+      [%END%] <!--foreach site -->
     [%ELSE%]
       <tr><td>No sites found for this TF</td></tr>
     [%END%]
