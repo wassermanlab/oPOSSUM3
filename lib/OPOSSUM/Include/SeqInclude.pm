@@ -66,7 +66,13 @@ sub id_seqs
     my %seq_id_seqs;
     my $seq_num = 0;
     foreach my $seq (@$seqs) {
-        my $seq_id = "seq$seq_num";
+        #
+        # Format the internal seq. ID so that it can be sorted and preserve
+        # the original order of input sequences in the seq. ID to display
+        # ID mappings.
+        # DJA 2012/11/07
+        #
+        my $seq_id = sprintf "seq%06d", $seq_num;
     
         push @seq_ids, $seq_id;
     
