@@ -382,7 +382,11 @@ sub _compute_mean
         $n++;
     }
 
-    return $sum / $n;
+    if ($n) {
+        return $sum / $n;
+    }
+
+    return 0;
 }
 
 sub _compute_sd
@@ -400,7 +404,11 @@ sub _compute_sd
         $n++;
     }
 
-    return sqrt($sum / $n);
+    if ($n) {
+        return sqrt($sum / $n);
+    }
+
+    return 0;
 }
 
 sub _compute_threshold
