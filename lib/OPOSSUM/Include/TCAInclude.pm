@@ -82,50 +82,61 @@ sub merge_cluster_ctfbs_sites
     my ($ctfbss, $cluster_id) = @_;
     
     return if !$ctfbss or @$ctfbss == 0;
+
+    #
+    # The code below will only work if the incoming TFBSs are already sorted
+    # DJA 2012/11/01
+    #
+    @$ctfbss = sort {$a->start <=> $b->start} @$ctfbss;
+
+	my $prev_site = $ctfbss->[0];
+    $prev_site->id($cluster_id);
     
-    #my $it = $tf_siteset->Iterator(-sort_by => 'start');    
-    #my $prev_site = $it->next;
-	my $prev_site = $$ctfbss[0];
+    #
+    # Let's not mess around setting and resetting strand info. Strand is
+    # meaningless for clusters. Just keep everything on the +ve strand.
+    # DJA 2012/11/02
+    #
+    if ($prev_site->strand == -1) {
+        $prev_site->strand(1);
+        $prev_site->seq(revcom($prev_site->seq));
+    }
 
     my @merged_sites;
 	push @merged_sites, $prev_site;
     
-    #while (my $curr_site = $it->next)
-	for (my $i = 0; $i < scalar @$ctfbss; $i++)
-    {
-		my $curr_site = $$ctfbss[$i];
+	for (my $i = 0; $i < scalar @$ctfbss; $i++) {
+		my $curr_site = $ctfbss->[$i];
+
+        $curr_site->id($cluster_id);
+
+        if ($curr_site->strand == -1) {
+            $curr_site->strand(1);
+            $curr_site->seq(revcom($curr_site->seq));
+        }
+
         my $prev_site = $merged_sites[$#merged_sites];
-        $prev_site->id($cluster_id);
         
-        # if overlap, keep the max score
+        # if overlap (or adjacent - DJA), keep the max score
         # merge the two sites
-		if (overlap($prev_site, $curr_site))
-        {
+		if (overlap($prev_site, $curr_site, 1)) {
 			if ($prev_site->end < $curr_site->end) {
-				
-				$prev_site->end($curr_site->end);
-                
                 # merge the sequences
-                # first, check the strands of the sites
-                # if negative, reverse complement
-                # I should only do this if they are overlapping
-				if ($prev_site->strand != $curr_site->strand) {
-                    if ($prev_site->strand == -1) {
-                        my $seq = Bio::Seq->new(-seq => $prev_site->seq);
-                        $prev_site->seq($seq->revcom->seq);
-                    } else {
-                        my $seq = Bio::Seq->new(-seq => $curr_site->seq);
-                        $curr_site->seq($seq->revcom->seq);
-                    }
-				}
-                
-				my $ext_seq = substr($curr_site->seq, $prev_site->end - $curr_site->start);
-				$prev_site->seq($prev_site->seq . $ext_seq);
+				my $ext_seq = substr(
+                    $curr_site->seq, $prev_site->end - $curr_site->start + 1
+                );
+				
+                if ($ext_seq) {
+                    $prev_site->seq($prev_site->seq . $ext_seq);
+                }
+
+				$prev_site->end($curr_site->end);
             }
 
 			if ($curr_site->score > $prev_site->score) {
 				$prev_site->score($curr_site->score);
 			}
+
 			if ($curr_site->rel_score > $prev_site->rel_score) {
 				$prev_site->rel_score($curr_site->rel_score);
 			}
@@ -153,16 +164,31 @@ sub merge_cluster_tfbs_siteset
 	return merge_cluster_ctfbs_sites($ctfbss, $cluster_id);
 }
 
-
+#
+# Re-wrote this to simplify and also check for adjacent sites (we want to
+# merge adjacent sites in clusters).
+# DJA 2012/11/02
+#
 sub overlap
 {
-    my ($tf1, $tf2) = @_;
+    my ($tf1, $tf2, $adjacent_ok) = @_;
     
-    if (($tf1->start <= $tf2->start and $tf1->end > $tf2->start)
-        or ($tf2->start <= $tf1->start and $tf2->end > $tf1->start))
-    {
-        return 1;
+    if ($adjacent_ok) {
+        #
+        # Sites can also be directly adjacent to one another
+        #
+        if ($tf1->start <= ($tf2->end + 1) && $tf1->end >= ($tf2->start - 1)) {
+            return 1;
+        }
+    } else {
+        #
+        # The sites must overlap by at least 1 bp
+        #
+        if ($tf1->start <= $tf2->end && $tf1->end >= $tf2->start) {
+            return 1;
+        }
     }
+
     return 0;
 }
 
