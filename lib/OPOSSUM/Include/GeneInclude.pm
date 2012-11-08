@@ -126,7 +126,7 @@ sub fetch_gene_data_for_opossum_analysis
         $t_gene_id_type, $t_gene_ids,
         $bg_gene_id_type, $bg_gene_ids, $bg_num_rand_genes,
         %fatal_args
-        ) = @_;
+    ) = @_;
     
     my $job_id = $fatal_args{-job_id};
     my $heading = $fatal_args{-heading};
@@ -142,15 +142,16 @@ sub fetch_gene_data_for_opossum_analysis
         $t_gid_gene_ids,
         #t_gene_id_gids,
         $t_operon_first_gids,
-        $t_operon_unique_gids
+        $t_operon_unique_gids,
+        $return_t_gene_id_type
     ) = fetch_opossum_gene_ids(
         $ga, $oa, $t_gene_id_type, $t_gene_ids, $has_operon
     );
     
     if (!$t_gids || !$t_gids->[0]) {
         fatal(
-              "Error fetching target oPOSSUM gene IDs. Please make sure"
-            . " you specified the correct gene ID type for the IDs entered.",
+              "Error fetching target oPOSSUM genes. Please make sure"
+            . " you entered valid gene symbols/IDs.",
             %fatal_args
         );
     }
@@ -161,6 +162,7 @@ sub fetch_gene_data_for_opossum_analysis
     my $bg_gid_gene_ids;
     my $bg_operon_first_gids;
     my $bg_operon_unique_gids;
+    my $return_bg_gene_id_type;
     if ($bg_gene_ids) {
         $logger->info("Fetching background oPOSSUM gene IDs");
         ($bg_gids,
@@ -168,16 +170,16 @@ sub fetch_gene_data_for_opossum_analysis
          $bg_missing_gene_ids,
          $bg_gid_gene_ids,
          $bg_operon_first_gids,
-         $bg_operon_unique_gids
+         $bg_operon_unique_gids,
+         $return_bg_gene_id_type
         ) = fetch_opossum_gene_ids(
             $ga, $oa, $bg_gene_id_type, $bg_gene_ids, $has_operon
         );
     
         if (!$bg_gids || !$bg_gids->[0]) {
             fatal(
-                  "Error fetching background oPOSSUM gene IDs. Please make"
-                . " sure you specified the correct gene ID type for the gene"
-                . " IDs entered.",
+                  "Error fetching background oPOSSUM genes. Please make"
+                . " sure you entered valid gene symbols/IDs.",
                 %fatal_args
             );
         }
@@ -212,7 +214,9 @@ sub fetch_gene_data_for_opossum_analysis
         $bg_missing_gene_ids,
         $bg_gid_gene_ids,
         $bg_operon_first_gids,
-        $bg_operon_unique_gids
+        $bg_operon_unique_gids,
+        $return_t_gene_id_type,
+        $return_bg_gene_id_type
     );
 }
 
@@ -334,6 +338,7 @@ sub fetch_opossum_gene_ids
 {
     my ($ga, $oa, $id_type, $ids, $has_operon) = @_;
 
+    my $return_ext_id_type;
     my @mapped_ids;
     my @unmapped_ids;
     my %gene_id_ext_ids;
@@ -370,6 +375,8 @@ sub fetch_opossum_gene_ids
             #-ensembl_id_gene_ids    => \%ext_id_gene_ids
         );
         #%gene_id_ext_ids = %gene_id_ensembl_ids;
+
+        $return_ext_id_type = $id_type;
     } else { 
         #
         # Fetch by external gene IDs
@@ -379,7 +386,8 @@ sub fetch_opossum_gene_ids
             $id_type,
             -mapped_ext_ids         => \@mapped_ids,
             -unmapped_ext_ids       => \@unmapped_ids,
-            -gene_id_ext_ids        => \%gene_id_ext_ids
+            -gene_id_ext_ids        => \%gene_id_ext_ids,
+            -return_ext_id_type     => \$return_ext_id_type
             #-ext_id_gene_ids        => \%ext_id_gene_ids
             #-gene_id_ensembl_ids    => \%gene_id_ensembl_ids
         );
@@ -421,7 +429,8 @@ sub fetch_opossum_gene_ids
         #                            ? \%operon_first_gene_to_gene_ids : undef
         %operon_gene_id_to_first_gene_id
                                     ? \%operon_gene_id_to_first_gene_id : undef,
-        @operon_unique_gene_ids     ? \@operon_unique_gene_ids : undef
+        @operon_unique_gene_ids     ? \@operon_unique_gene_ids : undef,
+        $return_ext_id_type
     );
 }
 
