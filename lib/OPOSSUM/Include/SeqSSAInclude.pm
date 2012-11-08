@@ -7,8 +7,8 @@
 
 =head1 DESCRIPTION
 
-  Contains all options and routines that are common to all the sequence-based SSA
-  scripts and web modules.
+  Contains all options and routines that are common to all the
+  sequence-based SSA scripts and web modules.
 
 =head1 AUTHOR
 
@@ -31,25 +31,28 @@ use strict;
 
 
 #
-# Search seqs with all the TFs in the TF set. Return two hashrefs.
+# New routine to search sequences for binding sites, compute the TFBS counts
+# and the site to peak max distances. The binding site destails are written
+# to temporary data files for later conversion to text and html files to
+# avoid having to store all the binding sites in memory.
+# DJA 2012/11/07
 #
-# The first hashref refers to a hash of hashes of sites indexed on seq ID
-# and TF ID. In the case where there were no TFBSs for a seq/TF combo,
-# the value of the hash is undef.
+# Search seqs with all the TFs in the TF set. Return two values, an
+# OPOSSUM::Analysis::Counts object of the seq-TF binding site counts and an
+# OPOSSUM::Analysis::Values object which stores the seq-TF binding site to
+# peak max. distances.
 #
-# The second hasref refers to a hash of listrefs of sequence IDs, indexed
-# on TF ID. Only seq IDs for which there were TFBSs for this TF are stored
-# in the list.
-#
-# i.e.:
-# $hashref1->{$seq_id}->{$tf_id} = $siteset
-# $hashref2->{$tf_id} = \@seq_ids
-#
-sub tf_set_search_seqs
+sub search_seqs_compute_tfbs_counts_and_distances
 {
-    my ($tf_set, $seq_id_seqs, $threshold, %job_args) = @_;
+    my (
+        $tf_set, $seq_id_seqs, $seq_id_display_ids, $seq_peak_max_pos,
+        $threshold, $write_details, %job_args
+    ) = @_;
+
+    my $any_tfbs_found = 0;
 
     my $logger = $job_args{-logger};
+    my $results_dir = $job_args{-results_dir};
 
     my $tf_ids = $tf_set->ids();
 
@@ -66,9 +69,38 @@ sub tf_set_search_seqs
         $threshold .= '%';
     }
 
-    my %tf_seq_siteset;
+    my $counts = OPOSSUM::Analysis::Counts->new(
+        -gene_ids   => \@seq_ids,
+        -tf_ids     => $tf_ids
+    );
+
+    my $distances = OPOSSUM::Analysis::Values->new(
+        -seq_ids    => \@seq_ids,
+        -tf_ids     => $tf_ids,
+    );
 
 	foreach my $tf_id (@$tf_ids) {
+        my $fh;
+
+        if ($write_details && $results_dir) {
+            my $fname = $tf_id;
+            $fname =~ s/\//_/g;
+
+            my $data_file = "$results_dir/$fname.data";
+
+            if (open($fh, ">$data_file")) {
+                #
+                # Specific header format recognized by Datafile plugin of the
+                # Template Toolkit.
+                #
+                printf $fh
+                    "seq_id : start : end : strand : score : rel_score : seq\n";
+            } else {
+                carp "Error opening output TFBS details data file"
+                    . " $data_file - $!\n";
+            }
+        }
+
 	    my $matrix = $tf_set->get_matrix($tf_id);
 
         my $pwm;
@@ -78,7 +110,9 @@ sub tf_set_search_seqs
             $pwm = $matrix;
         }
 
-        foreach my $seq_id (@seq_ids) {
+        foreach my $seq_id (sort @seq_ids) {
+            my $tfbs_count = 0;
+
             my $seq = $seq_id_seqs->{$seq_id};
 
             #$logger->info("processing sequence $seq_id");
@@ -93,21 +127,79 @@ sub tf_set_search_seqs
                 $filtered_siteset = filter_overlapping_sites($siteset);
 
                 if ($filtered_siteset && $filtered_siteset->size > 0) {
-                    # Only set if seqs had sites for this TF
-                    #push @{$tf_seqs{$tf_id}}, $seq_id;
-                    $tf_seq_siteset{$tf_id}->{$seq_id} = $filtered_siteset;
+                    $any_tfbs_found = 1;
+
+                    if ($fh) {
+                        write_tfbs_details_data(
+                            $fh, $seq_id, $filtered_siteset, %job_args
+                        );
+                    }
+
+                    $tfbs_count = $filtered_siteset->size;
+
+                    compute_seq_tf_site_peak_distances(
+                        $distances, $seq_id, $tf_id,
+                        $seq_id_display_ids->{$seq_id},
+                        $seq, $seq_peak_max_pos->{$seq_id},
+                        $filtered_siteset
+                    );
                 }
             }
+
+            $counts->gene_tfbs_count($seq_id, $tf_id, $tfbs_count);
         }
+
+        close($fh) if $fh;
     }
 
-    my $retval1 = %tf_seq_siteset ? \%tf_seq_siteset : undef;
-    #my $retval2 = %tf_seqs ? \%tf_seqs : undef;
-
-    #return ($retval1, $retval2);
-    return $retval1;
+    return ($any_tfbs_found ? $counts : undef, $distances);
 }
 
+#
+# New routine called by search_seqs_compute_tfbs_counts_and_distances to
+# compute the binding site to peak max distances for a single TF/sequence
+# combination.
+# DJA 2012/11/07
+#
+sub compute_seq_tf_site_peak_distances
+{
+    my (
+        $distances, $seq_id, $tf_id, $display_id, $seq, $peak_max_pos,
+        $siteset)
+    = @_;
+
+    my $peak_max_loc = 0;
+    
+    # if display_id does not contain coordinates, cannot proceed
+    if ($display_id =~ /^(\w+):(\d+)-(\d+)/ and $peak_max_pos) {
+        
+        # convert peak_max_loc to sequence frame
+        my ($chr, $pos) = split ":", $display_id;
+        my ($seq_start, $seq_end) = split "-", $pos;
+        
+        $peak_max_loc = $peak_max_pos->{$seq_id} - $seq_start + 1;
+    } else {
+        # Assume centre of peak sequence is the peak max location
+        $peak_max_loc = $seq->length / 2;
+    }
+    
+    my $iter = $siteset->Iterator(-sort_by => 'start');
+    while (my $site = $iter->next) {
+        my $site_loc = $site->start + $site->seq->length / 2;
+
+        my $dist = abs($site_loc - $peak_max_loc);
+        my $dist_n = $dist / $seq->length;
+        
+        $distances->add_seq_tfbs_value($seq_id, $tf_id, $dist_n);
+    }
+}
+
+#
+# Deprecated routine. The site counts is now performed within the
+# search_seqs_compute_tfbs_counts_and_distances routine.
+#
+# DJA 2012/11/07
+#
 sub compute_site_counts
 {
     my ($tf_set, $seq_ids, $tf_seq_siteset) = @_;
@@ -134,6 +226,14 @@ sub compute_site_counts
 
     return $counts;
 }
+
+
+#
+# Deprecated routine. The TFBS to peak max distances are now performed within
+# the search_seqs_compute_tfbs_counts_and_distances routine.
+#
+# DJA 2012/11/07
+#
 
 =head2 compute_tfbs_peak_distances
 
@@ -339,59 +439,226 @@ sub write_results_text
     return $filename;
 }
 
-
-
+#
+# This routine has been modified to call the write_tfbs_details_text_from_data
+# and write_tfbs_details_html_from_data routines 
+# DJA 2012/11/07
 #
 # For each TF/seq, write the details of the putative TFBSs out to text and
 # html files.
 #
 sub write_tfbs_details
 {
-    my ($tf_set, $tf_db, $tf_seq_siteset,
-        $seq_id_display_ids, 
-        $abs_results_dir, $rel_results_dir, $web,
-		%job_args) = @_;
+    my ($tf_set, $seq_id_display_ids, %job_args) = @_;
 
-    my $logger = $job_args{-logger};
+    my $logger      = $job_args{-logger};
+    my $web         = $job_args{-web};
+    my $results_dir = $job_args{-results_dir};
+
 	#$logger->info("Writing TFBS details");
 	
     my $tf_ids = $tf_set->ids();
 
     foreach my $tf_id (@$tf_ids) {
-        my $seq_siteset = $tf_seq_siteset->{$tf_id};
+        my $tf = $tf_set->get_tf($tf_id);
 
-        if ($seq_siteset) {
-            my @seq_ids = keys %$seq_siteset;
+        my $fname = $tf_id;
+        $fname =~ s/\//_/g;
 
-            my $tf = $tf_set->get_tf($tf_id);
+        my $data_file = "$results_dir/$fname.data";
 
-            my $fname = $tf_id;
-            $fname =~ s/\//_/g;
+        my $text_file = "$results_dir/$fname.txt";
 
-            my $text_filename = "$abs_results_dir/$fname.txt";
-            my $html_filename = "$abs_results_dir/$fname.html";
-        
-            write_tfbs_details_text(
-                $text_filename,
-                $tf, $tf_db,
-                \@seq_ids,
-                $seq_id_display_ids,
-                $seq_siteset,
-                %job_args
+        write_tfbs_details_text_from_data(
+            $tf, $seq_id_display_ids, $data_file, $text_file, %job_args
+        );
+
+        if ($web) {
+            my $html_file = "$results_dir/$fname.html";
+
+            write_tfbs_details_html_from_data(
+                $tf, $seq_id_display_ids, $data_file, $html_file, %job_args
             );
-            
-            write_tfbs_details_html(
-                $html_filename, $rel_results_dir,
-                $tf, $tf_db,
-                \@seq_ids,
-                $seq_id_display_ids,
-                $seq_siteset,
-                %job_args
-            ) if $web;
         }
+
+        #
+        # Remove data file
+        #
+        unlink $data_file;
     }
 }
 
+#
+# Write the details of the putative TFBSs to the given file in a format
+# recognized by the Datafile plugin of the Template Toolkit, for later
+# conversion into text and html files.
+#
+sub write_tfbs_details_data
+{
+    my ($fh, $seq_id, $siteset) = @_;
+    
+    my $iter = $siteset->Iterator(-sort_by => 'start');
+
+    while (my $site = $iter->next()) {
+        printf $fh "%s : %d : %d : %s : %.3f : %.1f%% : %s\n",
+            $seq_id,
+            $site->start,
+            $site->end,
+            $site->strand == -1 ? '-' : '+',
+            $site->score,
+            $site->rel_score * 100,
+            $site->seq->seq();
+    }
+}
+
+sub write_tfbs_details_text_from_data
+{
+    my ($tf, $seq_id_display_ids, $data_file, $text_file, %job_args) = @_;
+
+    my $logger = $job_args{-logger};
+    my $tf_db  = $job_args{-tf_db};
+
+    my $tf_id   = $tf->ID;
+    my $tf_name = $tf->name;
+
+    unless (open(DFH, $data_file)) {
+        $logger->error("Error opening TFBS detail data file $data_file - $!");
+        return;
+    }
+
+    unless (open(OFH, ">$text_file")) {
+        $logger->error("Error creating TFBS detail text file $text_file - $!");
+        return;
+    }
+
+    my $total_ic;
+    if ($tf->isa("TFBS::Matrix::PFM")) {
+        $total_ic = sprintf("%.3f", $tf->to_ICM->total_ic());
+    } else {
+        $total_ic = 'NA';
+    }
+
+    print  OFH "$tf_name\n\n";
+
+    if ($tf_db) {
+        print  FH "JASPAR ID:\t$tf_id\n";
+    }
+    printf OFH "Class:\t%s\n", $tf->class() || 'NA',
+    printf OFH "Family:\t%s\n", $tf->tag('family') || 'NA',
+    printf OFH "Sysgroup:\t%s\n", $tf->tag('tax_group') || 'NA',
+    printf OFH "IC:\t%s\n", $total_ic;
+
+    print OFH "\n\n$tf_name Binding Sites\n\n";
+
+    printf OFH "\n\n%-31s\t%7s\t%7s\t%7s\t%7s\t%7s\t%s\n",
+        'Sequence ID', 'Start', 'End', 'Strand', 'Score', '%Score',
+        'TFBS Sequence';
+
+    my $last_seq_id = '';
+    while (my $line = <DFH>) {
+        chomp $line;
+
+        my @cols = split /\s+:\s+/, $line;
+
+        next if $cols[0] eq 'seq_id';  # skip header
+
+        my $seq_id = $cols[0];
+
+        if ($seq_id eq $last_seq_id) {
+            printf OFH "%-31s", '';
+        } else {
+            my $display_id = $seq_id_display_ids->{$seq_id};
+
+            printf OFH "%-31s", $display_id;
+
+            $last_seq_id = $seq_id;
+        }
+
+        printf(OFH "\t%7s\t%7s\t%7s\t%7s\t%7s\t%s\n",
+            $cols[1],
+            $cols[2],
+            $cols[3],
+            $cols[4],
+            $cols[5],
+            $cols[6]
+        );
+    }
+}
+
+sub write_tfbs_details_html_from_data
+{
+    my ($tf, $seq_id_display_ids, $data_file, $html_file, %job_args) = @_;
+
+    my $tf_name = $tf->name();
+    my $tf_id   = $tf->ID();
+
+    my $job_id          = $job_args{-job_id};
+    my $heading         = $job_args{-heading};
+    my $email           = $job_args{-email};
+    my $tf_db           = $job_args{-tf_db};
+    my $logger          = $job_args{-logger};
+    my $rel_results_dir = $job_args{-rel_results_dir};
+
+    open(FH, ">$html_file") || fatal(
+        "Could not create TFBS details html file $html_file", %job_args
+    );
+
+    $logger->info("Writing '$tf_id - $tf_name' TFBS details to $html_file");
+    
+    my $title = "oPOSSUM $heading";
+    my $section = sprintf("%s Binding Site Details", $tf_name);
+
+    my $fname = $tf_id;
+    $fname =~ s/\//_/g;
+
+    my $vars = {
+        abs_htdocs_path         => ABS_HTDOCS_PATH,
+        abs_cgi_bin_path        => ABS_CGI_BIN_PATH,
+        rel_htdocs_path         => REL_HTDOCS_PATH,
+        rel_cgi_bin_path        => REL_CGI_BIN_PATH,
+        version                 => VERSION,
+        devel_version           => DEVEL_VERSION,
+        jaspar_url              => JASPAR_URL,
+        heading                 => $heading,
+        title                   => $title,
+        section                 => $section,
+        bg_color_class          => BG_COLOR_CLASS,
+        low_matrix_ic           => LOW_MATRIX_IC,
+        high_matrix_ic          => HIGH_MATRIX_IC,
+        low_matrix_gc           => LOW_MATRIX_GC,
+        high_matrix_gc          => HIGH_MATRIX_GC,
+        low_seq_gc              => LOW_SEQ_GC,
+        high_seq_gc             => HIGH_SEQ_GC,
+
+        tf_db                   => $tf_db,
+        tf                      => $tf,
+        seq_id_display_ids      => $seq_id_display_ids,
+        rel_results_dir         => $rel_results_dir,
+        data_file               => $data_file,
+        tfbs_details_file       => "$fname.txt",
+
+        formatf                 => sub {
+                                    my $dec = shift;
+                                    my $f = shift;
+                                    return ($f || $f eq '0')
+                                        ? sprintf("%.*f", $dec, $f)
+                                        : 'NA'
+                                   },
+
+        var_template            => "tfbs_details_seq_ssa.html"
+    };
+
+    my $output = process_template('master.html', $vars, %job_args);
+
+    print FH $output;
+
+    close(FH);
+}
+
+#
+# Deprecated routine. This routine is replaced by the
+# write_tfbs_details_text_from_data routine.
+# DJA 2012/11/07
 #
 # Write the details of the putative TFBSs for each TF/seq. Create a
 # text file for each TF.
@@ -469,6 +736,10 @@ sub write_tfbs_details_text
     close(FH);
 }
 
+#
+# Deprecated routine. This routine is replaced by the
+# write_tfbs_details_html_from_data routine.
+# DJA 2012/11/07
 #
 # Write the details of the putative TFBSs for each TF/seq. Create an
 # HTML file for each TF.
