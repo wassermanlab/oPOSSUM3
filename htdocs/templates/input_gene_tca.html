@@ -183,7 +183,7 @@ function verify(f)
     Paste gene IDs (max. [%max_target_genes%] gene IDs):
     <br>
     <input type="button" name="use_sample_genes" value="Use sample genes"
-      onClick="{input.t_id_input_method[0].checked=true; input.t_gene_id_type[1].selected=true; input.t_gene_text.value=document.getElementById('sample_genes_[%species%]').value}">
+      onClick="{input.t_id_input_method[0].checked=true; input.t_gene_text.value=document.getElementById('sample_genes_[%species%]').value}">
     <br>
     <textarea name="t_gene_text" rows=5 cols=50 wrap=SOFT
       onClick="{input.t_id_input_method[1].checked=true}"
@@ -210,6 +210,7 @@ function verify(f)
           {input.t_id_input_method[0].checked=true}
       }">
     </span>
+    <!--
     <br><br>
     <b>Gene ID type:</b>
     <span class="subtext">
@@ -220,6 +221,7 @@ function verify(f)
       [%END%]
     </select>
     </span>
+    -->
   </p>
 
   <br>
@@ -269,6 +271,7 @@ function verify(f)
           {input.bg_id_input_method[0].checked=true}
       }">
     </span>
+    <!--
     <br><br>
     <b>Gene ID type:</b>
     <span class="subtext">
@@ -279,6 +282,7 @@ function verify(f)
       [%END%]
     </select>
     </span>
+    -->
   </p>
 
   <br>
