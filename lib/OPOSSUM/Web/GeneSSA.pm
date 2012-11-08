@@ -150,7 +150,7 @@ sub input
     #
     # Retrieve any previously entered values from state.
     #
-    my $in_t_gene_id_type = $state->t_gene_id_type();
+    #my $in_t_gene_id_type = $state->t_gene_id_type();
     my @in_t_gene_ids = @{$state->t_gene_ids()} if $state->t_gene_ids();
 
     #
@@ -158,9 +158,11 @@ sub input
     # application, these take precedent. These are always assumed
     # to be Ensembl IDs (gene ID type = 0).
     #
-    foreach my $id ($q->param("id")) {
-        push @in_t_gene_ids, $id;
-        $in_t_gene_id_type = 0;
+    if ($q->param("id")) {
+        foreach my $id ($q->param("id")) {
+            push @in_t_gene_ids, $id;
+        }
+        #$in_t_gene_id_type = DFLT_GENE_ID_TYPE;
     }
 
     # this should be later modified to give the user a choice
@@ -176,7 +178,7 @@ sub input
         $total_genes = $self->fetch_gene_count();
     }
     my $db_info = $self->fetch_db_info();
-    my $xgid_types = $self->fetch_external_gene_id_types();
+    #my $xgid_types = $self->fetch_external_gene_id_types();
     my $cl_hash = $self->fetch_conservation_levels();
     my $thl_hash = $self->fetch_threshold_levels();
     my $srl_hash = $self->fetch_search_region_levels();
@@ -296,7 +298,7 @@ sub input
         species                 => $species,
         db_info                 => $db_info,
         total_genes             => $total_genes,
-        xgid_types              => $xgid_types,
+        #xgid_types              => $xgid_types,
         cl_hash                 => $cl_hash,
         thl_hash                => $thl_hash,
         srl_hash                => $srl_hash,
@@ -310,7 +312,7 @@ sub input
         pbm_tf_sets             => \%pbm_tf_sets,
         pending_tf_sets         => \%pending_tf_sets,
         #fam_tf_set              => $fam_tf_set,
-        in_t_gene_id_type       => $in_t_gene_id_type,
+        #in_t_gene_id_type       => $in_t_gene_id_type,
         in_t_gene_ids           => \@in_t_gene_ids,
         var_template            => "input_gene_ssa.html"
     };
@@ -368,9 +370,9 @@ sub results
     #$state->t_id_input_method($t_id_input_method);
 
     my $t_gene_id_type = $q->param("t_gene_id_type");
-    if (!defined $t_gene_id_type) {
-        return $self->error("Target gene ID type not specified");
-    }
+    #if (!defined $t_gene_id_type) {
+    #    return $self->error("Target gene ID type not specified");
+    #}
     #$state->t_gene_id_type($t_gene_id_type);
 
     my $bg_id_input_method = $q->param('bg_id_input_method');
@@ -379,14 +381,15 @@ sub results
     }
     #$state->bg_id_input_method($bg_id_input_method);
 
+	my $bg_gene_id_type;
 	my $bg_num_rand_genes;
-	my $bg_gene_id_type = DFLT_GENE_ID_TYPE;
 	if ($bg_id_input_method eq 'paste' || $bg_id_input_method eq 'upload') {
 	    $bg_gene_id_type = $q->param("bg_gene_id_type");
-	    unless (defined $bg_gene_id_type) {
-	        return $self->error("Background gene ID type not specified");
-	    }
+	    #unless (defined $bg_gene_id_type) {
+	    #    return $self->error("Background gene ID type not specified");
+	    #}
 	} elsif ($bg_id_input_method eq 'random') {
+        $bg_gene_id_type = DFLT_GENE_ID_TYPE;
         $bg_num_rand_genes = $q->param('bg_num_rand_genes');
 	    unless ($bg_num_rand_genes) {
 	        return $self->error(
@@ -755,11 +758,11 @@ sub results
 	}
 
 	if (defined $user_t_gene_file) {
-		$command .= " -utgf $user_t_gene_file";
+		$command .= " -utgf '$user_t_gene_file'";
 	}
 
 	if (defined $user_bg_gene_file) {
-		$command .= " -ubgf $user_bg_gene_file";
+		$command .= " -ubgf '$user_bg_gene_file'";
 	}
 
 	if ($state->biotype()) {
