@@ -432,13 +432,13 @@ unless ($t_gene_file) {
 # set optional parameters to default values if not provided by the user
 #
 
-unless (defined $t_gene_id_type) {
-    $t_gene_id_type = DFLT_GENE_ID_TYPE;
-}
+#unless (defined $t_gene_id_type) {
+#    $t_gene_id_type = DFLT_GENE_ID_TYPE;
+#}
 
-unless (defined $bg_gene_id_type) {
-    $bg_gene_id_type = DFLT_GENE_ID_TYPE;
-}
+#unless (defined $bg_gene_id_type) {
+#    $bg_gene_id_type = DFLT_GENE_ID_TYPE;
+#}
 
 unless (defined $conservation_level) {
 	$conservation_level = DFLT_CONSERVATION_LEVEL;
@@ -542,7 +542,9 @@ my (
 	$bg_missing_gene_ids,
 	$bg_gid_gene_ids,
 	$bg_operon_first_gids,
-	$bg_operon_unique_gids
+	$bg_operon_unique_gids,
+    $return_t_gene_id_type,
+    $return_bg_gene_id_type
 ) = fetch_gene_data_for_opossum_analysis(
     $ga, $oa, $cla, $has_operon, $biotype,
 	$t_gene_id_type, $t_gene_ids,
@@ -550,6 +552,13 @@ my (
 	%job_args
 );
 
+if (!defined $t_gene_id_type && defined $return_t_gene_id_type) {
+    $t_gene_id_type = $return_t_gene_id_type;
+}
+
+if (!defined $bg_gene_id_type && defined $return_bg_gene_id_type) {
+    $bg_gene_id_type = $return_bg_gene_id_type;
+}
 
 #
 # JASPAR / TF parameter settings
@@ -1135,13 +1144,13 @@ sub write_tfbs_cluster_details
 	my $anchor_cluster_tf_ids = $anchor_cluster->tf_ids();
 
 	# if results are truncated, show the relevant tf cluster ids only
-    my $tfcl_ids;
+    my @tfcl_ids;
 	#my $t_gids = $t_counts->gene_ids;
 	foreach my $result (@$cresults) {
-		push @$tfcl_ids, $result->id;
+		push @tfcl_ids, $result->id;
 	}
 
-    foreach my $tfcl_id (@$tfcl_ids) 
+    foreach my $tfcl_id (@tfcl_ids) 
 	{
         my $tfcl = $tf_cluster_set->get_tf_cluster($tfcl_id);
 		#my $tfcl_id = $tfcl->id();

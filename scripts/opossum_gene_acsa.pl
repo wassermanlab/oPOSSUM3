@@ -433,13 +433,13 @@ unless ($t_gene_file) {
 
 #$collection = 'CORE' if !$collection;
 
-unless (defined $t_gene_id_type) {
-    $t_gene_id_type = DFLT_GENE_ID_TYPE;
-}
+#unless (defined $t_gene_id_type) {
+#    $t_gene_id_type = DFLT_GENE_ID_TYPE;
+#}
 
-unless (defined $bg_gene_id_type) {
-    $bg_gene_id_type = DFLT_GENE_ID_TYPE;
-}
+#unless (defined $bg_gene_id_type) {
+#    $bg_gene_id_type = DFLT_GENE_ID_TYPE;
+#}
 
 unless (defined $conservation_level) {
 	$conservation_level = DFLT_CONSERVATION_LEVEL;
@@ -543,7 +543,9 @@ my (
 	$bg_missing_gene_ids,
 	$bg_gid_gene_ids,
 	$bg_operon_first_gids,
-	$bg_operon_unique_gids
+	$bg_operon_unique_gids,
+    $return_t_gene_id_type,
+    $return_bg_gene_id_type
 ) = fetch_gene_data_for_opossum_analysis(
     $ga, $oa, $cla, $has_operon, $biotype,
 	$t_gene_id_type, $t_gene_ids,
@@ -551,6 +553,13 @@ my (
 	%job_args
 );
 
+if (!defined $t_gene_id_type && defined $return_t_gene_id_type) {
+    $t_gene_id_type = $return_t_gene_id_type;
+}
+
+if (!defined $bg_gene_id_type && defined $return_bg_gene_id_type) {
+    $bg_gene_id_type = $return_bg_gene_id_type;
+}
 
 #
 # JASPAR / TF parameter settings
@@ -909,12 +918,17 @@ if ($plotter) {
     )) {
         $logger->error("Plotting error: $plot_err");
     }
+} else {
+    $logger->error("Error initializing plotting");
+}
 
+$plotter = OPOSSUM::Plot::ScoreVsGC->new();
+if ($plotter) {
     $logger->info("Plotting Fisher scores vs. profile \%GC content");
 
     my $fisher_plot_file = "$abs_results_dir/" . FISHER_PLOT_FILENAME;
 
-    $plot_err = "";
+    my $plot_err = "";
     unless($plotter->plot(
         $cresults, $tf_set, 'Fisher', FISHER_PLOT_SD_FOLD,
         $fisher_plot_file, \$plot_err
