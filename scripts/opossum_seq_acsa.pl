@@ -693,14 +693,19 @@ if ($plotter) {
     )) {
         $logger->error("Plotting error: $plot_err");
     }
+} else {
+    $logger->error("Error initializing content plotting");
+}
 
+$plotter = OPOSSUM::Plot::ScoreVsGC->new();
+if ($plotter) {
     $logger->info(
         "Plotting Fisher scores vs. profile \%GC content plotting"
     );
 
     my $fisher_plot_file = "$abs_results_dir/" . FISHER_PLOT_FILENAME;
 
-    $plot_err = "";
+    my $plot_err = "";
     unless($plotter->plot(
         $cresults, $tf_set, 'Fisher', FISHER_PLOT_SD_FOLD, $fisher_plot_file,
         \$plot_err
