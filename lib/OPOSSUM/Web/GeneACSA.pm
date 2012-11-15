@@ -624,12 +624,14 @@ sub process
     if ($t_id_input_method eq 'upload') {
         $user_t_gene_file = $q->param('t_gene_file');
         $user_t_gene_file =~ s/.*\///;
+        $user_t_gene_file =~ s/\s+//g;
     }
 
     my $user_bg_gene_file;
     if ($bg_id_input_method eq 'upload') {
         $user_bg_gene_file = $q->param('bg_gene_file');
         $user_bg_gene_file =~ s/.*\///;
+        $user_bg_gene_file =~ s/\s+//g;
     }
 
     #
