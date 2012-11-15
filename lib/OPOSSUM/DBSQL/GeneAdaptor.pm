@@ -774,20 +774,32 @@ sub _fetch_gene_ids_by_external_id_helper
     push @$ext_ids, $ext_id if $ext_id;
 	
     my $sql =
-        qq{select g.gene_id, g.ensembl_id, xgi.id_type
+        qq{select g.gene_id, g.ensembl_id, xgi.external_id, xgi.id_type
            from genes g, external_gene_ids xgi
            where g.gene_id = xgi.gene_id
-           and xgi.external_id = ?};
+        };
 			
     if (defined $ext_id_type) {
         $sql .= " and xgi.id_type = $ext_id_type";
     }
 
+    if ($ext_ids && $ext_ids->[0]) {
+        $sql .= " and xgi.external_id in ('";
+        $sql .= join "','", @$ext_ids;
+        $sql .= " ')";
+    }
+
     my $sth = $self->prepare($sql);
-    if (!$sth) {
+    unless ($sth) {
         carp "Error preparing fetch gene ID:\n$sql\n"
             . $self->errstr;
         return;
+    }
+
+    unless ($sth->execute()) {
+        carp "Error executing fetch gene IDs by external IDs:\n$sql\n"
+            . $self->errstr;
+        next;
     }
 
     my @gene_ids;
@@ -795,66 +807,59 @@ sub _fetch_gene_ids_by_external_id_helper
     my %ext_id_included;
     my %gene_id_ext_id_included;
     my %ext_id_type_included;
-    foreach my $ext_id (@$ext_ids) {
-        if (!$sth->execute($ext_id)) {
-            carp "Error executing fetch gene ID:\n$sql\n"
-                . "with external_id = $ext_id"
-                . $self->errstr;
-            next;
+
+    #
+    # There can be a many-to-many mapping of oPOSSUM gene IDs and
+    # external gene IDs.
+    #
+    while (my @row = $sth->fetchrow_array) {
+        my $gene_id = $row[0];
+        my $ensid   = $row[1];
+        my $ext_id  = $row[2];
+        my $id_type = $row[3];
+
+        #
+        # Keep track of which external ID type was mapped to the
+        # external gene ID of the fetched row.
+        #
+        $ext_id_type_included{$id_type} = 1;
+
+        #
+        # There is a 1-to-1 mapping of oPOSSUM gene IDs
+        # and Ensembl IDs.
+        #
+        unless ($gene_included{$gene_id}) {
+            $gene_included{$gene_id} = 1;
+
+            push @gene_ids, $gene_id;
+
+            $gene_id_ensembl_ids->{$gene_id} = $ensid;
         }
 
         #
-        # There can be a many-to-many mapping of oPOSSUM gene IDs and
-        # external gene IDs.
+        # Each external gene ID can have multiple oPOSSUM gene IDs
+        # mapped to it.
         #
-        while (my @row = $sth->fetchrow_array) {
-            my $gene_id = $row[0];
-            my $ensid   = $row[1];
-            my $id_type = $row[2];
+        unless ($ext_id_included{$ext_id}) {
+            push @$mapped_ext_ids, $ext_id;
 
-            #
-            # Keep track of which external ID type was mapped to the
-            # external gene ID of the fetched row.
-            #
-            $ext_id_type_included{$id_type} = 1;
+            $ext_id_included{$ext_id} = 1;
+        }
 
-            #
-            # There is a 1-to-1 mapping of oPOSSUM gene IDs
-            # and Ensembl IDs.
-            #
-            unless ($gene_included{$gene_id}) {
-                $gene_included{$gene_id} = 1;
+        #
+        # If not limiting to a specific external gene ID type, we could
+        # have duplicate oPOSSUM gene ID to external gene ID mappings
+        # as the same external ID can be stored as with more than one
+        # external gene ID type, e.g. for some fly/worm/yeast genes the
+        # symbols used by Ensembl are not Ensembl specific (ENS*) gene
+        # symbols and duplicate the flyBase, wormBase etc symbols.
+        # DJA 2012/11/1
+        #
+        unless ($gene_id_ext_id_included{$gene_id}->{$ext_id}) {
+            push @{$ext_id_gene_ids->{$ext_id}}, $gene_id;
+            push @{$gene_id_ext_ids->{$gene_id}}, $ext_id;
 
-                push @gene_ids, $gene_id;
-
-                $gene_id_ensembl_ids->{$gene_id} = $ensid;
-            }
-
-            #
-            # Each external gene ID can have multiple oPOSSUM gene IDs
-            # mapped to it.
-            #
-            unless ($ext_id_included{$ext_id}) {
-                push @$mapped_ext_ids, $ext_id;
-
-                $ext_id_included{$ext_id} = 1;
-            }
-
-            #
-            # If not limiting to a specific external gene ID type, we could
-            # have duplicate oPOSSUM gene ID to external gene ID mappings
-            # as the same external ID can be stored as with more than one
-            # external gene ID type, e.g. for some fly/worm/yeast genes the
-            # symbols used by Ensembl are not Ensembl specific (ENS*) gene
-            # symbols and duplicate the flyBase, wormBase etc symbols.
-            # DJA 2012/11/1
-            #
-            unless ($gene_id_ext_id_included{$gene_id}->{$ext_id}) {
-                push @{$ext_id_gene_ids->{$ext_id}}, $gene_id;
-                push @{$gene_id_ext_ids->{$gene_id}}, $ext_id;
-
-                $gene_id_ext_id_included{$gene_id}->{$ext_id} = 1;
-            }
+            $gene_id_ext_id_included{$gene_id}->{$ext_id} = 1;
         }
     }
     $sth->finish;
