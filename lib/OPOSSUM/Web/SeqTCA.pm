@@ -470,23 +470,23 @@ sub process
     }
 
     if ($user_tf_family_file) {
-        $command .= " -ufamf $user_tf_family_file";
+        $command .= " -ufamf '$user_tf_family_file'";
     }
 
     if ($user_seq_file) {
-        $command .= " -utsf $user_seq_file";
+        $command .= " -utsf '$user_seq_file'";
     }
 
     if ($user_bg_seq_file) {
-        $command .= " -ubsf $user_bg_seq_file";
+        $command .= " -ubsf '$user_bg_seq_file'";
     }
     
     if ($user_peak_pos_file) {
-        $command .= " -utpf $user_peak_pos_file";
+        $command .= " -utpf '$user_peak_pos_file'";
     }
 
     if ($user_bg_peak_pos_file) {
-        $command .= " -ubpf $user_bg_peak_pos_file";
+        $command .= " -ubpf '$user_bg_peak_pos_file'";
     }
     
     if ($bg_seq_set_name) {

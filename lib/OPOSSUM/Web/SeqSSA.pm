@@ -607,23 +607,23 @@ sub process
     }
     
     if ($user_matrix_file) {
-        $command .= " -umf $user_matrix_file";
+        $command .= " -umf '$user_matrix_file'";
     }
 
     if ($user_seq_file) {
-        $command .= " -utsf $user_seq_file";
+        $command .= " -utsf '$user_seq_file'";
     }
 
     if ($user_bg_seq_file) {
-        $command .= " -ubsf $user_bg_seq_file";
+        $command .= " -ubsf '$user_bg_seq_file'";
     }
 
     if ($user_peak_pos_file) {
-        $command .= " -utpf $user_peak_pos_file";
+        $command .= " -utpf '$user_peak_pos_file'";
     }
 
     if ($user_bg_peak_pos_file) {
-        $command .= " -ubpf $user_bg_peak_pos_file";
+        $command .= " -ubpf '$user_bg_peak_pos_file'";
     }
 
     my $submitted_time = scalar localtime(time);

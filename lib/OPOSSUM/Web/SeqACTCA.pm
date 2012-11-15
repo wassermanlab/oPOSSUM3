@@ -472,11 +472,11 @@ sub process
 
 	#printf LOG "6:  $command\n\n";
     if ($user_seq_file) {
-        $command .= " -utsf $user_seq_file";
+        $command .= " -utsf '$user_seq_file'";
     }
 
     if ($user_bg_seq_file) {
-        $command .= " -ubsf $user_bg_seq_file";
+        $command .= " -ubsf '$user_bg_seq_file'";
     }
 
     if ($bg_seq_set_name) {
@@ -484,7 +484,7 @@ sub process
     }
 
     if ($user_tf_family_file) {
-        $command .= " -ufamf $user_tf_family_file";
+        $command .= " -ufamf '$user_tf_family_file'";
     }
 
 	#printf LOG "Done\n";
