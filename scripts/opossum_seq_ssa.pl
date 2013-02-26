@@ -538,7 +538,11 @@ my $tf_set = OPOSSUM::TFSet->new(-matrix_set => $matrix_set);
 # DJA 2012/11/07
 #
 
-my $write_details = 1;
+my $write_details = 0;
+unless ($nh) {
+    $write_details = 1;
+}
+
 $logger->info(
     "Searching target sequences for TFBSs, computing counts and TFBS"
     . " to peak max. distances"
