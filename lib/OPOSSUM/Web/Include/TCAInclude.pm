@@ -96,8 +96,8 @@ sub get_tf_family_file
     
     my $filename;
     if ($fam_input_method eq "specific") {
-        my $sl = $q->param('tf_families');
-        if (!$sl) {
+        my @fams = $q->param('tf_families');
+        if (!@fams) {
             $self->_error("TF families not specified");
             return;
         }
@@ -107,7 +107,10 @@ sub get_tf_family_file
             $self->_error("Unable to create TF family list file $filename\n");
             return;
         }
-        print FH $sl;
+
+        foreach my $fam (@fams) {
+            print FH "$fam\n";
+        }
         close(FH);
     } elsif ($fam_input_method eq "upload") {
         my $file = $q->param('tf_family_upload_file');
