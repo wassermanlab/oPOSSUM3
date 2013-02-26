@@ -453,12 +453,18 @@ sub process
     
     # make sure that bg_peak_pos is specified only if user is supplying own
     # background sequence set
-    if ($bg_seq_input_method eq 'default' && defined $bg_peak_pos_input_method)
-    {
-        return $self->error(
-            "Cannot specify peak max positions when using default sequence sets"
-        );
-    }
+    #
+    # This doesn't work as the bg_peak_pos_input_method is always set to
+    # something. If we check anything we should check that an actual upload
+    # file or pasted values were provided. How was this bug introduced? Why
+    # wasn't it picked up before??? DJA 2013/02/25
+    #
+    #if ($bg_seq_input_method eq 'default' && defined $bg_peak_pos_input_method)
+    #{
+    #    return $self->error(
+    #        "Cannot specify peak max positions when using default sequence sets"
+    #    );
+    #}
     
     #
     # user TF file
