@@ -389,7 +389,7 @@ sub write_results_text
                     ? sprintf("%.3f", $result->ks_p_value()) : 'NA';
         }
     } else {
-        $text = "TF Name\tClass\tFamily\tTax Group\tIC\tTarget seq hits\tTarget seq non-hits\tBackground seq hits\tBackground seq non-hits\tTarget TFBS hits\tTarget TFBS nucleotide rate\tBackground TFBS hits\tBackground TFBS nucleotide rate\tZ-score\tFisher score\tPeakDist p-value\n";
+        $text = "TF Name\tClass\tFamily\tTax Group\tIC\tTarget seq hits\tTarget seq non-hits\tBackground seq hits\tBackground seq non-hits\tTarget TFBS hits\tTarget TFBS nucleotide rate\tBackground TFBS hits\tBackground TFBS nucleotide rate\tZ-score\tFisher score\tKS score\n";
 
         foreach my $result (@$results) {
             my $tf = $tf_set->get_tf($result->id());
