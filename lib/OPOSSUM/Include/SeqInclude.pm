@@ -48,8 +48,9 @@ sub check_seqs
     foreach my $seq (@$seqs) {
         unless ($seq->seq) {
             my $msg = sprintf(
-                  "Poorly formatted $t_or_bg sequences. Sequence ID %s has no"
-                . " actual sequence associated with it.", $seq->display_id
+                  "Poorly formatted $t_or_bg sequences. Please make sure your"
+                . " sequences are in FASTA format. Sequence at:\n%s",
+                $seq->display_id
             );
 
             fatal($msg, %job_args);
