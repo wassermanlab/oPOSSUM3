@@ -227,6 +227,9 @@ sub read_matrices
     while (my $line = <FH>) {
         chomp $line;
 
+        $line =~ s/^\s+//;
+        $line =~ s/\s+$//;
+
         next if !$line;
 
         if ($line =~ /^>\s*(\S+)\s+(\S+)/) {
@@ -239,7 +242,7 @@ sub read_matrices
             if ($line =~ /^\s*[ACGT]\s*\[\s*(.*)\s*\]/) {
                 # line of the form: A [ # # # ... # ]
                 $matrix_string .= "$1\n";
-            } elsif ($line =~ /^\s*\d+/) {
+            } elsif ($line =~ /^\s*-{0,1}\d+/) {
                 # line of the form: # # # ... #
                 $matrix_string .= "$line\n";
             } else {
