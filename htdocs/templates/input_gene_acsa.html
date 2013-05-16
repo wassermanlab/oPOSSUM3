@@ -268,13 +268,13 @@ function verify(f)
     <br>
     <span class="subtext">
     <input type="file" name="bg_gene_file" size="40"
-      onClick="{input.bg_id_input_method[2].checked=true}"
-      onFocus="{input.bg_id_input_method[2].checked=true}"
+      onClick="{input.bg_id_input_method[3].checked=true}"
+      onFocus="{input.bg_id_input_method[3].checked=true}"
       onChange="{
         if (!isblank(input.bg_gene_file.value))
-          {input.bg_id_input_method[2].checked=true}
+          {input.bg_id_input_method[3].checked=true}
         else if (!isblank(input.bg_gene_text.value))
-          {input.bg_id_input_method[1].checked=true}
+          {input.bg_id_input_method[2].checked=true}
         else
           {input.bg_id_input_method[0].checked=true}
       }">
