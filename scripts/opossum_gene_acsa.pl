@@ -485,7 +485,7 @@ if (scalar @$t_gene_ids > MAX_TARGET_GENES) {
 my $bg_gene_ids;
 if ($bg_gene_file) {
     $logger->info("Reading background gene IDs file");
-	my $bg_gene_ids = read_gene_ids_from_file($bg_gene_file, %job_args);
+	$bg_gene_ids = read_gene_ids_from_file($bg_gene_file, %job_args);
     unless ($bg_gene_ids) {
         fatal(
             "No background gene IDs read from file $bg_gene_file", %job_args
