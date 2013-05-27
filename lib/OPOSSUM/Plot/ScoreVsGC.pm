@@ -200,6 +200,14 @@ sub plot
         push @names, $tf->name;
     }
 
+    unless (@scores && defined $scores[0]) {
+        $$error = "No results with defined $plot_type scores";
+        carp $$error;
+        return;
+    }
+
+    my $num_scores = scalar @scores;
+
     my $mean = _compute_mean(\@scores);
     my $sd = _compute_sd(\@scores, $mean);
     my $threshold = _compute_threshold($mean, $sd, $sd_fold);
@@ -218,7 +226,6 @@ sub plot
     # for labelling on the graph.
     #
     my $has_inf = 0;
-    my $num_scores = scalar @scores;
     foreach my $i (0..$num_scores - 1) {
         my $score = $scores[$i];
 
@@ -285,8 +292,8 @@ sub plot
 
     my $num_scores_above = scalar @scores_above;
     foreach my $i (0..$num_scores_above - 1) {
-        if ($scores[$i] == $nan) {
-            $scores[$i] = 0;
+        if ($scores_above[$i] == $nan) {
+            $scores_above[$i] = 0;
         } elsif ($scores_above[$i] > $max_score) {
             $scores_above[$i] = $max_score;
         } elsif ($scores_above[$i] < $min_score) {
@@ -313,11 +320,9 @@ sub plot
     push @R_cmds, qq{ylimit = c($min_score, $max_score)};
     push @R_cmds, qq{png(filename="$filename", units="px", width=1024, height=1024, res=NA, pointsize=16, bg="white")};
 
-    if (@scores && $scores[0]) {
-        push @R_cmds, qq{plot(gc, scores, cex=0.5, cex.axis=0.9, cex.main=0.8, main="$title", xlab="TF profile \%GC composition", ylab="$ylab", xlim=xlimit, ylim=ylimit, las=1)};
-    }
+    push @R_cmds, qq{plot(gc, scores, cex=0.5, cex.axis=0.9, cex.main=0.8, main="$title", xlab="TF profile \%GC composition", ylab="$ylab", xlim=xlimit, ylim=ylimit, las=1)};
 
-    if (@scores_above && $scores_above[0]) {
+    if (@scores_above && defined $scores_above[0]) {
         push @R_cmds, q{text(gc_above, scores_above, labels=names_above, pos=3, offset=0.2, cex=0.8)};
     }
 
