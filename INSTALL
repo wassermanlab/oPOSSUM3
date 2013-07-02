@@ -15,10 +15,28 @@ by oPOSSUM.
 	oPOSSUM3_yeast
 	TFBS_cluster
 
-   To download the databases from our servers see section below.
+   To download the databases from our servers see section below. You only have
+   to download and install the databases for the species you are interested in.
+   If you do not plan to do cluster analysis then you don't need to download
+   and install the TFBS_cluster database either.
 
-   Now you must create a user "opossum_r" with select privileges on the
-   each of the databases, e.g.
+   You must have a local MySQL server set up. Setting up MySQL is beyond the
+   scope of this document. Please see the MySQL documentation at
+   http://dev.mysql.com/doc.
+
+   Load each of the species databases and the TFBS_cluster database. From
+   the command line:
+
+   $ mysql -u root -p < oPOSSUM3_human.sql
+
+   Enter the MySQL root password when prompted. Note, if you didn't set a MySQL
+   root password, leave out the -p switch in the command above. Run this for
+   each of the species databases you plan to use and the TFBS_cluster database
+   if you plan to do cluster analyses.
+
+   After you have finished loading the oPOSSUM databases, you must create a
+   user "opossum_r" with select privileges on each of these databases. Log
+   into mysql and run the following, e.g.:
 
     mysql> grant select on oPOSSUM3_human.* to opossum_r@'%'; (etc..)
 
