@@ -238,7 +238,7 @@ sub add_matrix_set
 {
     my ($self, $matrix_set) = @_;
 
-    return unless $matrix_set;;
+    return unless $matrix_set;
 
     unless ($matrix_set->isa('TFBS::MatrixSet')) {
         carp("Not a TFBS::MatrixSet");
