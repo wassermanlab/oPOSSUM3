@@ -727,7 +727,7 @@ if ($ok)
 
 }
 
-$logger->info("Sending notification email to $email");
+#$logger->info("Sending notification email to $email");
 
 $job_args{-web} = $web;
 $job_args{-abs_results_dir} = $abs_results_dir;
