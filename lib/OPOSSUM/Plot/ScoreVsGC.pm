@@ -311,7 +311,6 @@ sub plot
     $R->set('gc_above', \@gc_above);
     $R->set('scores_above', \@scores_above);
     $R->set('names_above', \@names_above);
-    $R->set('gc', \@gc);
     $R->set('leg', \@legend);
 
     my @R_cmds;

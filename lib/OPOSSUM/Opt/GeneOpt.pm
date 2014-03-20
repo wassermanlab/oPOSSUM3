@@ -3,7 +3,7 @@
 #
 
 # The maximum number of target genes a user is allowed to paste/upload
-use constant MAX_TARGET_GENES           => 1000;
+use constant MAX_TARGET_GENES           => 2000;
 
 # Form selection values and default settings
 use constant DFLT_BG_NUM_RAND_GENES     => 5000;

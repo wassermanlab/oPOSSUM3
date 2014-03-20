@@ -58,6 +58,7 @@ use constant REL_HTDOCS_DATA_PATH       => REL_HTDOCS_PATH . '/data';
 #
 # External URLs
 #
+#use constant JASPAR_URL => 'http://asp.ii.uib.no:8090/cgi-bin/jaspar2010/jaspar_db.pl';
 use constant JASPAR_URL => 'http://jaspar.genereg.net/cgi-bin/jaspar_db.pl';
 use constant PAZAR_URL  => 'http://www.pazar.info/cgi-bin/display_JASPAR_profile.cgi';
 
