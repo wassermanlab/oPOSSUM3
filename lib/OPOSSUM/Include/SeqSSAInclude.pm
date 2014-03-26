@@ -342,13 +342,21 @@ sub write_results_text
     $logger->info("Writing analysis results to $filename\n");
 
     my $text;
-    if (!$tf_file)
-    {
+
+#
+#    This special case existed because if the profiles are custom profiles
+#    from a user specified file ($tf_file is defined) the TF objects didn't
+#    (necessarily) have an ID defined. Therefore the output should not include
+#    an TF ID header/data column. This changed though so all TF objects
+#    have the ID set (even if it just duplicates the name) and we should
+#    probably maintain consistency in the output columns.
+#
+#    if (!$tf_file) {
         #
         # Single line (tab-delimited) header format
         # NOTE: rearranged columns
         #
-        $text = "TF\tJASPAR ID\tClass\tFamily\tTax Group\tIC\tGC Content\tTarget seq hits\tTarget seq non-hits\tBackground seq hits\tBackground seq non-hits\tTarget TFBS hits\tTarget TFBS nucleotide rate\tBackground TFBS hits\tBackground TFBS nucleotide rate\tZ-score\tFisher score\tKS score\n";
+        $text = "TF\tID\tClass\tFamily\tTax Group\tIC\tGC Content\tTarget seq hits\tTarget seq non-hits\tBackground seq hits\tBackground seq non-hits\tTarget TFBS hits\tTarget TFBS nucleotide rate\tBackground TFBS hits\tBackground TFBS nucleotide rate\tZ-score\tFisher score\tKS score\n";
 
         foreach my $result (@$results) {
             my $tf = $tf_set->get_tf($result->id());
@@ -365,7 +373,7 @@ sub write_results_text
             $text .= sprintf 
                 "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%s\t%d\t%s\t%s\t%s\t%s\n",
                 $tf->name(),
-                $tf->ID(),
+                $tf->ID() || 'NA',
                 $tf->class() || 'NA',
                 $tf->tag('family') || 'NA',
                 $tf->tag('tax_group') || 'NA',
@@ -388,44 +396,44 @@ sub write_results_text
                 defined $result->ks_p_value()
                     ? sprintf("%.3f", $result->ks_p_value()) : 'NA';
         }
-    } else {
-        $text = "TF Name\tClass\tFamily\tTax Group\tIC\tTarget seq hits\tTarget seq non-hits\tBackground seq hits\tBackground seq non-hits\tTarget TFBS hits\tTarget TFBS nucleotide rate\tBackground TFBS hits\tBackground TFBS nucleotide rate\tZ-score\tFisher score\tKS score\n";
-
-        foreach my $result (@$results) {
-            my $tf = $tf_set->get_tf($result->id());
-
-            my $total_ic;
-            if ($tf->isa("TFBS::Matrix::PFM")) {
-                $total_ic = sprintf("%.3f", $tf->to_ICM->total_ic());
-            } else {
-                $total_ic = 'NA';
-            }
-
-            $text .= sprintf 
-                "%s\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%s\t%d\t%s\t%s\t%s\t%s\n",
-                $tf->name(),
-                $tf->class() || 'NA',
-                $tf->tag('family') || 'NA',
-                $tf->tag('tax_group') || 'NA',
-                $total_ic,
-                $result->t_gene_hits() || 0,
-                $result->t_gene_no_hits() || 0,
-                $result->bg_gene_hits() || 0,
-                $result->bg_gene_no_hits() || 0,
-                $result->t_tfbs_hits() || 0,
-                defined $result->t_tfbs_rate()
-                    ? sprintf("%.3f", $result->t_tfbs_rate()) : 'NA',
-                $result->bg_tfbs_hits() || 0,
-                defined $result->bg_tfbs_rate()
-                    ? sprintf("%.3f", $result->bg_tfbs_rate()) : 'NA',
-                defined $result->zscore()
-                    ? sprintf("%.3f", $result->zscore()) : 'NA',
-                defined $result->fisher_p_value()
-                    ? sprintf("%.3f", $result->fisher_p_value()) : 'NA',
-                defined $result->ks_p_value()
-                    ? sprintf("%.3f", $result->ks_p_value()) : 'NA';
-        }
-    }
+#    } else {
+#        $text = "TF Name\tClass\tFamily\tTax Group\tIC\tTarget seq hits\tTarget seq non-hits\tBackground seq hits\tBackground seq non-hits\tTarget TFBS hits\tTarget TFBS nucleotide rate\tBackground TFBS hits\tBackground TFBS nucleotide rate\tZ-score\tFisher score\tKS score\n";
+#
+#        foreach my $result (@$results) {
+#            my $tf = $tf_set->get_tf($result->id());
+#
+#            my $total_ic;
+#            if ($tf->isa("TFBS::Matrix::PFM")) {
+#                $total_ic = sprintf("%.3f", $tf->to_ICM->total_ic());
+#            } else {
+#                $total_ic = 'NA';
+#            }
+#
+#            $text .= sprintf 
+#                "%s\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%s\t%d\t%s\t%s\t%s\t%s\n",
+#                $tf->name(),
+#                $tf->class() || 'NA',
+#                $tf->tag('family') || 'NA',
+#                $tf->tag('tax_group') || 'NA',
+#                $total_ic,
+#                $result->t_gene_hits() || 0,
+#                $result->t_gene_no_hits() || 0,
+#                $result->bg_gene_hits() || 0,
+#                $result->bg_gene_no_hits() || 0,
+#                $result->t_tfbs_hits() || 0,
+#                defined $result->t_tfbs_rate()
+#                    ? sprintf("%.3f", $result->t_tfbs_rate()) : 'NA',
+#                $result->bg_tfbs_hits() || 0,
+#                defined $result->bg_tfbs_rate()
+#                    ? sprintf("%.3f", $result->bg_tfbs_rate()) : 'NA',
+#                defined $result->zscore()
+#                    ? sprintf("%.3f", $result->zscore()) : 'NA',
+#                defined $result->fisher_p_value()
+#                    ? sprintf("%.3f", $result->fisher_p_value()) : 'NA',
+#                defined $result->ks_p_value()
+#                    ? sprintf("%.3f", $result->ks_p_value()) : 'NA';
+#        }
+#    }
     
     unless (open(FH, ">$filename")) {
         fatal("Unable to create results text file $filename", %$job_args);
