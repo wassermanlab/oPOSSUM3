@@ -316,6 +316,7 @@ sub process
 			return $self->error(
 				"Error parsing TFBS profile matrices from pasted text");
 		}
+	} elsif ($tf_select_criteria eq 'upload') {
         my $matrix_upload_file = $q->param('matrix_upload_file');
         my $matrix_upload_fh   = $q->upload('matrix_upload_file');
 
