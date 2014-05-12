@@ -1,6 +1,6 @@
 =head1 NAME
 
- OPOSSUM::Include::SeqSSAInclude.pm
+ OPOSSUM::Include::SeqTCAInclude.pm
 
 =head1 SYNOPSIS
 

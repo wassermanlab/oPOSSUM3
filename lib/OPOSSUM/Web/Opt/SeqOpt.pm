@@ -1,7 +1,7 @@
 #
 # Sequence-based oPOSSUM web specific options
 #
-use constant MAX_SEQ_FILE_SIZE  => 40000000;
+use constant MAX_SEQ_FILE_SIZE  => 20000000;
 
 #use constant DFLT_BACKGROUND    => 'MM0444_min05_peak_seqs.fa';
 use constant DFLT_BACKGROUND    => 'MM0444_min05_5000_rand_peak_seqs.fa';
