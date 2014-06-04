@@ -333,7 +333,7 @@ sub compute_tfbs_peak_distances
 #
 sub write_results_text
 {
-    my ($filename, $results, $tf_set, $tf_file, $job_args) = @_;
+    my ($filename, $results, $tf_set, $job_args) = @_;
 
     return unless $results && $results->[0];
 
@@ -341,99 +341,52 @@ sub write_results_text
     my $logger = $$job_args{-logger};
     $logger->info("Writing analysis results to $filename\n");
 
-    my $text;
+    #
+    # Single line (tab-delimited) header format
+    # NOTE: rearranged columns
+    #
+    my $text = "TF Name\tTF ID\tClass\tFamily\tTax Group\tIC\tGC Content\tTarget seq hits\tTarget seq non-hits\tBackground seq hits\tBackground seq non-hits\tTarget TFBS hits\tTarget TFBS nucleotide rate\tBackground TFBS hits\tBackground TFBS nucleotide rate\tZ-score\tFisher score\tKS score\n";
 
-#
-#    This special case existed because if the profiles are custom profiles
-#    from a user specified file ($tf_file is defined) the TF objects didn't
-#    (necessarily) have an ID defined. Therefore the output should not include
-#    an TF ID header/data column. This changed though so all TF objects
-#    have the ID set (even if it just duplicates the name) and we should
-#    probably maintain consistency in the output columns.
-#
-#    if (!$tf_file) {
-        #
-        # Single line (tab-delimited) header format
-        # NOTE: rearranged columns
-        #
-        $text = "TF\tID\tClass\tFamily\tTax Group\tIC\tGC Content\tTarget seq hits\tTarget seq non-hits\tBackground seq hits\tBackground seq non-hits\tTarget TFBS hits\tTarget TFBS nucleotide rate\tBackground TFBS hits\tBackground TFBS nucleotide rate\tZ-score\tFisher score\tKS score\n";
+    foreach my $result (@$results) {
+        my $tf = $tf_set->get_tf($result->id());
 
-        foreach my $result (@$results) {
-            my $tf = $tf_set->get_tf($result->id());
-
-            my $total_ic;
-            if ($tf->isa("TFBS::Matrix::PFM")) {
-                $total_ic = sprintf("%.3f", $tf->to_ICM->total_ic());
-            } else {
-                $total_ic = 'NA';
-            }
-            
-            my $gc_content = sprintf("%.3f", $tf->tag('gc_content'));
-
-            $text .= sprintf 
-                "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%s\t%d\t%s\t%s\t%s\t%s\n",
-                $tf->name(),
-                $tf->ID() || 'NA',
-                $tf->class() || 'NA',
-                $tf->tag('family') || 'NA',
-                $tf->tag('tax_group') || 'NA',
-                $total_ic,
-                $gc_content,
-                $result->t_gene_hits() || 0,
-                $result->t_gene_no_hits() || 0,
-                $result->bg_gene_hits() || 0,
-                $result->bg_gene_no_hits() || 0,
-                $result->t_tfbs_hits() || 0,
-                defined $result->t_tfbs_rate()
-                    ? sprintf("%.3g", $result->t_tfbs_rate()) : 'NA',
-                $result->bg_tfbs_hits() || 0,
-                defined $result->bg_tfbs_rate()
-                    ? sprintf("%.3g", $result->bg_tfbs_rate()) : 'NA',
-                defined $result->zscore()
-                    ? sprintf("%.3f", $result->zscore()) : 'NA',
-                defined $result->fisher_p_value()
-                    ? sprintf("%.3f", $result->fisher_p_value()) : 'NA',
-                defined $result->ks_p_value()
-                    ? sprintf("%.3f", $result->ks_p_value()) : 'NA';
+        my $total_ic;
+        if ($tf->isa("TFBS::Matrix::PFM")) {
+            $total_ic = sprintf("%.3f", $tf->to_ICM->total_ic());
+        } else {
+            $total_ic = 'NA';
         }
-#    } else {
-#        $text = "TF Name\tClass\tFamily\tTax Group\tIC\tTarget seq hits\tTarget seq non-hits\tBackground seq hits\tBackground seq non-hits\tTarget TFBS hits\tTarget TFBS nucleotide rate\tBackground TFBS hits\tBackground TFBS nucleotide rate\tZ-score\tFisher score\tKS score\n";
-#
-#        foreach my $result (@$results) {
-#            my $tf = $tf_set->get_tf($result->id());
-#
-#            my $total_ic;
-#            if ($tf->isa("TFBS::Matrix::PFM")) {
-#                $total_ic = sprintf("%.3f", $tf->to_ICM->total_ic());
-#            } else {
-#                $total_ic = 'NA';
-#            }
-#
-#            $text .= sprintf 
-#                "%s\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%s\t%d\t%s\t%s\t%s\t%s\n",
-#                $tf->name(),
-#                $tf->class() || 'NA',
-#                $tf->tag('family') || 'NA',
-#                $tf->tag('tax_group') || 'NA',
-#                $total_ic,
-#                $result->t_gene_hits() || 0,
-#                $result->t_gene_no_hits() || 0,
-#                $result->bg_gene_hits() || 0,
-#                $result->bg_gene_no_hits() || 0,
-#                $result->t_tfbs_hits() || 0,
-#                defined $result->t_tfbs_rate()
-#                    ? sprintf("%.3f", $result->t_tfbs_rate()) : 'NA',
-#                $result->bg_tfbs_hits() || 0,
-#                defined $result->bg_tfbs_rate()
-#                    ? sprintf("%.3f", $result->bg_tfbs_rate()) : 'NA',
-#                defined $result->zscore()
-#                    ? sprintf("%.3f", $result->zscore()) : 'NA',
-#                defined $result->fisher_p_value()
-#                    ? sprintf("%.3f", $result->fisher_p_value()) : 'NA',
-#                defined $result->ks_p_value()
-#                    ? sprintf("%.3f", $result->ks_p_value()) : 'NA';
-#        }
-#    }
+        
+        my $gc_content = "NA";
+        if ($tf->tag('gc_content')) {
+            $gc_content = sprintf("%.3f", $tf->tag('gc_content'));
+        }
+
+        $text .= sprintf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%s\t%d\t%s\t%s\t%s\t%s\n",
+            $tf->name(),
+            $tf->ID() || 'NA',
+            $tf->class() || 'NA',
+            $tf->tag('family') || 'NA',
+            $tf->tag('tax_group') || 'NA',
+            $total_ic,
+            $gc_content,
+            $result->t_gene_hits() || 0,
+            $result->t_gene_no_hits() || 0,
+            $result->bg_gene_hits() || 0,
+            $result->bg_gene_no_hits() || 0,
+            $result->t_tfbs_hits() || 0,
+            defined $result->t_tfbs_rate()
+                ? sprintf("%.3g", $result->t_tfbs_rate()) : 'NA',
+            $result->bg_tfbs_hits() || 0,
+            defined $result->bg_tfbs_rate()
+                ? sprintf("%.3g", $result->bg_tfbs_rate()) : 'NA',
+            defined $result->zscore()
+                ? sprintf("%.3f", $result->zscore()) : 'NA',
+            defined $result->fisher_p_value()
+                ? sprintf("%.3f", $result->fisher_p_value()) : 'NA',
+            defined $result->ks_p_value()
+                ? sprintf("%.3f", $result->ks_p_value()) : 'NA';
+    }
     
     unless (open(FH, ">$filename")) {
         fatal("Unable to create results text file $filename", %$job_args);
@@ -546,19 +499,25 @@ sub write_tfbs_details_text_from_data
         $total_ic = 'NA';
     }
 
-    print  OFH "$tf_name\n\n";
-
-    if ($tf_db) {
-        print  FH "JASPAR ID:\t$tf_id\n";
+    my $gc_content = 'NA';
+    if ($tf->tag('gc_content')) {
+        $gc_content = sprintf("%.3f", $tf->tag('gc_content'));
     }
-    printf OFH "Class:\t%s\n", $tf->class() || 'NA',
-    printf OFH "Family:\t%s\n", $tf->tag('family') || 'NA',
-    printf OFH "Sysgroup:\t%s\n", $tf->tag('tax_group') || 'NA',
-    printf OFH "IC:\t%s\n", $total_ic;
 
-    print OFH "\n\n$tf_name Binding Sites\n\n";
+    print OFH "$tf_name Binding Site Details\n\n";
 
-    printf OFH "\n\n%-31s\t%7s\t%7s\t%7s\t%7s\t%7s\t%s\n",
+    print OFH "TF Name:\t$tf_name\n";
+    print OFH "TF ID:\t$tf_id\n";
+
+    printf OFH "Class:\t%s\n", $tf->class() || 'NA';
+    printf OFH "Family:\t%s\n", $tf->tag('family') || 'NA';
+    printf OFH "Tax group:\t%s\n", $tf->tag('tax_group') || 'NA';
+    printf OFH "Information content:\t%s\n", $total_ic;
+    printf OFH "GC content:\t%s\n", $gc_content;
+
+    print OFH "\n\n$tf_name Binding Sites\n";
+
+    printf OFH "\n%-31s\t%7s\t%7s\t%7s\t%7s\t%7s\t%s\n",
         'Sequence ID', 'Start', 'End', 'Strand', 'Score', '%Score',
         'TFBS Sequence';
 

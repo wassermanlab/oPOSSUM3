@@ -303,7 +303,7 @@ sub compute_site_counts_multi_anchor
 #
 sub write_results_text
 {
-    my ($filename, $results, $tf_set, $tf_db, %job_args) = @_;
+    my ($filename, $results, $tf_set, %job_args) = @_;
 
     return unless $results && $results->[0];
 
@@ -319,12 +319,9 @@ sub write_results_text
     # Single line (tab-delimited) header format
     # NOTE: rearranged columns
     #
-	my $text .= "TF Name\t";
-    $text .= "JASPAR_ID\t";
-    $text .= "Class\tFamily\tTax Group\tIC\tGC Content\tTarget seq hits\tTarget seq non-hits\tBackground seq hits\tBackground seq non-hits\tTarget TFBS hits\tTarget TFBS nucleotide rate\tBackground TFBS hits\tBackground TFBS nucleotide rate\tZ-score\tFisher score\n";
+    my $text = "TF Name\tTF ID\tClass\tFamily\tTax Group\tIC\tGC Content\tTarget seq hits\tTarget seq non-hits\tBackground seq hits\tBackground seq non-hits\tTarget TFBS hits\tTarget TFBS nucleotide rate\tBackground TFBS hits\tBackground TFBS nucleotide rate\tZ-score\tFisher score\n";
 
-    foreach my $result (@$results) 
-	{
+    foreach my $result (@$results) {
         my $tf = $tf_set->get_tf($result->id());
 
         my $total_ic;
@@ -334,12 +331,14 @@ sub write_results_text
             $total_ic = 'NA';
         }
 
-        my $gc_content = sprintf("%.3f", $tf->tag('gc_content'));
+        my $gc_content = 'NA';
+        if ($tf->tag('gc_content')) {
+            $gc_content = sprintf("%.3f", $tf->tag('gc_content'));
+        }
 
-		$text .= $tf->name() . "\t";
-		$text .= $tf->ID() . "\t" if $tf_db;
-        $text .= sprintf 
-			"%s\t%s\t%s\t%s\t%.3f\t%d\t%d\t%d\t%d\t%d\t%s\t%d\t%s\t%s\t%s\n",
+        $text .= sprintf "%s\t%s\t%s\t%s\t%s\t%s\t%.3f\t%d\t%d\t%d\t%d\t%d\t%s\t%d\t%s\t%s\t%s\n",
+            $tf->name(),
+            $tf->ID() || 'NA',
             $tf->class() || 'NA',
             $tf->tag('family') || 'NA',
             $tf->tag('tax_group') || 'NA',
@@ -359,7 +358,6 @@ sub write_results_text
                 ? sprintf("%.3f", $result->zscore()) : 'NA',
             defined $result->fisher_p_value()
                 ? sprintf("%.3f", $result->fisher_p_value()) : 'NA';
-        
     }
 
 	print FH $text . "\n";
@@ -377,8 +375,7 @@ sub write_results_text
 #
 sub write_tfbs_details
 {
-    my ($tf_seq_sitepairs, $seq_id_display_ids,
-		$tf_set, $anchor_matrix, $tf_db,
+    my ($tf_seq_sitepairs, $seq_id_display_ids, $tf_set, $anchor_matrix,
 	   	$abs_results_dir, $rel_results_dir, $web, %job_args) = @_;
 
     my $tf_ids = $tf_set->ids();
@@ -398,15 +395,13 @@ sub write_tfbs_details
             my $html_filename = "$abs_results_dir/$fname.html";
         
             write_tfbs_details_text(
-                $text_filename,
-                $tf, $anchor_matrix, $tf_db,
+                $text_filename, $tf, $anchor_matrix, 
                 \@seq_ids, $seq_id_display_ids, $seq_sitepairs,
 				%job_args
             );
 
             write_tfbs_details_html(
-                $html_filename, $rel_results_dir,
-                $tf, $anchor_matrix, $tf_db,
+                $html_filename, $rel_results_dir, $tf, $anchor_matrix,
                 \@seq_ids, $seq_id_display_ids, $seq_sitepairs,
 				%job_args
             ) if $web;
@@ -420,10 +415,13 @@ sub write_tfbs_details
 #
 sub write_tfbs_details_text
 {
-    my ($filename, $tf, $anchor_matrix, $tf_db, 
-		$seq_ids, $seq_id_display_ids, $seq_sitepairs, %job_args) = @_;
+    my ($filename, $tf, $anchor_matrix, $seq_ids, $seq_id_display_ids,
+        $seq_sitepairs, %job_args) = @_;
 
 	my $logger = $job_args{-logger};
+
+    my $tf_db = $job_args{-tf_db};
+    my $anchor_tf_db = $job_args{-anchor_tf_db};
 
     open(FH, ">$filename") || fatal(
         "Could not create TFBS details text file $filename", %job_args
@@ -452,24 +450,20 @@ sub write_tfbs_details_text
 
     print  FH "$anchor_name\n\n";
 
-    if ($tf_db) {
-        printf  FH "JASPAR ID:\t$anchor_id\n";
-    }
+    printf FH "TF ID:\t$anchor_id\n";
     printf FH "Class:\t%s\n", $anchor_matrix->class() || 'NA',
     printf FH "Family:\t%s\n", $anchor_matrix->tag('family') || 'NA',
-    printf FH "Sysgroup:\t%s\n", $anchor_matrix->tag('tax_group') || 'NA',
+    printf FH "Tax group:\t%s\n", $anchor_matrix->tag('tax_group') || 'NA',
     printf FH "IC:\t%s\n", $anchor_total_ic;
 
     print FH "\n\n";
 
     print  FH "$tf_name\n\n";
 
-    if ($tf_db) {
-        print  FH "JASPAR ID:\t$tf_id\n";
-    }
+    print  FH "TF ID:\t$tf_id\n";
     printf FH "Class:\t%s\n", $tf->class() || 'NA',
     printf FH "Family:\t%s\n", $tf->tag('family') || 'NA',
-    printf FH "Sysgroup:\t%s\n", $tf->tag('tax_group') || 'NA',
+    printf FH "Tax group:\t%s\n", $tf->tag('tax_group') || 'NA',
     printf FH "IC:\t%s\n", $tf_total_ic;
 
     print FH "\n\n$anchor_name - $tf_name Binding Site Combinations\n\n";
@@ -529,7 +523,7 @@ sub write_tfbs_details_text
 #
 sub write_tfbs_details_html
 {
-    my ($filename, $rel_results_dir, $tf, $anchor_matrix, $tf_db,
+    my ($filename, $rel_results_dir, $tf, $anchor_matrix,
 	   	$seq_ids, $seq_id_display_ids, $seq_sitepairs,
 		%job_args) = @_;
 
@@ -577,7 +571,8 @@ sub write_tfbs_details_html
                                         : 'NA'
                                    },
 
-        tf_db                   => $tf_db,
+        anchor_tf_db            => $job_args{-anchor_tf_db},
+        tf_db                   => $job_args{-tf_db},
         tf                      => $tf,
         anchor_matrix           => $anchor_matrix,
         seq_ids                 => $seq_ids,

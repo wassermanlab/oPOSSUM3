@@ -8,23 +8,33 @@
   <h2>[%anchor_matrix.name%]</h2>
 
   <table border="0" cellpadding="2" cellspacing="0">
-    [%IF tf_db%]
-      <tr>
-        <td class="table_title">JASPAR ID:</td>
+    <tr>
+      <td class="table_title">TF ID:</td>
+      [%IF anchor_tf_db%]
         <td class="table_text"><a href="javascript:newWindow=window.open('[%jaspar_url%]?rm=present&collection=[%collection%]&ID=[%anchor_matrix.ID%]', '[%anchor_matrix.ID%]', 'width=850,height=700,toolbar=0,location=0,directories=0,status=0,menuBar=0,scrollBars=1'); newWindow.focus()">[%anchor_matrix.ID%]</a></td>
-      </tr>
-    [%END%]
+      [%ELSE%]
+        <td class="table_text">[%anchor_matrix.ID%]</td>
+      [%END%]
+    </tr>
     <tr>
       <td class="table_title">Class:</td>
       <td class="table_text">[%anchor_matrix.class%]</td>
     </tr>
     <tr>
       <td class="table_title">Family:</td>
-      <td class="table_text">[%anchor_matrix.tag('family')%]</td>
+      [%IF anchor_matrix.tag('family')%]
+        <td class="table_text">[%anchor_matrix.tag('family')%]</td>
+      [%ELSE%]
+        <td class="table_text">NA</td>
+      [%END%]
     </tr>
     <tr>
       <td class="table_title">Tax group:</td>
-      <td class="table_text">[%anchor_matrix.tag('tax_group')%]</td>
+      [%IF anchor_matrix.tag('tax_group')%]
+        <td class="table_text">[%anchor_matrix.tag('tax_group')%]</td>
+      [%ELSE%]
+        <td class="table_text">NA</td>
+      [%END%]
     </tr>
     <tr>
       <td class="table_title">Information content:</td>
@@ -57,23 +67,33 @@
   <h2>[%tf.name%]</h2>
 
   <table border="0" cellpadding="2" cellspacing="0">
-    [%IF tf_db%]
-      <tr>
-        <td class="table_title">JASPAR ID:</td>
+    <tr>
+      <td class="table_title">TF ID:</td>
+      [%IF tf_db%]
         <td class="table_text"><a href="javascript:newWindow=window.open('[%jaspar_url%]?rm=present&collection=[%collection%]&ID=[%tf.ID%]', '[%tf.ID%]', 'width=850,height=700,toolbar=0,location=0,directories=0,status=0,menuBar=0,scrollBars=1'); newWindow.focus()">[%tf.ID%]</a></td>
-      </tr>
-    [%END%]
+      [%ELSE%]
+        <td class="table_text">[%tf.ID%]</td>
+      [%END%]
+    </tr>
     <tr>
       <td class="table_title">Class:</td>
       <td class="table_text">[%tf.class%]</td>
     </tr>
     <tr>
       <td class="table_title">Family:</td>
-      <td class="table_text">[%tf.tag('family')%]</td>
+      [%IF tf.tag('family')%]
+        <td class="table_text">[%tf.tag('family')%]</td>
+      [%ELSE%]
+        <td class="table_text">NA</td>
+      [%END%]
     </tr>
     <tr>
       <td class="table_title">Tax group:</td>
-      <td class="table_text">[%tf.tag('tax_group')%]</td>
+      [%IF tf.tag('tax_group')%]
+        <td class="table_text">[%tf.tag('tax_group')%]</td>
+      [%ELSE%]
+        <td class="table_text">NA</td>
+      [%END%]
     </tr>
     <tr>
       <td class="table_title">Information content:</td>

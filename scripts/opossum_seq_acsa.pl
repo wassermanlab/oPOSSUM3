@@ -434,15 +434,14 @@ $max_site_dist = DFLT_INTER_BINDING_DIST if !$max_site_dist;
 # this is different from gene-based...
 # need to go over in detail over different possibilities
 #
-my $tf_db;
 my $jdb;
 unless ($matrix_file && $anchor_matrix_file) {
-    $tf_db = JASPAR_DB_NAME;
-
-    $jdb = jaspar_db_connect($tf_db)
-        || fatal("Could not connect to JASPAR database $tf_db", %job_args);
+    $jdb = jaspar_db_connect(JASPAR_DB_NAME) || fatal(
+        "Could not connect to JASPAR database " . JASPAR_DB_NAME, %job_args
+    );
 }
 
+my $tf_db;
 my $matrix_set;
 my $tf_select_criteria;
 if ($matrix_file) {
@@ -467,6 +466,9 @@ if ($matrix_file) {
 	# 2. Connect to JASPAR database and retrieve the matrices
 	#
 	$logger->info("Fetching matrices from JASPAR");
+
+    $tf_db = JASPAR_DB_NAME;
+    $job_args{-tf_db} = $tf_db;
 
 	my %get_matrix_args = (
 		-matrixtype => 'PFM'
@@ -494,6 +496,7 @@ if ($matrix_file) {
 #
 # Retrieve the anchor matrix
 #
+my $anchor_tf_db;
 my $anchor_matrix;
 if ($anchor_matrix_file) {
 	$logger->info("Reading anchor matrix from $anchor_matrix_file");
@@ -518,6 +521,9 @@ if ($anchor_matrix_file) {
 	$anchor_matrix = $iter->next();
 } else {
 	$logger->info("Fetching anchor matrix from JASPAR");
+
+    $anchor_tf_db = JASPAR_DB_NAME;
+    $job_args{-anchor_tf_db} = $anchor_tf_db;
 	
 	$anchor_matrix = $jdb->get_Matrix_by_ID($anchor_tf_id, 'PFM');
 	unless ($anchor_matrix) {
@@ -665,13 +671,13 @@ if ($ok)
 
     	$logger->info("Writing text results");
 		my $out_file = "$abs_results_dir/" . RESULTS_TEXT_FILENAME;
-    	write_results_text($out_file, $cresults, $tf_set, $tf_db, %job_args);
+    	write_results_text($out_file, $cresults, $tf_set, %job_args);
 
 		if (!$nh) {
     		$logger->info("Writing TFBS details");
     		write_tfbs_details($t_tf_seq_sitepairs, $t_seq_id_display_ids, 
-				$tf_set, $anchor_matrix, $tf_db, 
-				$abs_results_dir, $rel_results_dir, $web, %job_args);
+				$tf_set, $anchor_matrix, $abs_results_dir, $rel_results_dir,
+                $web, %job_args);
 		}
 	}
 }
@@ -723,7 +729,6 @@ $job_args{-user_t_file} = $user_seq_file;
 $job_args{-user_bg_file} = $user_bg_seq_file;
 $job_args{-t_num} = scalar @$t_seqs if $t_seqs;
 $job_args{-bg_num} = scalar @$bg_seqs if $bg_seqs;
-$job_args{-tf_db} = $tf_db;
 $job_args{-collections} = $collections_str if $collections_str;
 $job_args{-tax_groups} = $tax_groups_str if $tax_groups_str;
 $job_args{-tf_ids} = $tf_ids_str if $tf_ids_str;

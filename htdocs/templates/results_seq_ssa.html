@@ -174,10 +174,8 @@
 
   <table id="results_table" class="sortable" cellpadding="2" cellspacing="0">
   <tr class="table_title">
-    <th title="TF name (click to sort)">TF</th>
-    [%IF tf_db%]
-      <th title="JASPAR ID (click to sort)">JASPAR ID</th>
-    [%END%]
+    <th title="TF name (click to sort)">TF Name</th>
+    <th title="TF ID (click to sort)">TF ID</th>
     <th title="TF class (click to sort)">Class</th>
     <th title="TF family (click to sort)">Family</th>
     <th title="TF taxonomic supergroup (click to sort)">Tax group</th>
@@ -205,16 +203,18 @@
         <td>[%tf.name%]</td>
       [%END%]
 
+      <td>
       [%IF tf_db%]
         [%collection = tf.tag('collection')%]
-        <td>
         [%IF collection != 'PENDING'%]
           <a href="javascript:newWindow=window.open('[%jaspar_url%]?rm=present&collection=[%collection%]&ID=[%tf.ID%]', '[%tf.ID%]', 'width=850,height=700,toolbar=0,location=0,directories=0,status=0,menuBar=0,scrollBars=1'); newWindow.focus()">[%tf.ID%]</a>
         [%ELSE%]
           [%tf.ID%]
         [%END%]
-        </td>
+      [%ELSE%]
+        [%tf.ID%]
       [%END%]
+      </td>
 
       [%IF tf.class%]
         <td>[%tf.class%]</td>

@@ -467,15 +467,13 @@ $threshold = DFLT_THRESHOLD . "%" if !$threshold;
 #my $matrix_file = "$results_dir/matrices.txt";
 
 my $tf_db;
-unless ($matrix_file) {
-    $tf_db = JASPAR_DB_NAME;
-}
-$job_args{-tf_db} = $tf_db;
-
 my $matrix_set;
 my $tf_select_criteria;
 if ($matrix_file) {
     $logger->info("Reading matrices from $matrix_file");
+
+    $job_args{-matrix_file} = $matrix_file;
+
     unless (-e $matrix_file) {
         fatal(
               "Specified input TFBS profile matrix file $matrix_file does"
@@ -495,6 +493,9 @@ if ($matrix_file) {
     # Connect to JASPAR database and retrieve the matrices
     #
     $logger->info("Fetching matrices from JASPAR");
+
+    $tf_db = JASPAR_DB_NAME;
+    $job_args{-tf_db} = $tf_db;
 
     my $jdb = jaspar_db_connect($tf_db)
         || fatal("Could not connect to JASPAR database $tf_db", %job_args);
@@ -729,7 +730,7 @@ if ($web) {
 if ($ok) {
     $logger->info("Writing text results");
     my $out_file = "$abs_results_dir/" . RESULTS_TEXT_FILENAME;
-    write_results_text($out_file, $cresults, $tf_set, $matrix_file, \%job_args);
+    write_results_text($out_file, $cresults, $tf_set, \%job_args);
     
     if (!$nh) {
         $logger->info("Writing TFBS details");
@@ -810,7 +811,6 @@ $job_args{-user_t_peak_file} = $user_peak_pos_file;
 $job_args{-user_bg_peak_file} = $user_bg_peak_pos_file;
 $job_args{-t_num} = scalar @$t_seqs;
 $job_args{-bg_num} = scalar @$bg_seqs;
-$job_args{-tf_db} = $tf_db;
 $job_args{-collections} = $collections_str;
 $job_args{-tax_groups} = $tax_groups_str;
 $job_args{-tf_ids} = $tf_ids_str;
