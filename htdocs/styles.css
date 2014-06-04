@@ -63,6 +63,11 @@ h4 {
 	font-size: 12px; 
 	color: #FF0000;
 }
+.warn_text_large {
+	font-family: Verdana, Arial, Helvetica, sans-serif; 
+	font-size: 16px; 
+	color: #FF0000;
+}
 .warn_table_text {
 	font-family: Verdana, Arial, Helvetica, sans-serif; 
 	font-size: 10px; 
