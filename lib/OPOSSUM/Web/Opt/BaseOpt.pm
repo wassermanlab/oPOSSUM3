@@ -124,7 +124,7 @@ use constant DFLT_PEAK_DIST_DISTRIBUTION => 'punif';
 
 # temp. file cleanup no. of days
 use constant REMOVE_TEMPFILES_OLDER_THAN    => 3;
-use constant REMOVE_RESULTFILES_OLDER_THAN  => 7;
+use constant REMOVE_RESULTFILES_OLDER_THAN  => 14;
 
 use constant DEBUG          => 0;
 

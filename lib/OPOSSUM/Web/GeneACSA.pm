@@ -112,8 +112,8 @@ sub teardown
         $state->commit();
     }
 
-    $self->_clean_tempfiles;
-    $self->_clean_resultfiles;
+    #$self->_clean_tempfiles;
+    #$self->_clean_resultfiles;
 }
 
 sub input

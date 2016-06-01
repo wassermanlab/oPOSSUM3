@@ -394,7 +394,8 @@ sub _session_tmp_file
 {
     my $sid = shift;
 
-    return sprintf("%s/$sid", ABS_HTDOCS_TMP_PATH);
+    #return sprintf("%s/$sid", ABS_HTDOCS_TMP_PATH);
+    return sprintf("%s/$sid", OPOSSUM_TMP_PATH);
 }
 
 1;

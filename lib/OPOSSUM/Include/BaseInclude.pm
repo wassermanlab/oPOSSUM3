@@ -614,7 +614,7 @@ sub fatal
 
     my $cmd = "/usr/sbin/sendmail -i -t";
 
-    my $msg = "oPOSSUM $heading analysis failed\n";
+    my $msg = "oPOSSUM3 $heading analysis failed\n";
     $msg .= "\nJob ID: $job_id\n";
     $msg .= "\nError: $error\n";
 
@@ -624,7 +624,7 @@ sub fatal
     if ($web) {
         if (open(SM, "|" . $cmd)) {
             printf SM "To: %s\n", ADMIN_EMAIL;
-            print SM "Subject: oPOSSUM $heading fatal error\n\n";
+            print SM "Subject: oPOSSUM3 $heading fatal error\n\n";
             print SM "$msg" ;
             print SM "\nUser e-mail: $email\n" if $email;
 
@@ -642,7 +642,7 @@ sub fatal
         if (open(SM, "|" . $cmd)) {
             printf SM "To: %s\n", $email;
             printf SM "From: %s\n", ADMIN_EMAIL;
-            print SM "Subject: oPOSSUM $heading fatal error\n\n";
+            print SM "Subject: oPOSSUM3 $heading fatal error\n\n";
             print SM "$msg" ;
 
             close(SM);
